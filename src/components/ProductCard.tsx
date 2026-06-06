@@ -8,9 +8,10 @@ interface Props {
   perfume: Perfume;
   onAddToCart?: (perfume: Perfume, size: string, quantity: number) => void;
   lastNavClick?: number;
+  rank?: number;
 }
 
-const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick }) => {
+const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>(PRICES[1].size); // 30ML default
   const [quantity, setQuantity] = useState(1);
@@ -126,11 +127,15 @@ const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick }) =>
             </div>
           )}
 
-          {perfume.badge && (
+          {rank === 1 ? (
+            <div className="absolute top-3 left-3 flex items-center gap-1 bg-aura-gold text-white px-2.5 py-1 text-[7px] sm:text-[8px] font-bold tracking-[0.15em] border border-aura-gold z-20 shadow-md">
+              <span className="text-[9px] leading-none">★</span> Nº1 EN VENTAS
+            </div>
+          ) : perfume.badge ? (
             <div className={`absolute top-3 left-3 px-2.5 py-1 text-[7px] sm:text-[8px] font-bold tracking-[0.15em] border z-20 ${getBadgeStyles(perfume.badge)}`}>
               {getBadgeLabel(perfume.badge)}
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Info */}

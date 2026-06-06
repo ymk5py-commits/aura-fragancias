@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowDown, Sparkles } from 'lucide-react';
+import { ArrowDown, ArrowRight, Sparkles } from 'lucide-react';
 import { WHATSAPP_NUMBER, BANNER_IMAGE } from '../constants';
 
 interface HeroProps {
@@ -87,9 +87,10 @@ const Hero: React.FC<HeroProps> = ({
           {showCatalogButton && (
             <Link
               to="/hombres"
-              className="group w-full sm:w-auto bg-white text-aura-ink px-10 py-4 sm:px-12 sm:py-[18px] text-[11px] font-bold tracking-[0.25em] uppercase hover:bg-aura-gold hover:text-white transition-all duration-300 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)] active-scale text-center"
+              className="btn-shine group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-white text-aura-ink px-10 py-4 sm:px-12 sm:py-[18px] text-[11px] font-bold tracking-[0.25em] uppercase hover:bg-aura-gold hover:text-white transition-all duration-300 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)] active-scale text-center"
             >
               Ver Catálogo
+              <ArrowRight size={15} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           )}
           <a

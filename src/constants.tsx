@@ -29,6 +29,27 @@ export const SHIPPING_ZONES = [
   { name: "INTERIOR DEL PAÍS (ENCOMIENDA)", price: 35000 },
 ];
 
+// ============================================================
+//  TOP VENTAS AUTOMÁTICO
+//  Actualizá estos números con tus UNIDADES VENDIDAS reales.
+//  La sección "Top Ventas" se ordena SOLA, de mayor a menor venta,
+//  y marca al #1 como "Nº1 EN VENTAS". Agregá más códigos cuando
+//  quieras que un producto suba al Top.
+// ============================================================
+export const SALES_BY_CODE: Record<string, number> = {
+  CC180: 412, // The Most Wanted (Azzaro)
+  CC047: 388, // Eros (Versace)
+  CC034: 351, // Aventus (Creed)
+  DD192: 334, // La Bomba (Carolina Herrera)
+  DD057: 298, // Scandal (JPG)
+  DD094: 276, // La Vida es Bella (Lancôme)
+  UU019: 245, // Erba Pura (Xerjoff)
+  CC157: 190, // Valentino Uomo Born In Roma Intense
+};
+
+// Cuántos productos mostrar en el Top Ventas del home.
+export const TOP_SELLERS_COUNT = 8;
+
 export const LEGAL_TEXTS = {
   inspirations: {
     title: "Nuestras Inspiraciones",

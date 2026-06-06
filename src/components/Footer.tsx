@@ -24,7 +24,7 @@ const Footer: React.FC<FooterProps> = ({ onLegalClick }) => {
             href={CATALOG_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-white text-aura-ink px-12 py-4 text-[11px] font-bold tracking-[0.25em] uppercase hover:bg-aura-gold hover:text-white transition-all duration-300 active-scale"
+            className="btn-shine bg-white text-aura-ink px-12 py-4 text-[11px] font-bold tracking-[0.25em] uppercase hover:bg-aura-gold hover:text-white transition-all duration-300 active-scale"
           >
             Ver Catálogo Completo
           </a>

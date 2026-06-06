@@ -128,6 +128,23 @@ h1, h2, h3, h4, .font-luxury {
 /* Press feedback */
 .active-scale:active { transform: scale(0.96); transition: transform 0.1s; }
 
+/* Button shine sweep on hover */
+.btn-shine { position: relative; overflow: hidden; isolation: isolate; }
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: -1;
+  pointer-events: none;
+}
+.btn-shine:hover::after { left: 160%; }
+
 /* ============================================================
    Scrollbar
    ============================================================ */

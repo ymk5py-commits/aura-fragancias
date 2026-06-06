@@ -15,8 +15,9 @@ import Checkout from './components/Checkout';
 import WelcomeModal from './components/WelcomeModal';
 import ProductPage from './components/ProductPage';
 import { initPixel, trackEvent } from './lib/pixel';
-import { PERFUMES, LEGAL_TEXTS, PRICES, BANNER_MEN, BANNER_WOMEN, BANNER_UNISEX } from './constants';
+import { PERFUMES, LEGAL_TEXTS, PRICES, BANNER_MEN, BANNER_WOMEN, BANNER_UNISEX, SALES_BY_CODE, TOP_SELLERS_COUNT } from './constants';
 import ProductCard from './components/ProductCard';
+import WhatsAppButton from './components/WhatsAppButton';
 import { CartItem, Perfume } from './types';
 
 const App: React.FC = () => {
@@ -161,7 +162,14 @@ const App: React.FC = () => {
     setCart(prev => prev.filter(item => item.id !== id));
   };
 
-  const bestSellers = PERFUMES.filter(p => p.badge === 'Bestseller');
+  // Top Ventas automático: ordena por unidades vendidas (SALES_BY_CODE),
+  // con respaldo al badge "Bestseller" si no hay dato de ventas.
+  const bestSellers = [...PERFUMES]
+    .map(p => ({ p, score: SALES_BY_CODE[p.code] ?? (p.badge === 'Bestseller' ? 1 : 0) }))
+    .filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, TOP_SELLERS_COUNT)
+    .map(x => x.p);
 
   if (showCheckout) {
     return (
@@ -204,8 +212,8 @@ const App: React.FC = () => {
                   <div className="rule-gold w-20 mx-auto"></div>
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
-                  {bestSellers.map(p => (
-                    <ProductCard key={p.code} perfume={p} onAddToCart={handleAddToCart} lastNavClick={lastNavClick} />
+                  {bestSellers.map((p, i) => (
+                    <ProductCard key={p.code} perfume={p} onAddToCart={handleAddToCart} lastNavClick={lastNavClick} rank={i + 1} />
                   ))}
                 </div>
               </div>
@@ -278,6 +286,9 @@ const App: React.FC = () => {
           {notification}
         </div>
       )}
+
+      {/* Botón flotante de WhatsApp */}
+      <WhatsAppButton />
     </div>
   );
 };

@@ -1,0 +1,6 @@
+03_AURA_PERFUMES/
+node_modules/
+dist/
+.git/
+*.log
+aura_full.png

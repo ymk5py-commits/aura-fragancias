@@ -4,3 +4,6 @@ node_modules/
 .env.local
 .vercel
 *.log
+
+# Internal business assets — NOT for public deploy (catalogs, dossiers, source zips, media)
+03_AURA_PERFUMES/

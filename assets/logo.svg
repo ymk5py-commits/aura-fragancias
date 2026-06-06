@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Äura">
+  <!-- Black disc background -->
+  <circle cx="100" cy="100" r="100" fill="#0a0a0a"/>
+  <!-- Thin outer ring -->
+  <circle cx="100" cy="100" r="90" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <!-- Umlaut dots -->
+  <circle cx="86" cy="44" r="9" fill="#ffffff"/>
+  <circle cx="114" cy="44" r="9" fill="#ffffff"/>
+  <!-- Letter A (two legs as an even-odd triangular ring) -->
+  <path fill="#ffffff" fill-rule="evenodd" d="M100 60 L54 150 L146 150 Z M100 86 L74 150 L126 150 Z"/>
+  <!-- Crossbar -->
+  <rect x="72" y="116" width="56" height="13" fill="#ffffff"/>
+</svg>

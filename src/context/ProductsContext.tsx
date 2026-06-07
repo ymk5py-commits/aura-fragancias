@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../lib/firebase';
@@ -23,10 +25,14 @@ const ProductsContext = createContext<ProductsContextValue>({
 
 export const useProducts = () => useContext(ProductsContext);
 
-export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [products, setProducts] = useState<Perfume[]>(PERFUMES);
-  const [loading, setLoading] = useState(isFirebaseConfigured);
-  const [source, setSource] = useState<'firebase' | 'local'>('local');
+export const ProductsProvider: React.FC<{
+  children: React.ReactNode;
+  initial?: Perfume[];
+  initialSource?: 'firebase' | 'local';
+}> = ({ children, initial, initialSource }) => {
+  const [products, setProducts] = useState<Perfume[]>(initial && initial.length ? initial : PERFUMES);
+  const [loading, setLoading] = useState(false);
+  const [source, setSource] = useState<'firebase' | 'local'>(initialSource || 'local');
 
   useEffect(() => {
     if (!isFirebaseConfigured || !db) {

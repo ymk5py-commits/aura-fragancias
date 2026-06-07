@@ -1,5 +1,5 @@
 
-export const PIXEL_ID = (import.meta as any).env.VITE_META_PIXEL_ID || '1238570975103624';
+export const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || '1238570975103624';
 
 declare global {
   interface Window {

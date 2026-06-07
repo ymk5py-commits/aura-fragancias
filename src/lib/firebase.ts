@@ -1,19 +1,18 @@
-import { initializeApp, type FirebaseApp } from 'firebase/app';
+import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Firebase is "configured" only when the essential keys are present.
 export const isFirebaseConfigured = Boolean(
   firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId
 );
@@ -24,12 +23,12 @@ let db: Firestore | null = null;
 let storage: FirebaseStorage | null = null;
 
 if (isFirebaseConfigured) {
-  app = initializeApp(firebaseConfig);
+  app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
   storage = getStorage(app);
 
-  // Analytics (opcional, solo en navegador compatible — no rompe el build/SSR).
+  // Analytics solo en navegador compatible.
   if (firebaseConfig.measurementId && typeof window !== 'undefined') {
     import('firebase/analytics')
       .then(({ getAnalytics, isSupported }) =>
@@ -37,14 +36,8 @@ if (isFirebaseConfigured) {
           if (ok && app) getAnalytics(app);
         })
       )
-      .catch(() => {/* analytics no disponible, se ignora */});
+      .catch(() => {/* analytics no disponible */});
   }
-} else {
-  // No config yet: the storefront falls back to the bundled catalog,
-  // and /admin shows a setup message instead of crashing.
-  console.warn(
-    '[Äura] Firebase no está configurado. Agregá las variables VITE_FIREBASE_* en tu .env para activar el panel admin.'
-  );
 }
 
 export { app, auth, db, storage };

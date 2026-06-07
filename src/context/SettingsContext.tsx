@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../lib/firebase';
@@ -34,9 +36,12 @@ const SettingsContext = createContext<SettingsContextValue>({
 
 export const useSettings = () => useContext(SettingsContext);
 
-export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
-  const [loading, setLoading] = useState(isFirebaseConfigured);
+export const SettingsProvider: React.FC<{ children: React.ReactNode; initial?: SiteSettings }> = ({
+  children,
+  initial,
+}) => {
+  const [settings, setSettings] = useState<SiteSettings>(initial || DEFAULT_SETTINGS);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!isFirebaseConfigured || !db) {

@@ -5,6 +5,7 @@ import Wholesale from '../../components/Wholesale';
 import TechnicalSection from '../../components/TechnicalSection';
 import Reveal from '../../components/Reveal';
 import ProductCard from '../../components/ProductCard';
+import ScentFamilies from '../../components/ScentFamilies';
 import { getVisibleProducts, getSettings } from '../../lib/serverData';
 import { SALES_BY_CODE, TOP_SELLERS_COUNT } from '../../constants';
 
@@ -48,6 +49,7 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <ScentFamilies />
       <PricingSection />
       <Wholesale />
       <TechnicalSection />

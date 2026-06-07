@@ -1,5 +1,7 @@
 03_AURA_PERFUMES/
 node_modules/
+.next/
+out/
 dist/
 .git/
 *.log

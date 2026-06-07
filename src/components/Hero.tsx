@@ -62,7 +62,7 @@ const Hero: React.FC<HeroProps> = ({
           }`}
           style={{ animationDelay: '0.2s' }}
         >
-          {isHome ? <span className="text-gold-gradient">{title}</span> : title}
+          {isHome ? <span className="text-champagne">{title}</span> : title}
         </h1>
 
         {/* Subtitle */}

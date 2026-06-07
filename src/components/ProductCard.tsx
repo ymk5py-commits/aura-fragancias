@@ -9,9 +9,10 @@ interface Props {
   onAddToCart?: (perfume: Perfume, size: string, quantity: number) => void;
   lastNavClick?: number;
   rank?: number;
+  featured?: boolean;
 }
 
-const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank }) => {
+const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank, featured }) => {
   const { prices: PRICES } = useSettings();
   const [showDetails, setShowDetails] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>(PRICES[1].size); // 30ML default
@@ -83,6 +84,60 @@ const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank
   };
 
   const fromPrice = PRICES[0].price;
+
+  // ── Layout DESTACADO (editorial, ocupa ancho completo) ──────────────
+  if (featured) {
+    return (
+      <>
+        <div
+          className="group grid grid-cols-1 sm:grid-cols-12 bg-aura-ink text-white cursor-pointer overflow-hidden border border-white/5"
+          onClick={() => setShowDetails(true)}
+        >
+          <div className="sm:col-span-7 relative aspect-[16/12] sm:aspect-auto sm:min-h-[420px] overflow-hidden">
+            {perfume.imageUrl && (
+              <img
+                src={perfume.imageUrl}
+                alt={`${perfume.name} — inspiración ${perfume.inspiration}`}
+                className="w-full h-full object-cover transition-transform duration-[1.2s] group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+            )}
+            <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-aura-gold text-aura-ink px-3 py-1 text-[8px] sm:text-[9px] font-bold tracking-[0.2em]">
+              <span className="text-[11px] leading-none">★</span> Nº1 EN VENTAS
+            </div>
+          </div>
+          <div className="sm:col-span-5 flex flex-col justify-center p-7 sm:p-12">
+            <span className="text-aura-gold font-semibold tracking-[0.35em] text-[10px] uppercase mb-4">
+              Inspiración {perfume.inspiration}
+            </span>
+            <h3 className="text-3xl sm:text-5xl font-luxury leading-[1.05] mb-3">{perfume.name}</h3>
+            <p className="text-white/45 italic font-luxury text-base sm:text-lg mb-7">{perfume.family}</p>
+            <div className="flex items-center gap-6 mb-8">
+              <div>
+                <span className="block text-[9px] tracking-[0.2em] uppercase text-white/40 mb-1.5">Intensidad</span>
+                <div className="flex gap-1.5">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <span key={i} className={`h-[3px] w-5 rounded-full ${i <= perfume.intensity ? 'bg-aura-gold' : 'bg-white/15'}`} />
+                  ))}
+                </div>
+              </div>
+              <div>
+                <span className="block text-[9px] tracking-[0.2em] uppercase text-white/40 mb-1">Desde</span>
+                <span className="font-luxury text-2xl text-champagne tabular">Gs. {fromPrice.toLocaleString('es-PY')}</span>
+              </div>
+            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowDetails(true); }}
+              className="self-start bg-white text-aura-ink px-8 py-3.5 text-[10px] font-bold tracking-[0.25em] uppercase hover:bg-aura-gold transition-colors duration-300 active-scale"
+            >
+              Descubrir
+            </button>
+          </div>
+        </div>
+        {renderModal()}
+      </>
+    );
+  }
 
   return (
     <>
@@ -177,8 +232,13 @@ const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank
         </div>
       </div>
 
-      {/* Detail modal */}
-      {showDetails && (
+      {renderModal()}
+    </>
+  );
+
+  function renderModal() {
+    if (!showDetails) return null;
+    return (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-0 sm:p-4 animate-fade-in">
           <div className="absolute inset-0 bg-aura-ink/92 backdrop-blur-xl" onClick={() => setShowDetails(false)} />
           <div className="relative w-full h-full sm:h-auto sm:max-w-4xl bg-white shadow-2xl overflow-y-auto sm:overflow-hidden animate-scale-in flex flex-col md:flex-row sm:max-h-[90vh] z-[1001]">
@@ -305,9 +365,8 @@ const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank
             </div>
           </div>
         </div>
-      )}
-    </>
-  );
+    );
+  }
 };
 
 export default ProductCard;

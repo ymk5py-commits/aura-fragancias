@@ -17,6 +17,7 @@ import ProductPage from './components/ProductPage';
 import { initPixel, trackEvent } from './lib/pixel';
 import { LEGAL_TEXTS, SALES_BY_CODE, TOP_SELLERS_COUNT } from './constants';
 import ProductCard from './components/ProductCard';
+import Reveal from './components/Reveal';
 import WhatsAppButton from './components/WhatsAppButton';
 import { useProducts } from './context/ProductsContext';
 import { useSettings } from './context/SettingsContext';
@@ -222,14 +223,23 @@ const App: React.FC = () => {
 
             <section id="top-ventas" className="py-16 sm:py-28 bg-white scroll-mt-24">
               <div className="container mx-auto px-3 sm:px-6">
-                <div className="text-center mb-12 sm:mb-16">
+                <Reveal className="text-center mb-12 sm:mb-16">
                   <span className="text-aura-gold-deep font-semibold tracking-[0.4em] text-[10px] sm:text-[11px] uppercase mb-3 block">Los Favoritos</span>
                   <h2 className="text-3xl sm:text-5xl font-luxury text-aura-ink mb-5">Top Ventas</h2>
                   <div className="rule-gold w-20 mx-auto"></div>
-                </div>
+                </Reveal>
+
+                {bestSellers.length > 0 && (
+                  <Reveal className="mb-5 sm:mb-8">
+                    <ProductCard perfume={bestSellers[0]} onAddToCart={handleAddToCart} lastNavClick={lastNavClick} rank={1} featured />
+                  </Reveal>
+                )}
+
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
-                  {bestSellers.map((p, i) => (
-                    <ProductCard key={p.code} perfume={p} onAddToCart={handleAddToCart} lastNavClick={lastNavClick} rank={i + 1} />
+                  {bestSellers.slice(1).map((p, i) => (
+                    <Reveal key={p.code} delay={(i % 4) * 70}>
+                      <ProductCard perfume={p} onAddToCart={handleAddToCart} lastNavClick={lastNavClick} rank={i + 2} />
+                    </Reveal>
                   ))}
                 </div>
               </div>

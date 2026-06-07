@@ -59,14 +59,8 @@ h1, h2, h3, h4, .font-luxury {
    Decorative utilities
    ============================================================ */
 
-/* Gold gradient text for premium headings */
-.text-gold-gradient {
-  background: linear-gradient(100deg, #b8924e 0%, #e3c884 45%, #c5a059 70%, #9a7b3f 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-}
+/* Solid champagne gold for premium headings (no gradient text) */
+.text-champagne { color: #d9bd7e; }
 
 /* Hairline gold rule with fade */
 .rule-gold {
@@ -127,6 +121,14 @@ h1, h2, h3, h4, .font-luxury {
 
 /* Press feedback */
 .active-scale:active { transform: scale(0.96); transition: transform 0.1s; }
+
+/* Accessible focus ring (keyboard only) */
+:focus-visible {
+  outline: 2px solid var(--color-aura-gold);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+:focus:not(:focus-visible) { outline: none; }
 
 /* Button shine sweep on hover */
 .btn-shine { position: relative; overflow: hidden; isolation: isolate; }

@@ -1,42 +1,45 @@
 import React from 'react';
-import { Award, Clock, Droplets, FlaskConical, Tag } from 'lucide-react';
+import Reveal from './Reveal';
 
 const features = [
-  { icon: FlaskConical, title: '30% Esencia', desc: 'Extrait de Parfum puro' },
-  { icon: Clock, title: '8–12h', desc: 'Fijación prolongada' },
-  { icon: Droplets, title: 'Macerado', desc: '21 días de reposo' },
-  { icon: Award, title: '+40 Aromas', desc: 'Colección icónica' },
-  { icon: Tag, title: 'Lujo Real', desc: 'Accesible y honesto' },
+  { n: '01', title: '30% Esencia', desc: 'Extrait de Parfum puro, la concentración más alta.' },
+  { n: '02', title: '8–12 horas', desc: 'Fijación que acompaña tu día y tu noche.' },
+  { n: '03', title: '21 días', desc: 'Macerado y reposo antes de cada envío.' },
+  { n: '04', title: '+40 aromas', desc: 'Una colección de las fragancias más icónicas.' },
+  { n: '05', title: 'Lujo real', desc: 'Alta perfumería, honesta y accesible.' },
 ];
 
 const FeatureSection: React.FC = () => {
   return (
     <section className="py-16 sm:py-28 bg-aura-ivory border-y border-zinc-100">
       <div className="container mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12 sm:mb-20">
+        <Reveal className="text-center mb-12 sm:mb-20">
           <span className="text-aura-gold-deep font-semibold tracking-[0.4em] text-[10px] sm:text-[11px] uppercase mb-3 block">
             Por qué elegirnos
           </span>
-          <h2 className="text-3xl sm:text-5xl font-luxury text-aura-ink mb-5">El Diferencial Äura</h2>
-          <div className="rule-gold w-20 mx-auto" />
-        </div>
+          <h2 className="text-3xl sm:text-5xl font-luxury text-aura-ink">El Diferencial Äura</h2>
+        </Reveal>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-5">
-          {features.map(({ icon: Icon, title, desc }, i) => (
-            <div
-              key={title}
-              className="group flex flex-col items-center text-center p-5 sm:p-7 bg-white border border-zinc-100 hover:border-aura-gold/40 hover:shadow-[var(--shadow-card)] transition-all duration-500"
+        {/* Banda editorial: número grande + título + descripción, divididos por hairlines */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+          {features.map((f, i) => (
+            <Reveal
+              key={f.n}
+              delay={i * 80}
+              className={`px-2 sm:px-6 py-7 lg:py-3 border-b sm:border-b-0 border-zinc-200/70 ${
+                i !== features.length - 1 ? 'lg:border-r' : ''
+              } sm:[&:nth-child(odd)]:border-r lg:[&:nth-child(odd)]:border-r`}
             >
-              <div className="mb-4 sm:mb-6 w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-aura-ivory text-aura-gold-deep group-hover:bg-aura-ink group-hover:text-aura-gold transition-all duration-500">
-                <Icon size={20} strokeWidth={1.5} />
-              </div>
-              <h3 className="text-lg sm:text-2xl font-luxury font-semibold text-aura-ink mb-1.5 tracking-wide">
-                {title}
+              <span className="block font-luxury text-5xl sm:text-6xl text-aura-gold/40 leading-none mb-4 tabular">
+                {f.n}
+              </span>
+              <h3 className="text-lg sm:text-xl font-luxury font-semibold text-aura-ink mb-2 tracking-wide">
+                {f.title}
               </h3>
-              <p className="text-zinc-500 text-[9px] sm:text-[11px] leading-relaxed uppercase tracking-[0.15em]">
-                {desc}
+              <p className="text-zinc-500 text-[12px] sm:text-[13px] leading-relaxed max-w-[22ch]">
+                {f.desc}
               </p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>

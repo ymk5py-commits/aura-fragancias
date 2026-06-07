@@ -9,7 +9,7 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../lib/firebase';
-import { PERFUMES } from '../constants';
+import { PERFUMES, SALES_BY_CODE } from '../constants';
 import { Perfume } from '../types';
 
 const COLLECTION = 'products';
@@ -75,7 +75,7 @@ export async function seedCatalog(): Promise<number> {
   }
   let count = 0;
   for (const p of PERFUMES) {
-    await saveProduct({ ...p, visible: true });
+    await saveProduct({ ...p, visible: true, salesScore: SALES_BY_CODE[p.code] || 0 });
     count++;
   }
   return count;

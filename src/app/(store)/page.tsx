@@ -12,7 +12,7 @@ export default async function HomePage() {
   const [products, settings] = await Promise.all([getVisibleProducts(), getSettings()]);
 
   const bestSellers = [...products]
-    .map((p) => ({ p, score: p.salesScore ?? SALES_BY_CODE[p.code] ?? (p.badge === 'Bestseller' ? 1 : 0) }))
+    .map((p) => ({ p, score: (p.salesScore || 0) || SALES_BY_CODE[p.code] || (p.badge === 'Bestseller' ? 1 : 0) }))
     .filter((x) => x.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, TOP_SELLERS_COUNT)

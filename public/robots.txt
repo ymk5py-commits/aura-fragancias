@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://aurafragancias.store/sitemap.xml
+Sitemap: https://aurafrangancias.store/sitemap.xml

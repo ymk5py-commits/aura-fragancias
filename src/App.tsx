@@ -15,9 +15,13 @@ import Checkout from './components/Checkout';
 import WelcomeModal from './components/WelcomeModal';
 import ProductPage from './components/ProductPage';
 import { initPixel, trackEvent } from './lib/pixel';
-import { PERFUMES, LEGAL_TEXTS, PRICES, BANNER_MEN, BANNER_WOMEN, BANNER_UNISEX, SALES_BY_CODE, TOP_SELLERS_COUNT } from './constants';
+import { LEGAL_TEXTS, PRICES, BANNER_MEN, BANNER_WOMEN, BANNER_UNISEX, SALES_BY_CODE, TOP_SELLERS_COUNT } from './constants';
 import ProductCard from './components/ProductCard';
 import WhatsAppButton from './components/WhatsAppButton';
+import { useProducts } from './context/ProductsContext';
+
+// El panel admin se carga solo al entrar a /admin (no pesa en la tienda).
+const AdminApp = React.lazy(() => import('./admin/AdminApp'));
 import { CartItem, Perfume } from './types';
 
 const App: React.FC = () => {
@@ -32,6 +36,7 @@ const App: React.FC = () => {
   const location = useLocation();
   const { pathname } = location;
   const navigate = useNavigate();
+  const { visibleProducts } = useProducts();
 
   // Cerrar checkout cuando cambia la ruta
   useEffect(() => {
@@ -49,7 +54,7 @@ const App: React.FC = () => {
     const productCode = params.get('p');
     
     if (productCode) {
-      const perfume = PERFUMES.find(p => p.code.toUpperCase() === productCode.toUpperCase());
+      const perfume = visibleProducts.find(p => p.code.toUpperCase() === productCode.toUpperCase());
       if (perfume) {
         // Redirigir a la página independiente del producto
         navigate(`/producto/${productCode.toUpperCase()}`, { replace: true });
@@ -162,18 +167,27 @@ const App: React.FC = () => {
     setCart(prev => prev.filter(item => item.id !== id));
   };
 
-  // Top Ventas automático: ordena por unidades vendidas (SALES_BY_CODE),
-  // con respaldo al badge "Bestseller" si no hay dato de ventas.
-  const bestSellers = [...PERFUMES]
-    .map(p => ({ p, score: SALES_BY_CODE[p.code] ?? (p.badge === 'Bestseller' ? 1 : 0) }))
+  // Top Ventas automático: ordena por unidades vendidas (salesScore del
+  // producto o el mapa SALES_BY_CODE), con respaldo al badge "Bestseller".
+  const bestSellers = [...visibleProducts]
+    .map(p => ({ p, score: p.salesScore ?? SALES_BY_CODE[p.code] ?? (p.badge === 'Bestseller' ? 1 : 0) }))
     .filter(x => x.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, TOP_SELLERS_COUNT)
     .map(x => x.p);
 
+  // Panel de administración: app aparte, sin header/footer de la tienda.
+  if (pathname.startsWith('/admin')) {
+    return (
+      <React.Suspense fallback={<div className="min-h-dvh bg-aura-ink" />}>
+        <AdminApp />
+      </React.Suspense>
+    );
+  }
+
   if (showCheckout) {
     return (
-      <Checkout 
+      <Checkout
         cart={cart} 
         onUpdateQuantity={updateQuantity}
         onRemoveItem={removeFromCart}

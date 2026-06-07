@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
-import { PERFUMES } from '../constants';
 import ProductCard from './ProductCard';
+import { useProducts } from '../context/ProductsContext';
 import { Gender, Category, Perfume } from '../types';
 import { Search, XCircle, Zap } from 'lucide-react';
 
@@ -15,12 +15,13 @@ interface Props {
 type IntensityFilter = 'All' | 'Soft' | 'Moderate' | 'Intense';
 
 const ProductGrid: React.FC<Props> = ({ gender, id, onAddToCart, lastNavClick }) => {
+  const { visibleProducts } = useProducts();
   const [activeCategory, setActiveCategory] = useState<Category | 'All'>('All');
   const [activeIntensity, setActiveIntensity] = useState<IntensityFilter>('All');
   const [searchQuery, setSearchQuery] = useState('');
 
   const filtered = useMemo(() => {
-    return PERFUMES.filter(p => {
+    return visibleProducts.filter(p => {
       const matchesGender = gender === 'Unisex' ? p.gender === 'Unisex' : p.gender === gender;
       if (!matchesGender) return false;
 
@@ -42,7 +43,7 @@ const ProductGrid: React.FC<Props> = ({ gender, id, onAddToCart, lastNavClick })
         p.inspiration.toLowerCase().includes(searchLower)
       );
     });
-  }, [gender, activeCategory, activeIntensity, searchQuery]);
+  }, [visibleProducts, gender, activeCategory, activeIntensity, searchQuery]);
 
   const categories: (Category | 'All')[] = ['All', 'Daily', 'Casual', 'Night'];
   const intensities: { label: string, value: IntensityFilter }[] = [
@@ -59,7 +60,7 @@ const ProductGrid: React.FC<Props> = ({ gender, id, onAddToCart, lastNavClick })
     'Night': 'Noche'
   };
 
-  const hasAnyForGender = PERFUMES.some(p => gender === 'Unisex' ? p.gender === 'Unisex' : p.gender === gender);
+  const hasAnyForGender = visibleProducts.some(p => gender === 'Unisex' ? p.gender === 'Unisex' : p.gender === gender);
   if (!hasAnyForGender) return null;
 
   const sectionTitle = {

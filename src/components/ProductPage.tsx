@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PERFUMES, PRICES } from '../constants';
+import { PRICES } from '../constants';
+import { useProducts } from '../context/ProductsContext';
 import { ShoppingBag, ShieldCheck, Truck, Minus, Plus, ArrowLeft, Check } from 'lucide-react';
 import Header from './Header';
 import Footer from './Footer';
@@ -18,6 +19,7 @@ interface Props {
 const ProductPage: React.FC<Props> = ({ cart, onAddToCart, onOpenCart }) => {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
+  const { visibleProducts, loading } = useProducts();
   const [perfume, setPerfume] = useState<Perfume | null>(null);
   const [selectedSize, setSelectedSize] = useState<string>(PRICES[1].size);
   const [quantity, setQuantity] = useState(1);
@@ -25,16 +27,17 @@ const ProductPage: React.FC<Props> = ({ cart, onAddToCart, onOpenCart }) => {
   const [activeLegal, setActiveLegal] = useState<{title: string, content: string} | null>(null);
 
   useEffect(() => {
-    if (code) {
-      const found = PERFUMES.find(p => p.code.toUpperCase() === code.toUpperCase());
-      if (found) {
-        setPerfume(found);
-        window.scrollTo(0, 0);
-      } else {
-        navigate('/', { replace: true });
-      }
+    if (!code) return;
+    // Esperar a que terminen de cargar los productos antes de decidir.
+    if (loading) return;
+    const found = visibleProducts.find(p => p.code.toUpperCase() === code.toUpperCase());
+    if (found) {
+      setPerfume(found);
+      window.scrollTo(0, 0);
+    } else {
+      navigate('/', { replace: true });
     }
-  }, [code, navigate]);
+  }, [code, navigate, visibleProducts, loading]);
 
   if (!perfume) return null;
 

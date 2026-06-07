@@ -221,7 +221,7 @@ const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank
                   </div>
                   <button
                     onClick={() => {
-                      const url = `${window.location.origin}${window.location.pathname}#/producto/${perfume.code}`;
+                      const url = `${window.location.origin}/producto/${perfume.code}`;
                       navigator.clipboard.writeText(url);
                       setCopied(true);
                       setTimeout(() => setCopied(false), 2000);

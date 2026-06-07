@@ -1,9 +1,15 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Providers from './providers';
 import { getProducts, getSettings } from '../lib/serverData';
 
 const SITE = 'https://aurafrangancias.store';
+
+export const viewport: Viewport = {
+  themeColor: '#0c0a09',
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
@@ -35,7 +41,6 @@ export const metadata: Metadata = {
     icon: [{ url: '/logo.svg', type: 'image/svg+xml' }, { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' }],
     apple: '/apple-touch-icon.png',
   },
-  themeColor: '#0c0a09',
 };
 
 const storeJsonLd = {

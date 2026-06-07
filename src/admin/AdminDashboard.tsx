@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useMemo, useState } from 'react';
 import {
   Plus, Search, Eye, EyeOff, Pencil, Trash2, LogOut, Download, Loader2, ExternalLink, PackageOpen,

@@ -1,20 +1,19 @@
+'use client';
 
 import React, { useState, useMemo } from 'react';
 import ProductCard from './ProductCard';
 import { useProducts } from '../context/ProductsContext';
-import { Gender, Category, Perfume } from '../types';
+import { Gender, Category } from '../types';
 import { Search, XCircle, Zap } from 'lucide-react';
 
 interface Props {
   gender: Gender;
   id: string;
-  onAddToCart?: (perfume: Perfume, size: string) => void;
-  lastNavClick?: number;
 }
 
 type IntensityFilter = 'All' | 'Soft' | 'Moderate' | 'Intense';
 
-const ProductGrid: React.FC<Props> = ({ gender, id, onAddToCart, lastNavClick }) => {
+const ProductGrid: React.FC<Props> = ({ gender, id }) => {
   const { visibleProducts } = useProducts();
   const [activeCategory, setActiveCategory] = useState<Category | 'All'>('All');
   const [activeIntensity, setActiveIntensity] = useState<IntensityFilter>('All');
@@ -145,12 +144,7 @@ const ProductGrid: React.FC<Props> = ({ gender, id, onAddToCart, lastNavClick })
         {filtered.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-10 animate-fade-in">
             {filtered.map(perfume => (
-              <ProductCard 
-                key={perfume.code} 
-                perfume={perfume} 
-                onAddToCart={onAddToCart} 
-                lastNavClick={lastNavClick}
-              />
+              <ProductCard key={perfume.code} perfume={perfume} />
             ))}
           </div>
         ) : (

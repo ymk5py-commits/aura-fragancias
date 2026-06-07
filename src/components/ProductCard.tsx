@@ -1,39 +1,39 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { usePathname } from 'next/navigation';
 import { Perfume } from '../types';
 import { useSettings } from '../context/SettingsContext';
+import { useCart } from '../context/CartContext';
 import { cldn } from '../lib/img';
 import { ShoppingBag, X, Eye, Plus, Minus, Truck } from 'lucide-react';
 
 interface Props {
   perfume: Perfume;
-  onAddToCart?: (perfume: Perfume, size: string, quantity: number) => void;
-  lastNavClick?: number;
   rank?: number;
   featured?: boolean;
 }
 
-const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank, featured }) => {
+const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
   const { prices: PRICES } = useSettings();
+  const { addToCart } = useCart();
   const [showDetails, setShowDetails] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>(PRICES[1].size); // 30ML default
   const [quantity, setQuantity] = useState(1);
   const [copied, setCopied] = useState(false);
-  const location = useLocation();
+  const pathname = usePathname();
 
   useEffect(() => {
     setShowDetails(false);
-  }, [location.pathname, location.search, lastNavClick]);
+  }, [pathname]);
 
   useEffect(() => {
-    const globalParams = new URLSearchParams(window.location.search);
-    const routerParams = new URLSearchParams(location.search);
-    const productCode = globalParams.get('p') || routerParams.get('p');
+    const productCode = new URLSearchParams(window.location.search).get('p');
     if (productCode && productCode.toUpperCase() === perfume.code.toUpperCase()) {
       const timer = setTimeout(() => setShowDetails(true), 500);
       return () => clearTimeout(timer);
     }
-  }, [perfume.code, location.search]);
+  }, [perfume.code]);
 
   useEffect(() => {
     if (showDetails) {
@@ -78,10 +78,8 @@ const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank
 
   const handleAddToCartClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onAddToCart) {
-      onAddToCart(perfume, selectedSize, quantity);
-      setShowDetails(false);
-    }
+    addToCart(perfume, selectedSize, quantity);
+    setShowDetails(false);
   };
 
   const fromPrice = PRICES[0].price;
@@ -224,7 +222,7 @@ const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank
               ))}
             </div>
             <button
-              onClick={(e) => { e.stopPropagation(); if (onAddToCart) onAddToCart(perfume, selectedSize, 1); }}
+              onClick={(e) => { e.stopPropagation(); addToCart(perfume, selectedSize, 1); }}
               className="bg-aura-ink text-white text-[9px] font-bold tracking-[0.15em] py-2.5 uppercase flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
             >
               <ShoppingBag size={11} /> Agregar

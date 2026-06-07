@@ -1,5 +1,7 @@
+'use client';
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { ArrowDown, ArrowRight, Sparkles } from 'lucide-react';
 import { BANNER_IMAGE } from '../constants';
 import { useSettings } from '../context/SettingsContext';
@@ -88,7 +90,7 @@ const Hero: React.FC<HeroProps> = ({
         >
           {showCatalogButton && (
             <Link
-              to="/hombres"
+              href="/hombres"
               className="btn-shine group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-white text-aura-ink px-10 py-4 sm:px-12 sm:py-[18px] text-[11px] font-bold tracking-[0.25em] uppercase hover:bg-aura-gold hover:text-white transition-all duration-300 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)] active-scale text-center"
             >
               Ver Catálogo

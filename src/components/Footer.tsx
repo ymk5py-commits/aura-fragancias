@@ -1,5 +1,7 @@
+'use client';
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { Instagram, Facebook, MessageCircle, Music2 as Tiktok } from 'lucide-react';
 import { BRAND_NAME, INSTAGRAM_URL, FACEBOOK_URL, TIKTOK_URL, CATALOG_URL } from '../constants';
 import { useSettings } from '../context/SettingsContext';
@@ -47,10 +49,10 @@ const Footer: React.FC<FooterProps> = ({ onLegalClick }) => {
           <div>
             <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] mb-5 text-aura-gold">Navegación</h4>
             <ul className="space-y-3.5 text-sm text-white/65 font-medium">
-              <li><Link to="/hombres" className="hover:text-white transition-colors">Hombres</Link></li>
-              <li><Link to="/mujeres" className="hover:text-white transition-colors">Mujeres</Link></li>
-              <li><Link to="/unisex" className="hover:text-white transition-colors">Nicho & Unisex</Link></li>
-              <li><Link to="/#mayoristas" className="hover:text-white transition-colors">Mayoristas</Link></li>
+              <li><Link href="/hombres" className="hover:text-white transition-colors">Hombres</Link></li>
+              <li><Link href="/mujeres" className="hover:text-white transition-colors">Mujeres</Link></li>
+              <li><Link href="/unisex" className="hover:text-white transition-colors">Nicho & Unisex</Link></li>
+              <li><Link href="/#mayoristas" className="hover:text-white transition-colors">Mayoristas</Link></li>
             </ul>
           </div>
 

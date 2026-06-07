@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Loader2, Upload, Save, Image as ImageIcon } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';

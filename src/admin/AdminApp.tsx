@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Loader2, Settings } from 'lucide-react';
 import { isFirebaseConfigured } from '../lib/firebase';

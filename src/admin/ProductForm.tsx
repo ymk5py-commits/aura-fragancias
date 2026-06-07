@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { X, Upload, Loader2, Image as ImageIcon } from 'lucide-react';
 import { Perfume, Gender, Category, Badge } from '../types';

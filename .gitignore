@@ -2,11 +2,12 @@
 node_modules/
 .env
 .env.local
+.next/
+out/
 .vercel
 *.log
-dist/
 aura_full.png
-*.png.tmp
+next-env.d.ts
 
 # Internal business assets — NOT for public deploy
 03_AURA_PERFUMES/

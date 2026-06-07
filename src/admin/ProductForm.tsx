@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Upload, Loader2, Image as ImageIcon } from 'lucide-react';
 import { Perfume, Gender, Category, Badge } from '../types';
 import { saveProduct, uploadProductImage } from '../lib/productsService';
+import { cldn } from '../lib/img';
 
 interface Props {
   product: Perfume | null; // null = nuevo
@@ -115,7 +116,7 @@ const ProductForm: React.FC<Props> = ({ product, onClose, onSaved }) => {
           <div className="flex gap-4 items-start">
             <div className="w-28 h-32 shrink-0 bg-aura-ivory border border-zinc-100 flex items-center justify-center overflow-hidden">
               {form.imageUrl ? (
-                <img src={form.imageUrl} alt="preview" className="w-full h-full object-cover" />
+                <img src={cldn(form.imageUrl, 300)} alt="preview" className="w-full h-full object-cover" />
               ) : (
                 <ImageIcon size={26} className="text-zinc-300" />
               )}

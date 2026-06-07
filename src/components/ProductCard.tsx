@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Perfume } from '../types';
 import { useSettings } from '../context/SettingsContext';
+import { cldn } from '../lib/img';
 import { ShoppingBag, X, Eye, Plus, Minus, Truck } from 'lucide-react';
 
 interface Props {
@@ -96,7 +97,7 @@ const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank
           <div className="sm:col-span-7 relative aspect-[16/12] sm:aspect-auto sm:min-h-[420px] overflow-hidden">
             {perfume.imageUrl && (
               <img
-                src={perfume.imageUrl}
+                src={cldn(perfume.imageUrl, 800)}
                 alt={`${perfume.name} — inspiración ${perfume.inspiration}`}
                 className="w-full h-full object-cover transition-transform duration-[1.2s] group-hover:scale-105"
                 referrerPolicy="no-referrer"
@@ -167,7 +168,7 @@ const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank
 
           {perfume.imageUrl ? (
             <img
-              src={perfume.imageUrl}
+              src={cldn(perfume.imageUrl, 800)}
               alt={`${perfume.name} — inspiración ${perfume.inspiration}`}
               loading="lazy"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -254,7 +255,7 @@ const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank
             <div className="w-full md:w-5/12 bg-aura-ivory p-5 sm:p-10 flex items-center justify-center shrink-0 border-b md:border-b-0 md:border-r border-zinc-100">
               <div className="w-full max-w-[360px] aspect-[4/5] bg-white border border-zinc-100 shadow-2xl overflow-hidden">
                 {perfume.imageUrl ? (
-                  <img src={perfume.imageUrl} alt={perfume.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  <img src={cldn(perfume.imageUrl, 800)} alt={perfume.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 ) : (
                   <div className="w-full h-full flex flex-col justify-center items-center p-8 text-center">
                     <h3 className="text-6xl font-luxury font-light text-aura-ink">{perfume.code}</h3>

@@ -19,5 +19,16 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Firebase en su propio chunk: se cachea aparte y carga en paralelo.
+            firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
+            react: ['react', 'react-dom', 'react-router-dom'],
+          },
+        },
+      },
+    },
   };
 });

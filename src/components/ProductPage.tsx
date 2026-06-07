@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProducts } from '../context/ProductsContext';
+import { cldn } from '../lib/img';
 import { useSettings } from '../context/SettingsContext';
+import Seo from './Seo';
 import { ShoppingBag, ShieldCheck, Truck, Minus, Plus, ArrowLeft, Check } from 'lucide-react';
 import Header from './Header';
 import Footer from './Footer';
@@ -57,10 +59,46 @@ const ProductPage: React.FC<Props> = ({ cart, onAddToCart, onOpenCart }) => {
     </div>
   );
 
+  const site = 'https://aurafrangancias.store';
+  const genderLabel = perfume.gender === 'Man' ? 'Hombre' : perfume.gender === 'Woman' ? 'Mujer' : 'Nicho & Unisex';
+  const genderPath = perfume.gender === 'Man' ? '/hombres' : perfume.gender === 'Woman' ? '/mujeres' : '/unisex';
+  const productLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: perfume.name,
+    image: cldn(perfume.imageUrl, 800) || `${site}/logo-512.png`,
+    description: `Inspiración olfativa de ${perfume.inspiration}. Familia ${perfume.family}. Extrait de Parfum 30% con fijación de ${perfume.duration}.`,
+    sku: perfume.code,
+    brand: { '@type': 'Brand', name: 'Äura Fragancias' },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'PYG',
+      price: PRICES[0].price,
+      availability: 'https://schema.org/InStock',
+      url: `${site}/producto/${perfume.code}`,
+    },
+  };
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: site },
+      { '@type': 'ListItem', position: 2, name: genderLabel, item: site + genderPath },
+      { '@type': 'ListItem', position: 3, name: perfume.name, item: `${site}/producto/${perfume.code}` },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Header 
-        cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)} 
+      <Seo
+        title={`${perfume.name} — Inspiración ${perfume.inspiration} | Äura Fragancias`}
+        description={`${perfume.name}: inspiración olfativa de ${perfume.inspiration}, familia ${perfume.family}. Extrait de Parfum 30%, fijación ${perfume.duration}. Desde Gs. ${PRICES[0].price.toLocaleString('es-PY')}. Envío a todo Paraguay.`}
+        path={`/producto/${perfume.code}`}
+        image={cldn(perfume.imageUrl, 800)}
+        jsonLd={[productLd, breadcrumbLd]}
+      />
+      <Header
+        cartCount={cart.reduce((acc, item) => acc + item.quantity, 0)}
         onOpenCart={onOpenCart}
       />
 
@@ -81,7 +119,7 @@ const ProductPage: React.FC<Props> = ({ cart, onAddToCart, onOpenCart }) => {
               <div className={`relative aspect-[4/5] w-full max-w-[500px] mx-auto bg-white border border-zinc-100 shadow-2xl flex flex-col overflow-hidden rounded-sm`}>
                 {perfume.imageUrl ? (
                   <img 
-                    src={perfume.imageUrl} 
+                    src={cldn(perfume.imageUrl, 800)} 
                     alt={perfume.name} 
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"

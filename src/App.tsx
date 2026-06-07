@@ -18,6 +18,7 @@ import { initPixel, trackEvent } from './lib/pixel';
 import { LEGAL_TEXTS, SALES_BY_CODE, TOP_SELLERS_COUNT } from './constants';
 import ProductCard from './components/ProductCard';
 import Reveal from './components/Reveal';
+import Seo from './components/Seo';
 import WhatsAppButton from './components/WhatsAppButton';
 import { useProducts } from './context/ProductsContext';
 import { useSettings } from './context/SettingsContext';
@@ -217,6 +218,11 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={
           <main>
+            <Seo
+              title="Äura Fragancias | Perfumes de Lujo Accesible en Paraguay · Extrait de Parfum 30%"
+              description="Alta perfumería en Paraguay con 30% de concentración. Inspiraciones olfativas premium de las fragancias más icónicas, con fijación y estela excepcionales. Envío gratis desde Gs. 300.000."
+              path="/"
+            />
             <Hero title={settings.heroTitle} subtitle={settings.heroSubtitle} image={settings.heroImage} />
 
             <FeatureSection />
@@ -254,18 +260,33 @@ const App: React.FC = () => {
         } />
         <Route path="/hombres" element={
           <main>
+            <Seo
+              title="Perfumes de Hombre — Inspiraciones de Lujo | Äura Paraguay"
+              description="Fragancias masculinas de alta gama con 30% de concentración. Inspiraciones de los perfumes de hombre más icónicos, con fijación de 8 a 12 horas. Envío a todo Paraguay."
+              path="/hombres"
+            />
             <Hero title="Hombres" subtitle={settings.subtitleMen} image={settings.bannerMen} showCatalogButton={false} />
             <ProductGrid gender="Man" id="hombres" onAddToCart={handleAddToCart} lastNavClick={lastNavClick} />
           </main>
         } />
         <Route path="/mujeres" element={
           <main>
+            <Seo
+              title="Perfumes de Mujer — Inspiraciones de Lujo | Äura Paraguay"
+              description="Fragancias femeninas de alta gama con 30% de concentración. Inspiraciones de los perfumes de mujer más icónicos, con estela y fijación excepcionales. Envío a todo Paraguay."
+              path="/mujeres"
+            />
             <Hero title="Mujeres" subtitle={settings.subtitleWomen} image={settings.bannerWomen} showCatalogButton={false} />
             <ProductGrid gender="Woman" id="mujeres" onAddToCart={handleAddToCart} lastNavClick={lastNavClick} />
           </main>
         } />
         <Route path="/unisex" element={
           <main>
+            <Seo
+              title="Perfumes Nicho & Unisex — Inspiraciones de Lujo | Äura Paraguay"
+              description="Fragancias nicho y unisex con 30% de concentración. Aromas sin etiquetas, inspiraciones de alta perfumería con carácter. Envío a todo Paraguay."
+              path="/unisex"
+            />
             <Hero title="Unisex" subtitle={settings.subtitleUnisex} image={settings.bannerUnisex} showCatalogButton={false} />
             <ProductGrid gender="Unisex" id="unisex" onAddToCart={handleAddToCart} lastNavClick={lastNavClick} />
           </main>

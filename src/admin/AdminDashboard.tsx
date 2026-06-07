@@ -7,6 +7,7 @@ import { useProducts } from '../context/ProductsContext';
 import { Perfume } from '../types';
 import { toggleVisible, deleteProduct, seedCatalog } from '../lib/productsService';
 import ProductForm from './ProductForm';
+import { cldn } from '../lib/img';
 import SettingsForm from './SettingsForm';
 
 const AdminDashboard: React.FC = () => {
@@ -188,7 +189,7 @@ const AdminDashboard: React.FC = () => {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-12 bg-aura-ivory border border-zinc-100 overflow-hidden shrink-0">
-                          {p.imageUrl ? <img src={p.imageUrl} alt="" className="w-full h-full object-cover" /> : null}
+                          {p.imageUrl ? <img src={cldn(p.imageUrl, 120)} alt="" className="w-full h-full object-cover" /> : null}
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-aura-ink truncate max-w-[200px]">{p.name}</p>

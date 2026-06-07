@@ -10,6 +10,7 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Firebase is "configured" only when the essential keys are present.
@@ -27,6 +28,17 @@ if (isFirebaseConfigured) {
   auth = getAuth(app);
   db = getFirestore(app);
   storage = getStorage(app);
+
+  // Analytics (opcional, solo en navegador compatible — no rompe el build/SSR).
+  if (firebaseConfig.measurementId && typeof window !== 'undefined') {
+    import('firebase/analytics')
+      .then(({ getAnalytics, isSupported }) =>
+        isSupported().then((ok) => {
+          if (ok && app) getAnalytics(app);
+        })
+      )
+      .catch(() => {/* analytics no disponible, se ignora */});
+  }
 } else {
   // No config yet: the storefront falls back to the bundled catalog,
   // and /admin shows a setup message instead of crashing.

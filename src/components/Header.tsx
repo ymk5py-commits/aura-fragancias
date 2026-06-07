@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useSettings } from '../context/SettingsContext';
 
 interface HeaderProps {
   cartCount: number;
@@ -12,6 +13,7 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onOpenCart, onNavClick }) =>
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { pathname } = useLocation();
+  const { settings } = useSettings();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 40);
@@ -50,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onOpenCart, onNavClick }) =>
       <div className="bg-aura-ink text-white/90 overflow-hidden">
         <div className="py-2 px-4 text-center">
           <p className="text-[8px] sm:text-[10px] font-semibold tracking-[0.3em] uppercase">
-            <span className="text-aura-gold">✦</span>&nbsp; Envío gratis desde Gs. 300.000 &nbsp;·&nbsp; 30% de concentración &nbsp;<span className="text-aura-gold">✦</span>
+            <span className="text-aura-gold">✦</span>&nbsp; {settings.announcement} &nbsp;<span className="text-aura-gold">✦</span>
           </p>
         </div>
       </div>

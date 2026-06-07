@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { PRICES } from '../constants';
+import { useSettings } from '../context/SettingsContext';
 import { Star, Award } from 'lucide-react';
 
 const PricingSection: React.FC = () => {
+  const { prices: PRICES } = useSettings();
   return (
     <section className="py-20 sm:py-28 bg-white border-y border-zinc-100">
       <div className="container mx-auto px-6">

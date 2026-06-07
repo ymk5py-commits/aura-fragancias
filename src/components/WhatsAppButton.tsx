@@ -1,5 +1,5 @@
 import React from 'react';
-import { WHATSAPP_NUMBER } from '../constants';
+import { useSettings } from '../context/SettingsContext';
 
 const MESSAGE = encodeURIComponent(
   '¡Hola Äura! 👋 Vengo de la web y quiero asesoría sobre sus fragancias.'
@@ -13,9 +13,10 @@ const WhatsAppGlyph: React.FC<{ size?: number }> = ({ size = 32 }) => (
 );
 
 const WhatsAppButton: React.FC = () => {
+  const { settings } = useSettings();
   return (
     <a
-      href={`https://wa.me/${WHATSAPP_NUMBER}?text=${MESSAGE}`}
+      href={`https://wa.me/${settings.whatsappNumber}?text=${MESSAGE}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Escribinos por WhatsApp"

@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
-import { X, Gift, CheckCircle2 } from 'lucide-react';
+import { X, CheckCircle2 } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 
 interface WelcomeModalProps {
   onAccept: (code: string) => void;
@@ -8,6 +9,7 @@ interface WelcomeModalProps {
 }
 
 const WelcomeModal: React.FC<WelcomeModalProps> = ({ onAccept, onReject }) => {
+  const { settings } = useSettings();
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -49,20 +51,20 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onAccept, onReject }) => {
           </div>
 
           <span className="text-aura-gold font-bold tracking-[0.3em] text-[10px] uppercase mb-3 block">Regalo Exclusivo</span>
-          <h2 className="text-2xl sm:text-3xl font-luxury mb-4 text-zinc-900">Descuento de bienvenida Aura</h2>
-          
+          <h2 className="text-2xl sm:text-3xl font-luxury mb-4 text-zinc-900">Descuento de bienvenida · {settings.welcomePercent}% OFF</h2>
+
           <p className="text-zinc-500 text-sm mb-8 leading-relaxed">
             Te damos la bienvenida a nuestra comunidad de lujo. Disfrutá de un beneficio especial en tu primera compra.
           </p>
 
           <div className="bg-zinc-50 border-2 border-dashed border-zinc-200 p-4 mb-8 rounded-sm group">
             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Tu Código</span>
-            <span className="text-xl font-bold text-zinc-900 tracking-[0.2em] uppercase">Bienvenida10</span>
+            <span className="text-xl font-bold text-zinc-900 tracking-[0.2em] uppercase">{settings.welcomeCode}</span>
           </div>
 
           <div className="flex flex-col gap-3">
-            <button 
-              onClick={() => handleClose(() => onAccept('Bienvenida10'))}
+            <button
+              onClick={() => handleClose(() => onAccept(settings.welcomeCode))}
               className="w-full bg-zinc-900 text-white py-4 rounded-sm text-xs font-bold tracking-[0.2em] uppercase hover:bg-aura-gold transition-all flex items-center justify-center gap-2 group"
             >
               <CheckCircle2 size={16} className="group-hover:scale-110 transition-transform" />

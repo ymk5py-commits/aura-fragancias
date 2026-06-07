@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowDown, ArrowRight, Sparkles } from 'lucide-react';
-import { WHATSAPP_NUMBER, BANNER_IMAGE } from '../constants';
+import { BANNER_IMAGE } from '../constants';
+import { useSettings } from '../context/SettingsContext';
 
 interface HeroProps {
   title?: string;
@@ -16,6 +17,7 @@ const Hero: React.FC<HeroProps> = ({
   image = BANNER_IMAGE,
   showCatalogButton = true,
 }) => {
+  const { settings } = useSettings();
   const isHome = showCatalogButton;
 
   return (
@@ -94,7 +96,7 @@ const Hero: React.FC<HeroProps> = ({
             </Link>
           )}
           <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}`}
+            href={`https://wa.me/${settings.whatsappNumber}`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto border border-white/30 text-white px-10 py-4 sm:px-12 sm:py-[18px] text-[11px] font-bold tracking-[0.25em] uppercase hover:bg-white/10 hover:border-white/60 transition-all duration-300 active-scale text-center backdrop-blur-sm"

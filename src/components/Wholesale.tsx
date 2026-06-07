@@ -1,9 +1,11 @@
 
 import React from 'react';
-import { SCALES, WHATSAPP_NUMBER } from '../constants';
+import { SCALES } from '../constants';
+import { useSettings } from '../context/SettingsContext';
 import { TrendingUp, CheckCircle } from 'lucide-react';
 
 const Wholesale: React.FC = () => {
+  const { settings } = useSettings();
   const wholesaleMessage = encodeURIComponent("Hola Äura, me gustaría recibir información para ser mayorista.");
 
   return (
@@ -43,7 +45,7 @@ const Wholesale: React.FC = () => {
             </div>
 
             <a 
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${wholesaleMessage}`}
+              href={`https://wa.me/${settings.whatsappNumber}?text=${wholesaleMessage}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-white text-zinc-900 px-10 py-4 rounded-full text-sm font-bold tracking-widest hover:bg-aura-gold transition-colors"

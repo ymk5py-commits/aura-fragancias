@@ -32,3 +32,27 @@ export interface WholesaleScale {
   units: string;
   discount: string;
 }
+
+export interface SiteSettings {
+  // Hero principal (home)
+  heroTitle: string;
+  heroSubtitle: string;
+  heroImage: string;
+  // Banners de categorías
+  bannerMen: string;
+  bannerWomen: string;
+  bannerUnisex: string;
+  subtitleMen: string;
+  subtitleWomen: string;
+  subtitleUnisex: string;
+  // Barra de aviso + contacto
+  announcement: string;
+  whatsappNumber: string;
+  // Descuento de bienvenida
+  welcomeCode: string;
+  welcomePercent: number;
+  // Precios por presentación (Gs.)
+  price10: number;
+  price30: number;
+  price50: number;
+}

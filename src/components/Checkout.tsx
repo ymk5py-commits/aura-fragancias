@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Info, MessageCircle, Truck, Wallet, Plus, Minus, Trash2 } from 'lucide-react';
 import { CartItem } from '../types';
-import { WHATSAPP_NUMBER } from '../constants';
+import { useSettings } from '../context/SettingsContext';
 import { trackEvent } from '../lib/pixel';
 
 interface CheckoutProps {
@@ -14,6 +14,7 @@ interface CheckoutProps {
 }
 
 const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveItem, initialDiscount = 0, onBack }) => {
+  const { settings } = useSettings();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -76,7 +77,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       num_items: cart.reduce((acc, item) => acc + item.quantity, 0)
     });
 
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${settings.whatsappNumber}?text=${message}`, '_blank');
   };
 
   return (

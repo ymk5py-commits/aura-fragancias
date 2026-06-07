@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Perfume } from '../types';
-import { PRICES } from '../constants';
+import { useSettings } from '../context/SettingsContext';
 import { ShoppingBag, X, Eye, Plus, Minus, Truck } from 'lucide-react';
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
 }
 
 const ProductCard: React.FC<Props> = ({ perfume, onAddToCart, lastNavClick, rank }) => {
+  const { prices: PRICES } = useSettings();
   const [showDetails, setShowDetails] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>(PRICES[1].size); // 30ML default
   const [quantity, setQuantity] = useState(1);

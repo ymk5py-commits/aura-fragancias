@@ -15,10 +15,11 @@ import Checkout from './components/Checkout';
 import WelcomeModal from './components/WelcomeModal';
 import ProductPage from './components/ProductPage';
 import { initPixel, trackEvent } from './lib/pixel';
-import { LEGAL_TEXTS, PRICES, BANNER_MEN, BANNER_WOMEN, BANNER_UNISEX, SALES_BY_CODE, TOP_SELLERS_COUNT } from './constants';
+import { LEGAL_TEXTS, SALES_BY_CODE, TOP_SELLERS_COUNT } from './constants';
 import ProductCard from './components/ProductCard';
 import WhatsAppButton from './components/WhatsAppButton';
 import { useProducts } from './context/ProductsContext';
+import { useSettings } from './context/SettingsContext';
 
 // El panel admin se carga solo al entrar a /admin (no pesa en la tienda).
 const AdminApp = React.lazy(() => import('./admin/AdminApp'));
@@ -37,6 +38,7 @@ const App: React.FC = () => {
   const { pathname } = location;
   const navigate = useNavigate();
   const { visibleProducts } = useProducts();
+  const { settings, prices } = useSettings();
 
   // Cerrar checkout cuando cambia la ruta
   useEffect(() => {
@@ -103,7 +105,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleAcceptWelcome = (code: string) => {
-    setAppliedDiscount(10);
+    setAppliedDiscount(settings.welcomePercent);
     localStorage.setItem('hasSeenWelcome', 'true');
     setShowWelcomeModal(false);
     showNotification(`¡Descuento de bienvenida aplicado!`);
@@ -120,7 +122,7 @@ const App: React.FC = () => {
   };
 
   const handleAddToCart = (perfume: Perfume, size: string, quantity: number = 1) => {
-    const selectedPrice = PRICES.find(p => p.size === size)?.price || 0;
+    const selectedPrice = prices.find(p => p.size === size)?.price || 0;
     
     setCart(prev => {
       const existingItemIndex = prev.findIndex(item => item.perfume.code === perfume.code && item.size === size);
@@ -214,8 +216,8 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={
           <main>
-            <Hero />
-            
+            <Hero title={settings.heroTitle} subtitle={settings.heroSubtitle} image={settings.heroImage} />
+
             <FeatureSection />
 
             <section id="top-ventas" className="py-16 sm:py-28 bg-white scroll-mt-24">
@@ -242,19 +244,19 @@ const App: React.FC = () => {
         } />
         <Route path="/hombres" element={
           <main>
-            <Hero title="Hombres" subtitle="Fragancias masculinas de alta gama" image={BANNER_MEN} showCatalogButton={false} />
+            <Hero title="Hombres" subtitle={settings.subtitleMen} image={settings.bannerMen} showCatalogButton={false} />
             <ProductGrid gender="Man" id="hombres" onAddToCart={handleAddToCart} lastNavClick={lastNavClick} />
           </main>
         } />
         <Route path="/mujeres" element={
           <main>
-            <Hero title="Mujeres" subtitle="Elegancia y sofisticación femenina" image={BANNER_WOMEN} showCatalogButton={false} />
+            <Hero title="Mujeres" subtitle={settings.subtitleWomen} image={settings.bannerWomen} showCatalogButton={false} />
             <ProductGrid gender="Woman" id="mujeres" onAddToCart={handleAddToCart} lastNavClick={lastNavClick} />
           </main>
         } />
         <Route path="/unisex" element={
           <main>
-            <Hero title="Unisex" subtitle="Aromas sin etiquetas, pura esencia" image={BANNER_UNISEX} showCatalogButton={false} />
+            <Hero title="Unisex" subtitle={settings.subtitleUnisex} image={settings.bannerUnisex} showCatalogButton={false} />
             <ProductGrid gender="Unisex" id="unisex" onAddToCart={handleAddToCart} lastNavClick={lastNavClick} />
           </main>
         } />

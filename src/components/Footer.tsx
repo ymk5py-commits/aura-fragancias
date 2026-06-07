@@ -1,13 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, MessageCircle, Music2 as Tiktok } from 'lucide-react';
-import { BRAND_NAME, WHATSAPP_NUMBER, INSTAGRAM_URL, FACEBOOK_URL, TIKTOK_URL, CATALOG_URL } from '../constants';
+import { BRAND_NAME, INSTAGRAM_URL, FACEBOOK_URL, TIKTOK_URL, CATALOG_URL } from '../constants';
+import { useSettings } from '../context/SettingsContext';
 
 interface FooterProps {
   onLegalClick: (type: 'inspirations' | 'terms' | 'shipping') => void;
 }
 
 const Footer: React.FC<FooterProps> = ({ onLegalClick }) => {
+  const { settings } = useSettings();
   return (
     <footer className="bg-aura-ink text-white/80 pt-20 sm:pt-28 pb-10">
       <div className="container mx-auto px-6">
@@ -68,7 +70,7 @@ const Footer: React.FC<FooterProps> = ({ onLegalClick }) => {
                 { href: INSTAGRAM_URL, icon: Instagram, label: 'Instagram' },
                 { href: FACEBOOK_URL, icon: Facebook, label: 'Facebook' },
                 { href: TIKTOK_URL, icon: Tiktok, label: 'TikTok' },
-                { href: `https://wa.me/${WHATSAPP_NUMBER}`, icon: MessageCircle, label: 'WhatsApp' },
+                { href: `https://wa.me/${settings.whatsappNumber}`, icon: MessageCircle, label: 'WhatsApp' },
               ].map(({ href, icon: Icon, label }) => (
                 <a
                   key={label}

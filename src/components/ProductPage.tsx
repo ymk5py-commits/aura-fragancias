@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PRICES } from '../constants';
 import { useProducts } from '../context/ProductsContext';
+import { useSettings } from '../context/SettingsContext';
 import { ShoppingBag, ShieldCheck, Truck, Minus, Plus, ArrowLeft, Check } from 'lucide-react';
 import Header from './Header';
 import Footer from './Footer';
@@ -20,6 +20,7 @@ const ProductPage: React.FC<Props> = ({ cart, onAddToCart, onOpenCart }) => {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
   const { visibleProducts, loading } = useProducts();
+  const { prices: PRICES } = useSettings();
   const [perfume, setPerfume] = useState<Perfume | null>(null);
   const [selectedSize, setSelectedSize] = useState<string>(PRICES[1].size);
   const [quantity, setQuantity] = useState(1);

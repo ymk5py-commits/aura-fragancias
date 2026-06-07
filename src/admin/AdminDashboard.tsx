@@ -7,6 +7,7 @@ import { useProducts } from '../context/ProductsContext';
 import { Perfume } from '../types';
 import { toggleVisible, deleteProduct, seedCatalog } from '../lib/productsService';
 import ProductForm from './ProductForm';
+import SettingsForm from './SettingsForm';
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -17,6 +18,7 @@ const AdminDashboard: React.FC = () => {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [seeding, setSeeding] = useState(false);
   const [toast, setToast] = useState('');
+  const [tab, setTab] = useState<'products' | 'settings'>('products');
 
   const notify = (msg: string) => {
     setToast(msg);
@@ -100,7 +102,31 @@ const AdminDashboard: React.FC = () => {
         </div>
       </header>
 
+      {/* Tabs */}
+      <div className="bg-white border-b border-zinc-100 sticky top-[57px] z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex gap-1">
+          {([
+            { key: 'products', label: 'Productos' },
+            { key: 'settings', label: 'Configuración' },
+          ] as const).map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] border-b-2 transition-colors ${
+                tab === t.key ? 'border-aura-ink text-aura-ink' : 'border-transparent text-zinc-400 hover:text-zinc-600'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        {tab === 'settings' && <SettingsForm />}
+
+        {tab === 'products' && (
+        <>
         {/* Stats + seed notice */}
         {source === 'local' && (
           <div className="bg-amber-50 border border-amber-200 p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -213,6 +239,8 @@ const AdminDashboard: React.FC = () => {
             </tbody>
           </table>
         </div>
+        </>
+        )}
       </main>
 
       {showForm && (

@@ -1,5 +1,5 @@
 
-import { Perfume, WholesaleScale } from './types';
+import { Perfume, WholesaleScale, SiteSettings } from './types';
 
 export const WHATSAPP_NUMBER = "595994414986"; 
 export const INSTAGRAM_URL = "https://www.instagram.com/aura_fraganciaspy/";
@@ -28,6 +28,29 @@ export const SHIPPING_ZONES = [
   { name: "GRAN ASUNCIÓN", price: 25000 },
   { name: "INTERIOR DEL PAÍS (ENCOMIENDA)", price: 35000 },
 ];
+
+// ============================================================
+//  CONFIGURACIÓN DEL SITIO (editable desde /admin → Configuración)
+//  Estos son los valores por defecto; si hay datos en Firebase, mandan esos.
+// ============================================================
+export const DEFAULT_SETTINGS: SiteSettings = {
+  heroTitle: 'ÄURA',
+  heroSubtitle: 'El lujo al alcance de todos.',
+  heroImage: BANNER_IMAGE,
+  bannerMen: BANNER_MEN,
+  bannerWomen: BANNER_WOMEN,
+  bannerUnisex: BANNER_UNISEX,
+  subtitleMen: 'Fragancias masculinas de alta gama',
+  subtitleWomen: 'Elegancia y sofisticación femenina',
+  subtitleUnisex: 'Aromas sin etiquetas, pura esencia',
+  announcement: 'Envío gratis desde Gs. 300.000 · 30% de concentración',
+  whatsappNumber: WHATSAPP_NUMBER,
+  welcomeCode: 'BIENVENIDA10',
+  welcomePercent: 10,
+  price10: 30000,
+  price30: 70000,
+  price50: 120000,
+};
 
 // ============================================================
 //  TOP VENTAS AUTOMÁTICO

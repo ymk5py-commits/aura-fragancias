@@ -41,7 +41,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onAccept, onReject }) => {
         <div className="p-8 sm:p-12 text-center">
           <div className="mb-6">
             <img 
-              src="https://res.cloudinary.com/djmqjclxc/image/upload/v1775174238/622590067_1487240126742333_6479156717568628919_n_pawlsw.jpg" 
+              src="/logo.svg" 
               alt="Äura Logo" 
               className="w-20 h-20 rounded-full mx-auto border-2 border-aura-gold/20 object-cover shadow-lg"
               referrerPolicy="no-referrer"

@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
           </span>
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-luxury text-white leading-tight max-w-3xl mb-10">
             Elegí tu aroma. Elegí tu presencia.
-            <span className="block italic text-champagne">Elegí Äura.</span>
+            <span className="block text-champagne">Elegí Äura.</span>
           </h2>
           <a
             href={CATALOG_URL}

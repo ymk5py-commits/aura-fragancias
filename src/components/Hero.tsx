@@ -83,7 +83,7 @@ const Hero: React.FC<HeroProps> = ({
         {/* Subtitle */}
         <div className="space-y-3 sm:space-y-4 mb-9 sm:mb-12">
           <h2
-            className="text-2xl sm:text-4xl md:text-5xl font-luxury italic text-white/90 leading-tight opacity-0 animate-slide-up"
+            className="text-2xl sm:text-4xl md:text-5xl font-luxury text-white/90 leading-tight opacity-0 animate-slide-up"
             style={{ animationDelay: '0.35s' }}
           >
             {subtitle}

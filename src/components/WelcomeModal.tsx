@@ -1,6 +1,5 @@
 'use client';
 
-
 import React, { useEffect, useState } from 'react';
 import { X, CheckCircle2 } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
@@ -16,7 +15,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onAccept, onReject }) => {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 1000);
+    const timer = setTimeout(() => setIsVisible(true), 400);
     return () => clearTimeout(timer);
   }, []);
 
@@ -29,60 +28,64 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onAccept, onReject }) => {
 
   return (
     <div className={`fixed inset-0 z-[300] flex items-center justify-center px-4 transition-all duration-500 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
-      <div className="absolute inset-0 bg-zinc-900/80 backdrop-blur-sm" onClick={() => handleClose(onReject)}></div>
-      
-      <div className={`relative bg-white w-full max-w-md overflow-hidden rounded-sm shadow-2xl transition-all duration-500 transform ${isClosing ? 'scale-95 translate-y-10' : 'scale-100 translate-y-0'}`}>
-        {/* Decoración superior */}
-        <div className="h-2 bg-aura-gold w-full"></div>
-        
-        <button 
+      <div className="absolute inset-0 bg-aura-ink/85 backdrop-blur-md" onClick={() => handleClose(onReject)}></div>
+
+      <div className={`relative w-full max-w-md overflow-hidden bg-aura-charcoal border border-white/10 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)] transition-all duration-500 transform ${isClosing ? 'scale-95 translate-y-10' : 'scale-100 translate-y-0'}`}>
+        {/* Filete dorado superior */}
+        <div className="h-px bg-gradient-to-r from-transparent via-aura-gold to-transparent w-full" />
+
+        <button
           onClick={() => handleClose(onReject)}
-          className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-900 transition-colors z-10"
+          aria-label="Cerrar"
+          className="absolute top-4 right-4 p-2 text-white/40 hover:text-white transition-colors z-10"
         >
           <X size={20} />
         </button>
 
         <div className="p-8 sm:p-12 text-center">
-          <div className="mb-6">
-            <img 
-              src="/logo.svg" 
-              alt="Äura Logo" 
-              className="w-20 h-20 rounded-full mx-auto border-2 border-aura-gold/20 object-cover shadow-lg"
-              referrerPolicy="no-referrer"
-            />
-          </div>
+          <img
+            src="/logo.svg"
+            alt="Äura Fragancias"
+            className="w-16 h-16 rounded-full mx-auto mb-7 ring-1 ring-aura-gold/40 ring-offset-4 ring-offset-aura-charcoal"
+            width={64}
+            height={64}
+          />
 
-          <span className="text-aura-gold font-bold tracking-[0.3em] text-[10px] uppercase mb-3 block">Regalo Exclusivo</span>
-          <h2 className="text-2xl sm:text-3xl font-luxury mb-4 text-zinc-900">Descuento de bienvenida · {settings.welcomePercent}% OFF</h2>
+          <span className="text-aura-gold font-semibold tracking-[0.35em] text-[10px] uppercase mb-4 block">
+            Regalo de bienvenida
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-luxury text-white leading-tight mb-4">
+            {settings.welcomePercent}% OFF en tu primera compra
+          </h2>
 
-          <p className="text-zinc-500 text-sm mb-8 leading-relaxed">
-            Te damos la bienvenida a nuestra comunidad de lujo. Disfrutá de un beneficio especial en tu primera compra.
+          <p className="text-white/55 text-sm mb-8 leading-relaxed font-light max-w-xs mx-auto">
+            Un beneficio exclusivo para conocer la alta perfumería Äura.
           </p>
 
-          <div className="bg-zinc-50 border-2 border-dashed border-zinc-200 p-4 mb-8 rounded-sm group">
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">Tu Código</span>
-            <span className="text-xl font-bold text-zinc-900 tracking-[0.2em] uppercase">{settings.welcomeCode}</span>
+          <div className="border border-dashed border-aura-gold/40 bg-white/[0.03] p-4 mb-8">
+            <span className="text-[9px] font-semibold text-white/40 uppercase tracking-[0.3em] block mb-1.5">Tu código</span>
+            <span className="text-xl font-semibold text-champagne tracking-[0.25em] uppercase">{settings.welcomeCode}</span>
           </div>
 
           <div className="flex flex-col gap-3">
             <button
               onClick={() => handleClose(() => onAccept(settings.welcomeCode))}
-              className="w-full bg-zinc-900 text-white py-4 rounded-sm text-xs font-bold tracking-[0.2em] uppercase hover:bg-aura-gold transition-all flex items-center justify-center gap-2 group"
+              className="w-full bg-aura-gold text-aura-ink py-4 text-[11px] font-bold tracking-[0.25em] uppercase hover:bg-white transition-colors duration-300 flex items-center justify-center gap-2 active:scale-[0.98]"
             >
-              <CheckCircle2 size={16} className="group-hover:scale-110 transition-transform" />
-              ACEPTAR Y APLICAR
+              <CheckCircle2 size={15} />
+              Aplicar mi descuento
             </button>
-            <button 
+            <button
               onClick={() => handleClose(onReject)}
-              className="w-full py-3 text-[10px] font-bold text-zinc-400 hover:text-zinc-600 transition-colors tracking-widest uppercase"
+              className="w-full py-3 text-[10px] font-semibold text-white/35 hover:text-white/70 transition-colors tracking-[0.25em] uppercase"
             >
-              NO, GRACIAS
+              Ahora no
             </button>
           </div>
         </div>
 
-        <div className="bg-zinc-50 p-4 text-center border-t border-zinc-100">
-          <p className="text-[9px] text-zinc-400 uppercase tracking-widest">Válido por tiempo limitado en toda la tienda</p>
+        <div className="border-t border-white/5 p-4 text-center">
+          <p className="text-[9px] text-white/30 uppercase tracking-[0.25em]">Válido por tiempo limitado en toda la tienda</p>
         </div>
       </div>
     </div>

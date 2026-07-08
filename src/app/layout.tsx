@@ -1,22 +1,23 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, Inter } from 'next/font/google';
+import { Bodoni_Moda, Jost } from 'next/font/google';
 import './globals.css';
 import Providers from './providers';
 import { getProducts, getSettings } from '../lib/serverData';
 import { SITE } from '../lib/site';
 
-const cormorant = Cormorant_Garamond({
+// Bodoni Moda: didone de alto contraste, mismo ADN que el wordmark Ä del logo.
+// Jost: geométrica tipo Futura (código tipográfico clásico del lujo). Sin italics.
+const bodoni = Bodoni_Moda({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-cormorant',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-display',
   display: 'swap',
 });
 
-const inter = Inter({
+const jost = Jost({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-inter',
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-body',
   display: 'swap',
 });
 
@@ -92,7 +93,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [settings, productsData] = await Promise.all([getSettings(), getProducts()]);
 
   return (
-    <html lang="es" className={`${cormorant.variable} ${inter.variable}`}>
+    <html lang="es" className={`${bodoni.variable} ${jost.variable}`}>
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([storeJsonLd, webSiteJsonLd]) }} />

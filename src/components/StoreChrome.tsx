@@ -15,8 +15,27 @@ const StoreChrome: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   } = useCart();
   const [showWelcome, setShowWelcome] = useState(false);
 
+  // El descuento de bienvenida no interrumpe la primera impresión: aparece
+  // recién a los 12s o cuando la persona ya scrolleó un 35% (lo que pase antes).
   useEffect(() => {
-    if (!localStorage.getItem('hasSeenWelcome')) setShowWelcome(true);
+    if (localStorage.getItem('hasSeenWelcome')) return;
+    let fired = false;
+    const fire = () => {
+      if (fired) return;
+      fired = true;
+      setShowWelcome(true);
+      window.removeEventListener('scroll', onScroll);
+    };
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (max > 0 && window.scrollY / max > 0.35) fire();
+    };
+    const timer = setTimeout(fire, 12000);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   return (

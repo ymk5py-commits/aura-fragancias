@@ -89,7 +89,7 @@ const ScentFamilies: React.FC = () => {
               <div key={active} className="relative animate-fade-in">
                 {React.createElement(FAMILIES[active].icon, { size: 32, strokeWidth: 1.25, className: 'text-aura-gold mb-6' })}
                 <h3 className="text-5xl font-luxury text-white mb-4">{FAMILIES[active].name}</h3>
-                <p className="text-white/60 text-lg font-luxury italic leading-relaxed mb-8 max-w-md">{FAMILIES[active].desc}</p>
+                <p className="text-white/60 text-lg font-light leading-relaxed mb-8 max-w-md">{FAMILIES[active].desc}</p>
                 <div className="flex flex-wrap gap-2">
                   {FAMILIES[active].notes.map((n) => (
                     <span key={n} className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/75 border border-white/20 px-3.5 py-1.5">{n}</span>

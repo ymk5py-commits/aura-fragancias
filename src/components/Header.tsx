@@ -21,7 +21,9 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const onDark = !isScrolled && pathname === '/';
+  // El header vive SIEMPRE en el mundo noir: transparente sobre el hero de la
+  // home, vidrio oscuro al scrollear y en el resto de las páginas (nunca claro).
+  const transparent = !isScrolled && pathname === '/';
 
   const navLinks = [
     { name: 'Hombres', href: '/hombres' },
@@ -55,11 +57,11 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      <div className={`transition-all duration-500 ${onDark ? 'bg-transparent' : 'glass shadow-[0_1px_0_rgba(0,0,0,0.06)]'}`}>
+      <div className={`transition-all duration-500 ${transparent ? 'bg-transparent' : 'glass-dark shadow-[0_1px_0_rgba(255,255,255,0.07)]'}`}>
         <div className={`container mx-auto px-5 sm:px-6 flex justify-between items-center transition-all duration-500 ${isScrolled || pathname !== '/' ? 'py-3' : 'py-4 sm:py-5'}`}>
           <Link href="/" onClick={() => handleNavClick('/')} className="flex items-center gap-2.5 sm:gap-3 group">
             <img src="/logo.svg" alt="Äura Fragancias" className="w-9 h-9 sm:w-10 sm:h-10 rounded-full group-hover:scale-105 transition-transform duration-300" width={40} height={40} />
-            <span className={`text-2xl sm:text-3xl font-luxury font-semibold tracking-[0.2em] transition-colors duration-300 ${onDark ? 'text-white' : 'text-aura-ink'}`}>
+            <span className="text-2xl sm:text-3xl font-luxury font-semibold tracking-[0.2em] text-white">
               ÄURA
             </span>
           </Link>
@@ -70,7 +72,7 @@ const Header: React.FC = () => {
                 key={link.name}
                 href={link.href}
                 onClick={() => handleNavClick(link.href)}
-                className={`relative text-[11px] font-semibold tracking-[0.2em] uppercase transition-colors duration-300 after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-aura-gold after:transition-all after:duration-300 hover:after:w-full ${onDark ? 'text-white/85 hover:text-white' : 'text-zinc-700 hover:text-aura-ink'}`}
+                className="relative text-[11px] font-semibold tracking-[0.2em] uppercase transition-colors duration-300 after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-aura-gold after:transition-all after:duration-300 hover:after:w-full text-white/80 hover:text-white"
               >
                 {link.name}
               </Link>
@@ -78,7 +80,7 @@ const Header: React.FC = () => {
 
             <button
               onClick={openCart}
-              className={`flex items-center gap-2.5 px-5 py-2.5 text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 active:scale-95 ml-2 ${onDark ? 'bg-white text-aura-ink hover:bg-aura-gold hover:text-white' : 'bg-aura-ink text-white hover:bg-aura-gold'}`}
+              className="flex items-center gap-2.5 px-5 py-2.5 text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 active:scale-95 ml-2 bg-white text-aura-ink hover:bg-aura-gold hover:text-white"
             >
               <div className="relative">
                 <ShoppingBag size={16} strokeWidth={1.75} />
@@ -91,13 +93,13 @@ const Header: React.FC = () => {
           </nav>
 
           <div className="md:hidden flex items-center gap-1">
-            <button onClick={openCart} aria-label="Abrir carrito" className={`relative p-2 ${onDark ? 'text-white' : 'text-aura-ink'}`}>
+            <button onClick={openCart} aria-label="Abrir carrito" className="relative p-2 text-white">
               <ShoppingBag size={22} strokeWidth={1.75} />
               {cartCount > 0 && (
                 <span className="absolute top-0 right-0 bg-aura-gold text-white text-[8px] font-bold w-4 h-4 flex items-center justify-center rounded-full">{cartCount}</span>
               )}
             </button>
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Abrir menú" className={`p-2 ${onDark ? 'text-white' : 'text-aura-ink'}`}>
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Abrir menú" className="p-2 text-white">
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>

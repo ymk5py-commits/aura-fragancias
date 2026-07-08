@@ -32,7 +32,7 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
   const [copied, setCopied] = useState(false);
 
   return (
-    <main className="flex-grow pt-28 pb-16 min-h-screen bg-white">
+    <main className="flex-grow pt-28 pb-16 min-h-screen bg-aura-ivory">
       <div className="container mx-auto px-4 sm:px-6">
         <nav aria-label="Ruta de navegación" className="flex items-center flex-wrap gap-1.5 mb-8 text-[10px] font-bold tracking-[0.15em] uppercase text-zinc-400">
           <Link href="/" className="hover:text-zinc-900 transition-colors">Inicio</Link>
@@ -72,7 +72,7 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
             <div className="mb-10">
               <span className="text-aura-gold-deep font-bold tracking-[0.4em] text-[10px] uppercase mb-3 block">Inspiración {perfume.inspiration}</span>
               <h1 className="text-5xl sm:text-6xl font-luxury text-zinc-900 leading-none mb-3">{perfume.name}</h1>
-              <p className="text-base text-zinc-500 italic font-luxury mb-6">{perfume.family}</p>
+              <p className="text-xs text-zinc-500 font-medium tracking-[0.25em] uppercase mb-6">{perfume.family}</p>
 
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2 bg-zinc-50 px-4 py-2 rounded-sm border border-zinc-100">

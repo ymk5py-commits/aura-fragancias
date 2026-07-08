@@ -69,7 +69,7 @@ const Wholesale: React.FC = () => {
             
             <div className="mt-10 p-6 bg-aura-gold/10 rounded-xl border border-aura-gold/20 text-center">
               <TrendingUp className="mx-auto text-aura-gold mb-3" />
-              <p className="text-sm italic text-aura-gold font-medium">Margen de ganancia superior al 100% sugerido.</p>
+              <p className="text-sm text-aura-gold font-medium tracking-wide">Margen de ganancia superior al 100% sugerido.</p>
             </div>
           </div>
         </div>

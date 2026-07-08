@@ -191,12 +191,12 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
 
               <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-10 border-b border-zinc-100 pb-6 sm:pb-10">
                 {cart.length === 0 ? (
-                  <p className="text-zinc-400 text-center text-xs italic">Tu carrito está vacío</p>
+                  <p className="text-zinc-400 text-center text-xs">Tu carrito está vacío</p>
                 ) : (
                   cart.map((item) => (
                     <div key={item.id} className="flex justify-between items-center">
                       <div className="flex flex-col">
-                        <span className="text-[10px] sm:text-[11px] font-bold text-zinc-900 uppercase tracking-wider italic">AURA {item.perfume.code}</span>
+                        <span className="text-[10px] sm:text-[11px] font-bold text-zinc-900 uppercase tracking-wider">AURA {item.perfume.code}</span>
                         <span className="text-[8px] sm:text-[9px] text-zinc-400 uppercase tracking-widest">{item.size}</span>
                         
                         {/* Controles de Cantidad */}

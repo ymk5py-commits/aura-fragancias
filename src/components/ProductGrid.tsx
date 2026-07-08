@@ -149,7 +149,7 @@ const ProductGrid: React.FC<Props> = ({ gender, id }) => {
           </div>
         ) : (
           <div className="py-16 text-center border-y border-zinc-50 max-w-xl mx-auto">
-            <h3 className="text-xl font-luxury text-zinc-300 italic mb-3">Aroma no encontrado</h3>
+            <h3 className="text-xl font-luxury text-zinc-300 mb-3">Aroma no encontrado</h3>
             <p className="text-zinc-400 text-[8px] uppercase tracking-[0.2em]">Intenta con otra combinación de filtros.</p>
             <button 
               onClick={() => {setSearchQuery(''); setActiveCategory('All'); setActiveIntensity('All');}}

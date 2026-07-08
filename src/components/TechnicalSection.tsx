@@ -41,7 +41,7 @@ const TechnicalSection: React.FC = () => {
               </p>
               <div className="p-5 bg-zinc-50 border border-zinc-100 rounded-sm flex gap-4">
                 <Thermometer className="text-zinc-300 shrink-0" size={20} />
-                <p className="text-[11px] sm:text-xs text-zinc-500 italic leading-snug">
+                <p className="text-[11px] sm:text-xs text-zinc-500 leading-snug">
                   *La duración real puede variar según el pH de la piel y las condiciones climáticas del entorno.
                 </p>
               </div>

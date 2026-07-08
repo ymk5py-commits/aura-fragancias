@@ -126,7 +126,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
             <h3 className="text-3xl sm:text-5xl font-luxury leading-[1.05] mb-3">
               <Link href={productHref} onClick={openModal} className="hover:text-aura-gold transition-colors">{perfume.name}</Link>
             </h3>
-            <p className="text-white/45 italic font-luxury text-base sm:text-lg mb-7">{perfume.family}</p>
+            <p className="text-white/50 text-[11px] font-medium tracking-[0.25em] uppercase mb-7">{perfume.family}</p>
             <div className="flex items-center gap-6 mb-8">
               <div>
                 <span className="block text-[9px] tracking-[0.2em] uppercase text-white/40 mb-1.5">Intensidad</span>
@@ -295,7 +295,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
                   Inspiración {perfume.inspiration}
                 </span>
                 <h2 className="text-3xl sm:text-4xl font-luxury text-aura-ink leading-tight mb-2">{perfume.name}</h2>
-                <p className="text-sm text-zinc-500 italic font-luxury">{perfume.family}</p>
+                <p className="text-[11px] text-zinc-500 font-medium tracking-[0.2em] uppercase">{perfume.family}</p>
                 <div className="flex flex-wrap items-center gap-2 mt-5">
                   <div className="flex items-center gap-2 bg-aura-ivory px-3.5 py-2 border border-zinc-100">
                     <Truck size={13} className="text-aura-gold-deep" />

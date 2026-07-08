@@ -12,8 +12,8 @@
   --color-aura-ink: #0c0a09;
   --color-aura-charcoal: #1c1917;
 
-  --font-luxury: "Cormorant Garamond", ui-serif, Georgia, serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-luxury: var(--font-cormorant), "Cormorant Garamond", ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --shadow-luxe: 0 24px 60px -30px rgba(12, 10, 9, 0.45);
   --shadow-card: 0 12px 40px -22px rgba(12, 10, 9, 0.28);

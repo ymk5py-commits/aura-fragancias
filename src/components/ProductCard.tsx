@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Perfume } from '../types';
 import { useSettings } from '../context/SettingsContext';
 import { useCart } from '../context/CartContext';
 import { cldn } from '../lib/img';
-import { ShoppingBag, X, Eye, Plus, Minus, Truck } from 'lucide-react';
+import { ShoppingBag, X, Eye, Plus, Minus, Truck, ArrowRight } from 'lucide-react';
 
 interface Props {
   perfume: Perfume;
@@ -82,6 +83,16 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
     setShowDetails(false);
   };
 
+  // Los títulos llevan <Link href> real (crawleable, cmd+click abre la ficha);
+  // el click simple conserva la UX de modal.
+  const productHref = `/producto/${perfume.code}`;
+  const openModal = (e: React.MouseEvent) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return; // respeta abrir en pestaña nueva
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDetails(true);
+  };
+
   const fromPrice = PRICES[0].price;
 
   // ── Layout DESTACADO (editorial, ocupa ancho completo) ──────────────
@@ -109,7 +120,9 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
             <span className="text-aura-gold font-semibold tracking-[0.35em] text-[10px] uppercase mb-4">
               Inspiración {perfume.inspiration}
             </span>
-            <h3 className="text-3xl sm:text-5xl font-luxury leading-[1.05] mb-3">{perfume.name}</h3>
+            <h3 className="text-3xl sm:text-5xl font-luxury leading-[1.05] mb-3">
+              <Link href={productHref} onClick={openModal} className="hover:text-aura-gold transition-colors">{perfume.name}</Link>
+            </h3>
             <p className="text-white/45 italic font-luxury text-base sm:text-lg mb-7">{perfume.family}</p>
             <div className="flex items-center gap-6 mb-8">
               <div>
@@ -125,12 +138,13 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
                 <span className="font-luxury text-2xl text-champagne tabular">Gs. {fromPrice.toLocaleString('es-PY')}</span>
               </div>
             </div>
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowDetails(true); }}
+            <Link
+              href={productHref}
+              onClick={(e) => e.stopPropagation()}
               className="self-start bg-white text-aura-ink px-8 py-3.5 text-[10px] font-bold tracking-[0.25em] uppercase hover:bg-aura-gold transition-colors duration-300 active-scale"
             >
               Descubrir
-            </button>
+            </Link>
           </div>
         </div>
         {renderModal()}
@@ -199,7 +213,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
             Inspiración {perfume.inspiration}
           </span>
           <h3 className="text-[11px] sm:text-sm font-semibold text-aura-ink uppercase tracking-[0.12em] line-clamp-2 leading-tight mb-2 min-h-[2.2em] group-hover:text-aura-gold-deep transition-colors">
-            {perfume.name}
+            <Link href={productHref} onClick={openModal}>{perfume.name}</Link>
           </h3>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-[9px] font-medium text-zinc-400 tabular">Desde</span>
@@ -292,6 +306,13 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
                       {copied ? 'Copiado ✓' : 'Compartir'}
                     </span>
                   </button>
+                  <Link
+                    href={productHref}
+                    className="flex items-center gap-1.5 px-3.5 py-2 border border-zinc-200 bg-white hover:border-aura-gold transition-all"
+                  >
+                    <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-zinc-600">Ver ficha completa</span>
+                    <ArrowRight size={11} className="text-aura-gold-deep" />
+                  </Link>
                 </div>
               </div>
 

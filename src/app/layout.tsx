@@ -1,9 +1,24 @@
 import type { Metadata, Viewport } from 'next';
+import { Cormorant_Garamond, Inter } from 'next/font/google';
 import './globals.css';
 import Providers from './providers';
 import { getProducts, getSettings } from '../lib/serverData';
+import { SITE } from '../lib/site';
 
-const SITE = 'https://aurafrangancias.store';
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-cormorant',
+  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-inter',
+  display: 'swap',
+});
 
 export const viewport: Viewport = {
   themeColor: '#0c0a09',
@@ -64,19 +79,23 @@ const storeJsonLd = {
   ],
 };
 
+const webSiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Äura Fragancias',
+  url: SITE,
+  inLanguage: 'es-PY',
+  publisher: { '@id': SITE },
+};
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [settings, productsData] = await Promise.all([getSettings(), getProducts()]);
 
   return (
-    <html lang="es">
+    <html lang="es" className={`${cormorant.variable} ${inter.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(storeJsonLd) }} />
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([storeJsonLd, webSiteJsonLd]) }} />
       </head>
       <body className="bg-white text-zinc-900">
         <Providers settings={settings} products={productsData.products} source={productsData.source}>

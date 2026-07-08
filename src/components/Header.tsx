@@ -28,7 +28,7 @@ const Header: React.FC = () => {
     { name: 'Mujeres', href: '/mujeres' },
     { name: 'Unisex', href: '/unisex' },
     { name: 'Top Ventas', href: '/#top-ventas' },
-    { name: 'Mayoristas', href: '/#mayoristas' },
+    { name: 'Mayoristas', href: '/mayoristas' },
   ];
 
   const handleNavClick = (href: string) => {

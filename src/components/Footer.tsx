@@ -6,11 +6,7 @@ import { Instagram, Facebook, MessageCircle, Music2 as Tiktok } from 'lucide-rea
 import { BRAND_NAME, INSTAGRAM_URL, FACEBOOK_URL, TIKTOK_URL, CATALOG_URL } from '../constants';
 import { useSettings } from '../context/SettingsContext';
 
-interface FooterProps {
-  onLegalClick: (type: 'inspirations' | 'terms' | 'shipping') => void;
-}
-
-const Footer: React.FC<FooterProps> = ({ onLegalClick }) => {
+const Footer: React.FC = () => {
   const { settings } = useSettings();
   return (
     <footer className="bg-aura-ink text-white/80 pt-20 sm:pt-28 pb-10">
@@ -52,16 +48,16 @@ const Footer: React.FC<FooterProps> = ({ onLegalClick }) => {
               <li><Link href="/hombres" className="hover:text-white transition-colors">Hombres</Link></li>
               <li><Link href="/mujeres" className="hover:text-white transition-colors">Mujeres</Link></li>
               <li><Link href="/unisex" className="hover:text-white transition-colors">Nicho & Unisex</Link></li>
-              <li><Link href="/#mayoristas" className="hover:text-white transition-colors">Mayoristas</Link></li>
+              <li><Link href="/mayoristas" className="hover:text-white transition-colors">Mayoristas</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] mb-5 text-aura-gold">Legal</h4>
             <ul className="space-y-3.5 text-sm text-white/65 font-medium">
-              <li><button onClick={() => onLegalClick('inspirations')} className="hover:text-white transition-colors text-left">Inspiraciones</button></li>
-              <li><button onClick={() => onLegalClick('terms')} className="hover:text-white transition-colors text-left">Términos y Condiciones</button></li>
-              <li><button onClick={() => onLegalClick('shipping')} className="hover:text-white transition-colors text-left">Envíos y Devoluciones</button></li>
+              <li><Link href="/sobre-inspiraciones" className="hover:text-white transition-colors">Inspiraciones</Link></li>
+              <li><Link href="/terminos-y-condiciones" className="hover:text-white transition-colors">Términos y Condiciones</Link></li>
+              <li><Link href="/envios-y-devoluciones" className="hover:text-white transition-colors">Envíos y Devoluciones</Link></li>
             </ul>
           </div>
 

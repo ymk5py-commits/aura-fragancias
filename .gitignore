@@ -11,3 +11,4 @@ next-env.d.ts
 
 # Internal business assets — NOT for public deploy
 03_AURA_PERFUMES/
+tsconfig.tsbuildinfo

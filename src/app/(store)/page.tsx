@@ -3,6 +3,7 @@ import FeatureSection from '../../components/FeatureSection';
 import PricingSection from '../../components/PricingSection';
 import Wholesale from '../../components/Wholesale';
 import TechnicalSection from '../../components/TechnicalSection';
+import HomeFaq from '../../components/HomeFaq';
 import Reveal from '../../components/Reveal';
 import ProductCard from '../../components/ProductCard';
 import ScentFamilies from '../../components/ScentFamilies';
@@ -56,6 +57,7 @@ export default async function HomePage() {
       <PricingSection />
       <Wholesale />
       <TechnicalSection />
+      <HomeFaq />
     </main>
   );
 }

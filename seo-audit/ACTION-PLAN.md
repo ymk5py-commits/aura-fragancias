@@ -1,38 +1,93 @@
-# Plan de acción SEO — Äura Fragancias (priorizado)
+# Plan de acción SEO — Äura Fragancias (2026-07-07)
 
-## 🔴 CRÍTICO (hacer ya)
+Ordenado por **impacto ÷ esfuerzo**. Referencias exactas de archivo para ejecutar sin re-investigar.
+(El plan anterior, de junio, se completó con la migración a Next.js — este es el ciclo 2.)
 
-1. **Optimizar imágenes Cloudinary** — insertar `f_auto,q_auto,w_700` en las URLs.
-   Impacto: −94% de peso (3,2 MB → ~196 KB). Mejora LCP, móvil y CWV. Esfuerzo: bajo.
-   → 1 helper `cldn(url, w)` aplicado en ProductCard, ProductPage, Hero, admin.
+## 🔴 Semana 1 — Críticos (desbloquean indexación y descubrimiento)
 
-2. **Meta por ruta** — título, descripción y canonical únicos en `/hombres`, `/mujeres`,
-   `/unisex` y `/producto/:code`. Esfuerzo: medio (hook que setea `document.title` + meta).
+- [ ] **1. Unificar dominio a www** (⏱ 10 min, impacto enorme)
+      Cambiar `SITE` a `https://www.aurafrangancias.store` en:
+      `src/app/layout.tsx:6` · `src/app/sitemap.ts:4` · `src/app/robots.ts:6` ·
+      `src/app/(store)/producto/[code]/page.tsx:7`. Ideal: exportar desde un único
+      `src/lib/site.ts`. Verificar luego canonical, sitemap y JSON-LD.
 
-3. **Pre-render de rutas** (recomendado, más grande) — generar HTML real para home +
-   categorías con un prerender de Vite, o migrar a Next.js para SSR de fichas de producto.
-   Esfuerzo: alto. Es la solución de fondo para indexación.
+- [ ] **2. Enlaces internos reales a producto** (⏱ 1-2 h, el fix más importante del audit)
+      `src/components/ProductCard.tsx:143-145`: envolver imagen+título en
+      `<Link href={'/producto/'+code}>`; conservar modal con `e.preventDefault()` si se
+      quiere. Agregar "También te puede gustar" (4 productos misma familia) en
+      `ProductView.tsx` → interlinking entre fichas.
 
-## 🟡 ALTO (esta semana)
+- [ ] **3. Hero propio (sacar druni.es)** (⏱ 30 min)
+      Subir imagen propia a Cloudinary y actualizar el setting en Firestore/admin.
+      `src/components/Hero.tsx:33-39`. Bonus: `<link rel="preconnect" href="https://res.cloudinary.com">`
+      en `layout.tsx`.
 
-4. **Product schema (JSON-LD)** por producto + `BreadcrumbList`. Habilita rich results.
-5. **Diferir Firebase** del bundle inicial (lazy) para bajar el JS de la tienda.
-6. **`llms.txt`** en la raíz para buscadores de IA (GEO).
-7. **Sitemap con productos** — incluir las fichas `/producto/XX`.
+- [ ] **4. Corregir typos del catálogo** (⏱ 30 min, desde /admin + `constants.tsx`)
+      "AQCUA DI GIO"→"ACQUA DI GIÒ" · "GIRGIO"/"GIOGIO"→"GIORGIO" (`constants.tsx:126`) ·
+      "HEREOS"→revisar. Auditar los 47 nombres. Afectan title/H1 servidos.
 
-## 🟢 MEDIO (este mes)
+## 🟡 Semanas 2-3 — Altos (contenido + Merchant + performance)
 
-8. `<h1>` descriptivos con keywords por página.
-9. Headers de seguridad en `vercel.json`.
-10. `width/height` en imágenes para evitar CLS.
-11. Contenido editorial (notas olfativas, descripciones) — más texto = más E-E-A-T.
+- [ ] **5. Campo `description` + pirámide olfativa por producto**
+      `src/types.ts`: agregar `description`, `topNotes/heartNotes/baseNotes`.
+      Renderizar en `ProductView.tsx`. Redactar 100-150 palabras únicas ×47 (batch con IA +
+      revisión). Mata el thin content Y habilita citación por ChatGPT/Perplexity.
 
-## Quick wins que puedo aplicar ahora mismo (sin pre-render)
-- ✅ Optimización de imágenes Cloudinary
-- ✅ Meta dinámico por ruta (categorías y producto)
-- ✅ Product schema + BreadcrumbList
-- ✅ llms.txt + headers de seguridad + sitemap ampliado
-- ✅ Lazy-load de Firebase
+- [ ] **6. Páginas legales indexables** (desbloquea Google Merchant Center)
+      Crear `/envios-y-devoluciones`, `/terminos-y-condiciones`, `/sobre-inspiraciones`
+      reusando contenido de `LegalModal.tsx`. Footer con `<a>` reales
+      (`Footer.tsx:62-67`). Sumar a `sitemap.ts`.
 
-Estos 5 suben el puntaje estimado de **48 → ~75** sin tocar la arquitectura.
-El pre-render/SSR (punto 3) lo llevaría a 85+.
+- [ ] **7. Schema Offer completo**
+      `producto/[code]/page.tsx:52-58`: array de 3 Offers (10/30/50ML con precios reales) o
+      `AggregateOffer` (30.000–120.000), + `shippingDetails` (envío gratis ≥ Gs. 300.000),
+      `hasMerchantReturnPolicy`, `priceValidUntil`, `mpn: code`,
+      `category: "Beauty & Personal Care > Fragrance"`.
+      El bloque JSON-LD completo listo para copiar está en FULL-AUDIT-REPORT.
+
+- [ ] **8. next/font** — reemplazar `<link>` de Google Fonts (`layout.tsx:73-78`) por
+      `Cormorant_Garamond` + `Inter` de `next/font/google` (subsets latin, display swap).
+
+- [ ] **9. Página /mayoristas indexable** — mover contenido de `Wholesale.tsx` a ruta propia
+      con title "Perfumes por Mayor en Paraguay | Äura", H1, FAQ, schema. Header: cambiar
+      `/#mayoristas` → `/mayoristas`. Única forma de competir esa query B2B.
+
+- [ ] **10. Breadcrumb visible en producto** — `<nav>` con Links (Inicio → Género → Producto),
+      datos ya calculados en `producto/[code]/page.tsx:40-41`.
+
+## 🟠 Mes 1-2 — Medios
+
+- [ ] **11. next/image en los 6 componentes** con loader custom Cloudinary
+      (`images.loaderFile` en next.config; adaptar `src/lib/img.ts`).
+- [ ] **12. Bundle analyzer** — investigar chunk de 462 KB (¿Firebase no-modular? ¿lucide?);
+      `next/dynamic` para modales/carrito.
+- [ ] **13. FAQ en home** (6-8 preguntas: envíos, 30%, inspiración≠copia, pagos, mayoristas)
+      + schema FAQPage + headings en formato pregunta.
+- [ ] **14. Intro de 100-150 palabras en cada categoría** + `ItemList`+`BreadcrumbList` schema.
+- [ ] **15. H1 de home con keyword** ("Perfumes Extrait de Parfum 30% en Paraguay"; el
+      wordmark ÄURA como span/logo).
+- [ ] **16. Filtros → URLs indexables** — conectar `ScentFamilies` al catálogo
+      (`/hombres?familia=...` con searchParams SSR o rutas `/familia/[slug]`).
+- [ ] **17. llms.txt v2** — links markdown `[Nombre](URL)`, secciones Top Ventas y
+      Mayoristas, dominio www.
+- [ ] **18. WebSite schema** en layout (+ SearchAction si se agrega búsqueda global).
+- [ ] **19. Contenido editorial** — 2 piezas iniciales: "¿Qué es Extrait de Parfum?" y
+      tabla de equivalencias por familia. (Ver top 5 keywords en el reporte.)
+- [ ] **20. lastmod en sitemap** (usar `updatedAt` de Firestore si existe; si no, crearlo).
+
+## 🟢 Backlog
+
+- [ ] Slugs legibles en URLs de producto (con 301 desde /producto/CCxxx; sufijo -ccxxx)
+- [ ] CSP header + HSTS `includeSubDomains; preload` en vercel.json
+- [ ] Sistema de reseñas real → recién entonces AggregateRating
+- [ ] Google Business Profile (si hay dirección atendible) + directorios PY
+- [ ] Canal YouTube / presencia Reddit (señal de autoridad para IA)
+- [ ] IndexNow para Bing
+- [ ] Línea "*Origen: Web Checkout*" en el mensaje de WhatsApp (`Checkout.tsx:59-76`)
+- [ ] Actualizar CLAUDE.md del proyecto (aún describe el stack Vite; hoy es Next.js 16)
+
+## Métrica de éxito (revisar en 30 días en Search Console)
+
+1. Cobertura: las 47 fichas pasan de "Descubierta, no indexada" → "Indexada"
+2. Impresiones para queries no-marca ("perfume similar a X paraguay", "perfumes por mayor")
+3. LCP móvil < 2,5s tras hero propio + next/font (confirmar con Lighthouse, la API dio 429 hoy)

@@ -6,18 +6,13 @@ import Footer from './Footer';
 import WhatsAppButton from './WhatsAppButton';
 import Checkout from './Checkout';
 import WelcomeModal from './WelcomeModal';
-import LegalModal from './LegalModal';
-import { LEGAL_TEXTS } from '../constants';
 import { useCart } from '../context/CartContext';
-
-type LegalKey = 'inspirations' | 'terms' | 'shipping';
 
 const StoreChrome: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const {
     showCheckout, cart, updateQuantity, removeFromCart, appliedDiscount,
     closeCheckout, notification, applyWelcomeDiscount,
   } = useCart();
-  const [activeLegal, setActiveLegal] = useState<{ title: string; content: string } | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
@@ -28,7 +23,7 @@ const StoreChrome: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <>
       <Header />
       {children}
-      <Footer onLegalClick={(t: LegalKey) => setActiveLegal(LEGAL_TEXTS[t])} />
+      <Footer />
       <WhatsAppButton />
 
       {showCheckout && (
@@ -41,10 +36,6 @@ const StoreChrome: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             onBack={closeCheckout}
           />
         </div>
-      )}
-
-      {activeLegal && (
-        <LegalModal title={activeLegal.title} content={activeLegal.content} onClose={() => setActiveLegal(null)} />
       )}
 
       {showWelcome && (

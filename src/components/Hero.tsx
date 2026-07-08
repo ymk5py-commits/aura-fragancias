@@ -64,7 +64,15 @@ const Hero: React.FC<HeroProps> = ({
           }`}
           style={{ animationDelay: '0.2s' }}
         >
-          {isHome ? <span className="text-champagne">{title}</span> : title}
+          {isHome ? (
+            <>
+              <span className="text-champagne">{title}</span>
+              {/* Keyword del H1 para buscadores sin alterar el wordmark visual */}
+              <span className="sr-only"> — Perfumes Extrait de Parfum 30% en Paraguay</span>
+            </>
+          ) : (
+            title
+          )}
         </h1>
 
         {/* Subtitle */}

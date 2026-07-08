@@ -53,18 +53,42 @@ export async function getVisibleProducts(): Promise<Perfume[]> {
   return products.filter((p) => p.visible !== false);
 }
 
+// URLs de banners hotlinkeados a dominios de terceros que quedaron guardadas
+// en Firestore: se reescriben a los assets locales de /public/banners.
+const LEGACY_BANNERS: Record<string, string> = {
+  'https://www.druni.es/blog/wp-content/uploads/2026/03/03_Perfumes_unisex_PORTADA.jpg': '/banners/hero.jpg',
+  'https://www.radioformula.com.mx/__export/1768509508491/sites/formula/img/2026/01/15/perfume_de_hombre_exitosox_portada.png_2053803405.png': '/banners/men.jpg',
+  'https://fragarabic.com/cdn/shop/articles/Botellas_de_perfumes_arabes.jpg?v=1724446535&width=2048': '/banners/unisex.jpg',
+};
+
+function localizeBanners(s: SiteSettings): SiteSettings {
+  const fix = (url: string, fallback: string) => {
+    if (!url) return fallback;
+    if (LEGACY_BANNERS[url]) return LEGACY_BANNERS[url];
+    if (url.includes('publimetro.cl')) return '/banners/women.jpg';
+    return url;
+  };
+  return {
+    ...s,
+    heroImage: fix(s.heroImage, '/banners/hero.jpg'),
+    bannerMen: fix(s.bannerMen, '/banners/men.jpg'),
+    bannerWomen: fix(s.bannerWomen, '/banners/women.jpg'),
+    bannerUnisex: fix(s.bannerUnisex, '/banners/unisex.jpg'),
+  };
+}
+
 /** Lee la configuración del sitio desde Firestore. Fallback: defaults. */
 export async function getSettings(): Promise<SiteSettings> {
-  if (!PROJECT || !KEY) return DEFAULT_SETTINGS;
+  if (!PROJECT || !KEY) return localizeBanners(DEFAULT_SETTINGS);
   try {
     const res = await fetch(`${BASE}/settings/site?key=${KEY}`, {
       next: { revalidate: 120 },
     });
-    if (!res.ok) return DEFAULT_SETTINGS;
+    if (!res.ok) return localizeBanners(DEFAULT_SETTINGS);
     const data = await res.json();
-    if (!data.fields) return DEFAULT_SETTINGS;
-    return { ...DEFAULT_SETTINGS, ...(parseFields(data.fields) as Partial<SiteSettings>) };
+    if (!data.fields) return localizeBanners(DEFAULT_SETTINGS);
+    return localizeBanners({ ...DEFAULT_SETTINGS, ...(parseFields(data.fields) as Partial<SiteSettings>) });
   } catch {
-    return DEFAULT_SETTINGS;
+    return localizeBanners(DEFAULT_SETTINGS);
   }
 }

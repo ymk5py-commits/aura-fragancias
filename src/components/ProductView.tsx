@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { cldn } from '../lib/img';
 import { useSettings } from '../context/SettingsContext';
 import { useCart } from '../context/CartContext';
-import { ShoppingBag, Truck, Minus, Plus, ArrowLeft } from 'lucide-react';
+import { ShoppingBag, Truck, Minus, Plus, ChevronRight } from 'lucide-react';
 import { Perfume } from '../types';
 
 const IntensityBar = ({ level }: { level: number }) => (
@@ -16,8 +16,14 @@ const IntensityBar = ({ level }: { level: number }) => (
   </div>
 );
 
-const ProductView: React.FC<{ perfume: Perfume }> = ({ perfume }) => {
-  const router = useRouter();
+interface ProductViewProps {
+  perfume: Perfume;
+  description?: string;
+  related?: Perfume[];
+  breadcrumb?: { genderLabel: string; genderPath: string };
+}
+
+const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related = [], breadcrumb }) => {
   const { prices: PRICES } = useSettings();
   const { addToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState<string>(PRICES[1].size);
@@ -27,10 +33,17 @@ const ProductView: React.FC<{ perfume: Perfume }> = ({ perfume }) => {
   return (
     <main className="flex-grow pt-28 pb-16 min-h-screen bg-white">
       <div className="container mx-auto px-4 sm:px-6">
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors mb-8 group">
-          <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Volver</span>
-        </button>
+        <nav aria-label="Ruta de navegación" className="flex items-center flex-wrap gap-1.5 mb-8 text-[10px] font-bold tracking-[0.15em] uppercase text-zinc-400">
+          <Link href="/" className="hover:text-zinc-900 transition-colors">Inicio</Link>
+          <ChevronRight size={12} className="shrink-0" />
+          {breadcrumb && (
+            <>
+              <Link href={breadcrumb.genderPath} className="hover:text-zinc-900 transition-colors">{breadcrumb.genderLabel}</Link>
+              <ChevronRight size={12} className="shrink-0" />
+            </>
+          )}
+          <span className="text-zinc-700 normal-case tracking-normal font-semibold">{perfume.name}</span>
+        </nav>
 
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
           <div className="w-full lg:w-1/2">
@@ -108,6 +121,13 @@ const ProductView: React.FC<{ perfume: Perfume }> = ({ perfume }) => {
                 </div>
               )}
 
+              {description && (
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-4">Sobre esta fragancia</h4>
+                  <p className="text-[15px] leading-relaxed text-zinc-600 font-light max-w-prose">{description}</p>
+                </div>
+              )}
+
               <div className="flex flex-col gap-6">
                 <div className="flex items-center gap-6">
                   <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Cantidad</h4>
@@ -124,6 +144,39 @@ const ProductView: React.FC<{ perfume: Perfume }> = ({ perfume }) => {
             </div>
           </div>
         </div>
+
+        {related.length > 0 && (
+          <section aria-labelledby="relacionados" className="mt-20 sm:mt-28 border-t border-zinc-100 pt-14">
+            <h2 id="relacionados" className="text-2xl sm:text-3xl font-luxury text-zinc-900 mb-8 text-center">
+              También te puede gustar
+            </h2>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
+              {related.map((p) => (
+                <Link key={p.code} href={`/producto/${p.code}`} className="group block">
+                  <div className="relative aspect-[4/5] bg-aura-ivory overflow-hidden border border-zinc-100 group-hover:border-aura-gold/40 transition-all duration-500">
+                    {p.imageUrl && (
+                      <img
+                        src={cldn(p.imageUrl, 500)}
+                        alt={`${p.name} — inspiración ${p.inspiration}`}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        referrerPolicy="no-referrer"
+                      />
+                    )}
+                  </div>
+                  <div className="pt-3 text-center">
+                    <span className="text-[8px] font-bold text-aura-gold-deep uppercase tracking-[0.2em] block mb-1">
+                      Inspiración {p.inspiration}
+                    </span>
+                    <h3 className="text-[11px] sm:text-xs font-semibold text-zinc-900 uppercase tracking-[0.1em] line-clamp-2 group-hover:text-aura-gold-deep transition-colors">
+                      {p.name}
+                    </h3>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );

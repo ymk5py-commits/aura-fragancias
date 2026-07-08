@@ -25,6 +25,7 @@ const empty: Perfume = {
   imageUrl: '',
   visible: true,
   salesScore: 0,
+  description: '',
 };
 
 const GENDERS: { value: Gender; label: string }[] = [
@@ -163,7 +164,18 @@ const ProductForm: React.FC<Props> = ({ product, onClose, onSaved }) => {
 
           <label className="block">
             <span className={labelCls}>Notas (separadas por coma)</span>
-            <input value={notesText} onChange={(e) => setNotesText(e.target.value)} className={inputCls} placeholder="CARDAMOMO, TÓFE, AMBARWOOD" />
+            <input value={notesText} onChange={(e) => setNotesText(e.target.value)} className={inputCls} placeholder="CARDAMOMO, TOFFEE, MADERA AMBARADA" />
+          </label>
+
+          <label className="block">
+            <span className={labelCls}>Descripción (SEO · 100-150 palabras, única por producto)</span>
+            <textarea
+              value={form.description || ''}
+              onChange={(e) => set('description', e.target.value)}
+              rows={4}
+              className={inputCls}
+              placeholder="Historia y carácter del perfume: a qué huele, para qué ocasión, a quién le va. Si se deja vacío, la web genera un texto automático con los datos del producto."
+            />
           </label>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

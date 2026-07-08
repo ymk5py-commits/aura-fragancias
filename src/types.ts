@@ -18,6 +18,7 @@ export interface Perfume {
   imageUrl: string;
   visible?: boolean;    // false = oculto en la tienda (default: visible)
   salesScore?: number;  // unidades vendidas (ordena el Top Ventas)
+  description?: string; // prosa única del producto (SEO + ficha); si falta, se genera desde los datos
 }
 
 export interface CartItem {

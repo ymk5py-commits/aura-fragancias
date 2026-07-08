@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSettings } from '../context/SettingsContext';
 import { useCart } from '../context/CartContext';
 import smartImageLoader from '../lib/imageLoader';
+import { trackEvent } from '../lib/pixel';
+import { newEventId } from '../lib/tracking';
+import { toItem, gaViewItem, gaRemarketing } from '../lib/gtag';
 import { ShoppingBag, Truck, Minus, Plus, ChevronRight } from 'lucide-react';
 import { Perfume } from '../types';
 
@@ -30,6 +33,23 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
   const [selectedSize, setSelectedSize] = useState<string>(PRICES[1].size);
   const [quantity, setQuantity] = useState(1);
   const [copied, setCopied] = useState(false);
+
+  // ViewContent (Meta, pool de retargeting DPA) + view_item (GA4) + remarketing.
+  useEffect(() => {
+    const refPrice = PRICES[1]?.price || PRICES[0]?.price || 0;
+    const category = perfume.gender === 'Man' ? 'Hombre' : perfume.gender === 'Woman' ? 'Mujer' : 'Unisex';
+    trackEvent('ViewContent', {
+      content_name: perfume.name,
+      content_ids: [perfume.code],
+      content_type: 'product',
+      content_category: category,
+      value: refPrice,
+      currency: 'PYG',
+    }, newEventId());
+    gaViewItem(toItem(perfume, refPrice, PRICES[1]?.size));
+    gaRemarketing('product', [perfume.code], refPrice);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [perfume.code]);
 
   return (
     <main className="flex-grow pt-28 pb-16 min-h-screen bg-aura-ivory">
@@ -182,6 +202,12 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
                       {p.name}
                     </h3>
                   </div>
+                  <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(p, PRICES[1].size); }}
+                    className="mt-2 w-full border border-zinc-200 py-2 text-[9px] font-bold tracking-[0.2em] uppercase text-zinc-600 hover:border-aura-ink hover:text-aura-ink transition-colors"
+                  >
+                    Agregar
+                  </button>
                 </Link>
               ))}
             </div>

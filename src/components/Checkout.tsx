@@ -2,10 +2,12 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Info, MessageCircle, Truck, Wallet, Plus, Minus, Trash2 } from 'lucide-react';
+import { ChevronLeft, Info, MessageCircle, Truck, Wallet, Plus, Minus, Trash2, ShieldCheck } from 'lucide-react';
 import { CartItem } from '../types';
 import { useSettings } from '../context/SettingsContext';
 import { trackEvent } from '../lib/pixel';
+import { newEventId, capiTrack } from '../lib/tracking';
+import { toItem, gaBeginCheckout, gaGenerateLead } from '../lib/gtag';
 
 interface CheckoutProps {
   cart: CartItem[];
@@ -24,21 +26,40 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     address: '',
     paymentMethod: 'Transferencia Bancaria / QR'
   });
-  const [coupon, setCoupon] = useState(initialDiscount > 0 ? 'BIENVENIDA10' : '');
+  const [discount, setDiscount] = useState(initialDiscount);
+  const [coupon, setCoupon] = useState(initialDiscount > 0 ? settings.welcomeCode : '');
+  const [couponMsg, setCouponMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const discountAmount = initialDiscount > 0 ? subtotal * (initialDiscount / 100) : 0;
+  const discountAmount = discount > 0 ? Math.round(subtotal * (discount / 100)) : 0; // PYG entero
   const total = subtotal - discountAmount;
 
+  const applyCoupon = () => {
+    const code = coupon.trim().toUpperCase();
+    if (code && code === (settings.welcomeCode || '').toUpperCase()) {
+      setDiscount(settings.welcomePercent);
+      setCouponMsg(`Cupón aplicado: ${settings.welcomePercent}% OFF`);
+    } else {
+      setDiscount(0);
+      setCouponMsg('Cupón inválido');
+    }
+    setTimeout(() => setCouponMsg(null), 3000);
+  };
+
   useEffect(() => {
+    const eventID = newEventId();
+    const contents = cart.map((item) => ({ id: item.perfume.code, quantity: item.quantity, item_price: item.price }));
     trackEvent('InitiateCheckout', {
       content_ids: cart.map(item => item.perfume.code),
       content_type: 'product',
+      contents,
       value: total,
       currency: 'PYG',
       num_items: cart.reduce((acc, item) => acc + item.quantity, 0)
-    });
+    }, eventID);
+    gaBeginCheckout(cart.map((i) => toItem(i.perfume, i.price, i.size, i.quantity)), total);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCompleteOrder = () => {
@@ -55,9 +76,10 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     }
 
     const isFreeShipping = subtotal >= 300000;
+    const orderId = `AURA-${Date.now().toString(36).toUpperCase()}`;
     const itemsText = cart.map(item => `- ${item.quantity}x ${item.perfume.name} (${item.perfume.code}) ${item.size}: Gs. ${(item.price * item.quantity).toLocaleString('es-PY')}`).join('\n');
     const message = encodeURIComponent(
-      `*COMPRA HECHA EN WEB*\n\n` +
+      `*PEDIDO WEB · ${orderId}*\n\n` +
       `*Datos del Cliente:*\n` +
       `Nombre: ${formData.name}\n` +
       `Teléfono: ${formData.phone}\n` +
@@ -66,18 +88,38 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       `Pago: ${formData.paymentMethod}\n\n` +
       `*Pedido:*\n${itemsText}\n\n` +
       `Subtotal: Gs. ${subtotal.toLocaleString('es-PY')}\n` +
-      (discountAmount > 0 ? `Descuento (${initialDiscount}%): -Gs. ${discountAmount.toLocaleString('es-PY')}\n` : '') +
+      (discountAmount > 0 ? `Descuento (${discount}%): -Gs. ${discountAmount.toLocaleString('es-PY')}\n` : '') +
       `Envío: ${isFreeShipping ? 'GRATIS' : 'Consultar al WhatsApp'}\n` +
       `*TOTAL: Gs. ${total.toLocaleString('es-PY')}${isFreeShipping ? '' : ' + Envío'}*`
     );
 
-    trackEvent('Purchase', {
-      content_ids: cart.map(item => item.perfume.code),
+    // El redirect a WhatsApp NO es un Purchase: se modela como Lead (intención con
+    // datos de envío). El Purchase real se confirma cuando el vendedor cobra (CAPI desde /admin).
+    const eventID = newEventId();
+    const contentIds = cart.map(item => item.perfume.code);
+    const contents = cart.map(item => ({ id: item.perfume.code, quantity: item.quantity, item_price: item.price }));
+    const numItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+    trackEvent('Lead', {
+      content_ids: contentIds,
       content_type: 'product',
+      contents,
       value: total,
       currency: 'PYG',
-      num_items: cart.reduce((acc, item) => acc + item.quantity, 0)
+      num_items: numItems,
+    }, eventID);
+    capiTrack({
+      eventName: 'Lead',
+      eventId: eventID,
+      value: total,
+      currency: 'PYG',
+      contentIds,
+      contents,
+      numItems,
+      userData: { phone: formData.phone, firstName: formData.name, city: formData.cityAndNeighborhood },
+      actionSource: 'website',
     });
+    gaGenerateLead(cart.map((i) => toItem(i.perfume, i.price, i.size, i.quantity)), total, orderId);
 
     window.open(`https://wa.me/${settings.whatsappNumber}?text=${message}`, '_blank');
   };
@@ -183,10 +225,13 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                     value={coupon}
                     onChange={(e) => setCoupon(e.target.value)}
                   />
-                  <button className="bg-zinc-900 text-white px-4 sm:px-5 py-2 sm:py-3 rounded-sm text-[9px] sm:text-[10px] font-bold tracking-widest uppercase hover:bg-zinc-800 transition-all">
+                  <button onClick={applyCoupon} className="bg-zinc-900 text-white px-4 sm:px-5 py-2 sm:py-3 rounded-sm text-[9px] sm:text-[10px] font-bold tracking-widest uppercase hover:bg-zinc-800 transition-all">
                     APLICAR
                   </button>
                 </div>
+                {couponMsg && (
+                  <p className={`mt-2 text-[9px] font-bold uppercase tracking-widest ${discount > 0 ? 'text-green-600' : 'text-red-500'}`}>{couponMsg}</p>
+                )}
               </div>
 
               <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-10 border-b border-zinc-100 pb-6 sm:pb-10">
@@ -196,8 +241,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                   cart.map((item) => (
                     <div key={item.id} className="flex justify-between items-center">
                       <div className="flex flex-col">
-                        <span className="text-[10px] sm:text-[11px] font-bold text-zinc-900 uppercase tracking-wider">AURA {item.perfume.code}</span>
-                        <span className="text-[8px] sm:text-[9px] text-zinc-400 uppercase tracking-widest">{item.size}</span>
+                        <span className="text-[10px] sm:text-[11px] font-bold text-zinc-900 uppercase tracking-wider line-clamp-1">{item.perfume.name}</span>
+                        <span className="text-[8px] sm:text-[9px] text-zinc-400 uppercase tracking-widest">{item.perfume.code} · {item.size}</span>
                         
                         {/* Controles de Cantidad */}
                         <div className="flex items-center gap-3 mt-2">
@@ -235,7 +280,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between items-center">
-                    <span className="text-[11px] sm:text-xs font-bold text-aura-gold uppercase tracking-widest">DESCUENTO ({initialDiscount}%)</span>
+                    <span className="text-[11px] sm:text-xs font-bold text-aura-gold uppercase tracking-widest">DESCUENTO ({discount}%)</span>
                     <span className="text-[11px] sm:text-xs font-bold text-aura-gold">-Gs. {discountAmount.toLocaleString('es-PY')}</span>
                   </div>
                 )}
@@ -261,11 +306,21 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                 <span className="text-lg sm:text-2xl font-bold text-zinc-900">Gs. {total.toLocaleString('es-PY')}</span>
               </div>
 
-              <button 
+              {/* Sellos de confianza */}
+              <div className="grid grid-cols-2 gap-2 mb-5">
+                {['Devolución 7 días', 'Envío gratis +300k', 'Extrait 30% macerado 21d', 'Atención por WhatsApp'].map((t) => (
+                  <div key={t} className="flex items-center gap-1.5 text-[8px] font-semibold text-zinc-500 uppercase tracking-[0.1em]">
+                    <ShieldCheck size={12} className="text-aura-gold-deep shrink-0" />
+                    {t}
+                  </div>
+                ))}
+              </div>
+
+              <button
                 onClick={handleCompleteOrder}
-                className="w-full bg-[#25D366] text-white py-4 sm:py-5 rounded-sm text-[10px] sm:text-[11px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-3 hover:bg-[#1ebe57] transition-all shadow-[0_10px_30px_-10px_rgba(37,211,102,0.4)] active:scale-95"
+                className="w-full bg-aura-ink text-white py-4 sm:py-5 rounded-sm text-[10px] sm:text-[11px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-3 hover:bg-aura-gold transition-all shadow-[0_10px_30px_-10px_rgba(12,10,9,0.4)] active:scale-95"
               >
-                <MessageCircle size={18} fill="currentColor" />
+                <MessageCircle size={18} className="text-[#25D366]" fill="currentColor" />
                 COMPLETAR EN WHATSAPP
               </button>
 

@@ -6,6 +6,7 @@ import Footer from './Footer';
 import WhatsAppButton from './WhatsAppButton';
 import Checkout from './Checkout';
 import WelcomeModal from './WelcomeModal';
+import CartDrawer from './CartDrawer';
 import { useCart } from '../context/CartContext';
 
 const StoreChrome: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -44,6 +45,7 @@ const StoreChrome: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {children}
       <Footer />
       <WhatsAppButton />
+      <CartDrawer />
 
       {showCheckout && (
         <div className="fixed inset-0 z-[200] overflow-y-auto bg-white">

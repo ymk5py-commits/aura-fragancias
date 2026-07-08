@@ -1,9 +1,18 @@
 import type { Metadata, Viewport } from 'next';
 import { Bodoni_Moda, Jost } from 'next/font/google';
+import Script from 'next/script';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import './globals.css';
 import Providers from './providers';
+import MetaPixel from '../components/MetaPixel';
+import CookieConsent from '../components/CookieConsent';
 import { getProducts, getSettings } from '../lib/serverData';
 import { SITE } from '../lib/site';
+import { PIXEL_ID } from '../lib/pixel';
+
+const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID;
+const ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
+const GTAG_ID = GA4_ID || ADS_ID;
 
 // Bodoni Moda: didone de alto contraste, mismo ADN que el wordmark Ä del logo.
 // Jost: geométrica tipo Futura (código tipográfico clásico del lujo). Sin italics.
@@ -96,17 +105,40 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="es" className={`${bodoni.variable} ${jost.variable}`}>
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
+        {/* Consent Mode v2 — default DENIED antes de cargar gtag (Ley 7593/2025 PY + EU/UK) */}
+        {GTAG_ID && (
+          <Script id="consent-default" strategy="beforeInteractive">
+            {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+              gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500});
+              gtag('set','url_passthrough',true);`}
+          </Script>
+        )}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([storeJsonLd, webSiteJsonLd]) }} />
       </head>
       <body className="bg-white text-zinc-900">
         <Providers settings={settings} products={productsData.products} source={productsData.source}>
           {children}
         </Providers>
-        {/* Facebook Pixel (noscript) */}
+
+        {/* Meta Pixel (init + PageView por ruta) */}
+        <MetaPixel />
+
+        {/* Google: GA4 y/o Google Ads (mismo gtag.js, config extra para Ads) */}
+        {GTAG_ID && <GoogleAnalytics gaId={GTAG_ID} />}
+        {GA4_ID && ADS_ID && (
+          <Script id="google-ads-config" strategy="afterInteractive">
+            {`gtag('config','${ADS_ID}');`}
+          </Script>
+        )}
+
+        {/* Banner de consentimiento (solo si hay tags de Google) */}
+        {GTAG_ID && <CookieConsent />}
+
+        {/* Meta Pixel (noscript, fallback sin JS) */}
         <noscript>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img height="1" width="1" style={{ display: 'none' }} alt=""
-            src="https://www.facebook.com/tr?id=1238570975103624&ev=PageView&noscript=1" />
+            src={`https://www.facebook.com/tr?id=${PIXEL_ID}&ev=PageView&noscript=1`} />
         </noscript>
       </body>
     </html>

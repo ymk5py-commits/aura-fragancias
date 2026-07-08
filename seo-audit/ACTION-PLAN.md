@@ -3,6 +3,25 @@
 Ordenado por **impacto ÷ esfuerzo**. Referencias exactas de archivo para ejecutar sin re-investigar.
 (El plan anterior, de junio, se completó con la migración a Next.js — este es el ciclo 2.)
 
+## ✅ EJECUTADO Y DEPLOYADO 2026-07-07 (commit 58a9269)
+
+Ítems 1, 2, 3, 4 (críticos), 5 (soporte + texto autogenerado), 6, 7, 8, 9, 10, 13, 14, 15, 17, 18, 20.
+Verificado en producción: canonical www, 42 links a producto en /hombres, Product schema con 3 Offers +
+shipping/returns, FAQPage en home y /mayoristas, 4 páginas nuevas en 200, llms.txt v2, fonts self-hosted,
+banners locales.
+
+**Pendiente que depende del usuario (en /admin, los datos viven en Firestore):**
+- Corregir nombres con typo: CC016 → "ACQUA DI GIO PROFONDO GIORGIO ARMANI"; CC180 familia →
+  "ORIENTAL ESPECIADO" y notas "TOFFEE, MADERA AMBARADA"; DD097 → "LADY MILLION GOLD"; DD178 →
+  "...STRAVAGANZA"; CC024 nota → "INCIENSO"; CC059 → "FLOR DE AZAHAR"; DD096 familia → "...LAVANDA";
+  DD110 → "AVAINILLADO..."; y revisar los que solo existen en Firestore ("GIOGIO ARMANI", "HEREOS MEN").
+- DD161 (Good Girl Blush) usa la misma imagen que DD193 (Irresistible) — subir la imagen correcta.
+- Cargar descripciones reales por producto (campo nuevo en el form; mientras, se genera texto automático).
+- Enviar el sitemap en Google Search Console y pedir indexación de las páginas nuevas.
+
+**Pendiente técnico (siguiente ciclo):** ítems 11 (next/image), 12 (bundle 462KB), 16 (filtros
+indexables), 19 (contenido editorial) y backlog. Confirmar LCP con Lighthouse (PSI dio 429 hoy).
+
 ## 🔴 Semana 1 — Críticos (desbloquean indexación y descubrimiento)
 
 - [ ] **1. Unificar dominio a www** (⏱ 10 min, impacto enorme)

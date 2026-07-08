@@ -2,9 +2,11 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowDown, ArrowRight, Sparkles } from 'lucide-react';
 import { BANNER_IMAGE } from '../constants';
 import { useSettings } from '../context/SettingsContext';
+import smartImageLoader from '../lib/imageLoader';
 
 interface HeroProps {
   title?: string;
@@ -30,12 +32,15 @@ const Hero: React.FC<HeroProps> = ({
     >
       {/* Cinematic background */}
       <div className="absolute inset-0 z-0">
-        <img
+        <Image
           src={image}
           alt={`${title} — perfumería de lujo`}
-          className="w-full h-full object-cover animate-kenburns"
-          referrerPolicy="no-referrer"
+          fill
+          priority
           fetchPriority="high"
+          sizes="100vw"
+          loader={smartImageLoader}
+          className="object-cover animate-kenburns"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-aura-ink/85 via-aura-ink/55 to-aura-ink/95" />
         <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_30%,transparent_30%,rgba(12,10,9,0.75)_100%)]" />

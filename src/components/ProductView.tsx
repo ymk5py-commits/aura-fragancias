@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { cldn } from '../lib/img';
+import Image from 'next/image';
 import { useSettings } from '../context/SettingsContext';
 import { useCart } from '../context/CartContext';
+import smartImageLoader from '../lib/imageLoader';
 import { ShoppingBag, Truck, Minus, Plus, ChevronRight } from 'lucide-react';
 import { Perfume } from '../types';
 
@@ -49,7 +50,15 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
           <div className="w-full lg:w-1/2">
             <div className="relative aspect-[4/5] w-full max-w-[500px] mx-auto bg-white border border-zinc-100 shadow-2xl flex flex-col overflow-hidden rounded-sm">
               {perfume.imageUrl ? (
-                <img src={cldn(perfume.imageUrl, 800)} alt={perfume.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                <Image
+                  src={perfume.imageUrl}
+                  alt={`${perfume.name} — inspiración ${perfume.inspiration}`}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 500px"
+                  loader={smartImageLoader}
+                  className="object-cover"
+                />
               ) : (
                 <div className="w-full h-full flex flex-col p-10 sm:p-16 justify-center items-center text-center">
                   <h3 className="text-7xl sm:text-9xl font-luxury font-light text-zinc-900">{perfume.code}</h3>
@@ -155,12 +164,13 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
                 <Link key={p.code} href={`/producto/${p.code}`} className="group block">
                   <div className="relative aspect-[4/5] bg-aura-ivory overflow-hidden border border-zinc-100 group-hover:border-aura-gold/40 transition-all duration-500">
                     {p.imageUrl && (
-                      <img
-                        src={cldn(p.imageUrl, 500)}
+                      <Image
+                        src={p.imageUrl}
                         alt={`${p.name} — inspiración ${p.inspiration}`}
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        referrerPolicy="no-referrer"
+                        fill
+                        sizes="(max-width: 1024px) 50vw, 25vw"
+                        loader={smartImageLoader}
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     )}
                   </div>

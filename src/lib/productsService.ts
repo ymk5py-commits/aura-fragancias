@@ -1,27 +1,17 @@
-import {
-  collection,
-  doc,
-  getDocs,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../lib/firebase';
+// CRUD de productos (solo lo usa /admin). Los SDKs de Firestore/Storage se
+// importan dinámicamente para no entrar en el bundle de la tienda.
+import { getFirebaseDb, getFirebaseStorage } from './firebase';
 import { PERFUMES, SALES_BY_CODE } from '../constants';
 import { Perfume } from '../types';
 
 const COLLECTION = 'products';
 
-function assertDb() {
-  if (!db) throw new Error('Firebase no está configurado.');
-  return db;
-}
-
 /** Crea o reemplaza un producto. Usa el `code` como id del documento. */
 export async function saveProduct(p: Perfume): Promise<void> {
-  const database = assertDb();
+  const [db, { doc, setDoc, serverTimestamp }] = await Promise.all([
+    getFirebaseDb(),
+    import('firebase/firestore'),
+  ]);
   const id = (p.id || p.code).trim();
   const data: Record<string, unknown> = {
     code: p.code.trim(),
@@ -36,20 +26,24 @@ export async function saveProduct(p: Perfume): Promise<void> {
     imageUrl: p.imageUrl || '',
     visible: p.visible !== false,
     salesScore: Number(p.salesScore) || 0,
+    description: (p.description || '').trim(),
     updatedAt: serverTimestamp(),
   };
   if (p.badge) data.badge = p.badge;
-  await setDoc(doc(database, COLLECTION, id), data, { merge: true });
+  await setDoc(doc(db, COLLECTION, id), data, { merge: true });
 }
 
 export async function updateProductFields(id: string, fields: Partial<Perfume>): Promise<void> {
-  const database = assertDb();
-  await updateDoc(doc(database, COLLECTION, id), { ...fields, updatedAt: serverTimestamp() });
+  const [db, { doc, updateDoc, serverTimestamp }] = await Promise.all([
+    getFirebaseDb(),
+    import('firebase/firestore'),
+  ]);
+  await updateDoc(doc(db, COLLECTION, id), { ...fields, updatedAt: serverTimestamp() });
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-  const database = assertDb();
-  await deleteDoc(doc(database, COLLECTION, id));
+  const [db, { doc, deleteDoc }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
+  await deleteDoc(doc(db, COLLECTION, id));
 }
 
 export async function toggleVisible(id: string, visible: boolean): Promise<void> {
@@ -58,7 +52,10 @@ export async function toggleVisible(id: string, visible: boolean): Promise<void>
 
 /** Sube una imagen a Storage y devuelve su URL pública. */
 export async function uploadProductImage(file: File, code: string): Promise<string> {
-  if (!storage) throw new Error('Firebase Storage no está configurado.');
+  const [storage, { ref, uploadBytes, getDownloadURL }] = await Promise.all([
+    getFirebaseStorage(),
+    import('firebase/storage'),
+  ]);
   const safeCode = (code || 'producto').replace(/[^a-zA-Z0-9_-]/g, '');
   const path = `products/${safeCode}-${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
   const storageRef = ref(storage, path);
@@ -66,10 +63,13 @@ export async function uploadProductImage(file: File, code: string): Promise<stri
   return getDownloadURL(storageRef);
 }
 
-/** Importa el catálogo incluido (47 productos) a Firestore si está vacío. */
+/** Importa el catálogo incluido a Firestore si está vacío. */
 export async function seedCatalog(): Promise<number> {
-  const database = assertDb();
-  const existing = await getDocs(collection(database, COLLECTION));
+  const [db, { collection, getDocs }] = await Promise.all([
+    getFirebaseDb(),
+    import('firebase/firestore'),
+  ]);
+  const existing = await getDocs(collection(db, COLLECTION));
   if (!existing.empty) {
     throw new Error('Ya hay productos cargados en Firebase. La importación solo corre cuando está vacío.');
   }

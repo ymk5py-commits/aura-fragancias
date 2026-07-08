@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { db, isFirebaseConfigured } from '../lib/firebase';
+import { usePathname } from 'next/navigation';
+import { getFirebaseDb, isFirebaseConfigured } from '../lib/firebase';
 import { DEFAULT_SETTINGS } from '../constants';
 import { SiteSettings } from '../types';
 
@@ -36,37 +36,53 @@ const SettingsContext = createContext<SettingsContextValue>({
 
 export const useSettings = () => useContext(SettingsContext);
 
+// La tienda usa la configuración que llega por SSR/ISR (initial); la
+// suscripción en vivo a Firestore solo corre en /admin.
 export const SettingsProvider: React.FC<{ children: React.ReactNode; initial?: SiteSettings }> = ({
   children,
   initial,
 }) => {
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith('/admin') ?? false;
   const [settings, setSettings] = useState<SiteSettings>(initial || DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!isFirebaseConfigured || !db) {
+    if (!isAdmin || !isFirebaseConfigured) {
       setLoading(false);
       return;
     }
-    const unsub = onSnapshot(
-      doc(db, 'settings', 'site'),
-      (snap) => {
-        if (snap.exists()) {
-          // Merge: defaults + lo guardado (campos faltantes usan el default).
-          setSettings({ ...DEFAULT_SETTINGS, ...(snap.data() as Partial<SiteSettings>) });
-        } else {
+    let unsub: (() => void) | undefined;
+    let cancelled = false;
+    (async () => {
+      const [db, { doc, onSnapshot }] = await Promise.all([
+        getFirebaseDb(),
+        import('firebase/firestore'),
+      ]);
+      if (cancelled) return;
+      unsub = onSnapshot(
+        doc(db, 'settings', 'site'),
+        (snap) => {
+          if (snap.exists()) {
+            // Merge: defaults + lo guardado (campos faltantes usan el default).
+            setSettings({ ...DEFAULT_SETTINGS, ...(snap.data() as Partial<SiteSettings>) });
+          } else {
+            setSettings(DEFAULT_SETTINGS);
+          }
+          setLoading(false);
+        },
+        (err) => {
+          console.warn('[Äura] Error leyendo settings, usando valores por defecto:', err);
           setSettings(DEFAULT_SETTINGS);
+          setLoading(false);
         }
-        setLoading(false);
-      },
-      (err) => {
-        console.warn('[Äura] Error leyendo settings, usando valores por defecto:', err);
-        setSettings(DEFAULT_SETTINGS);
-        setLoading(false);
-      }
-    );
-    return unsub;
-  }, []);
+      );
+    })().catch(() => setLoading(false));
+    return () => {
+      cancelled = true;
+      unsub?.();
+    };
+  }, [isAdmin]);
 
   return (
     <SettingsContext.Provider value={{ settings, prices: buildPrices(settings), loading }}>

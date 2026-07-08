@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Perfume } from '../types';
 import { useSettings } from '../context/SettingsContext';
 import { useCart } from '../context/CartContext';
-import { cldn } from '../lib/img';
+import smartImageLoader from '../lib/imageLoader';
 import { ShoppingBag, X, Eye, Plus, Minus, Truck, ArrowRight } from 'lucide-react';
 
 interface Props {
@@ -105,11 +106,13 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
         >
           <div className="sm:col-span-7 relative aspect-[16/12] sm:aspect-auto sm:min-h-[420px] overflow-hidden">
             {perfume.imageUrl && (
-              <img
-                src={cldn(perfume.imageUrl, 800)}
+              <Image
+                src={perfume.imageUrl}
                 alt={`${perfume.name} — inspiración ${perfume.inspiration}`}
-                className="w-full h-full object-cover transition-transform duration-[1.2s] group-hover:scale-105"
-                referrerPolicy="no-referrer"
+                fill
+                sizes="(max-width: 640px) 100vw, 58vw"
+                loader={smartImageLoader}
+                className="object-cover transition-transform duration-[1.2s] group-hover:scale-105"
               />
             )}
             <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-aura-gold text-aura-ink px-3 py-1 text-[8px] sm:text-[9px] font-bold tracking-[0.2em]">
@@ -179,12 +182,13 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
           </div>
 
           {perfume.imageUrl ? (
-            <img
-              src={cldn(perfume.imageUrl, 800)}
+            <Image
+              src={perfume.imageUrl}
               alt={`${perfume.name} — inspiración ${perfume.inspiration}`}
-              loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              referrerPolicy="no-referrer"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              loader={smartImageLoader}
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
           ) : (
             <div className="w-full h-full flex flex-col p-5 sm:p-8 bg-white">
@@ -265,9 +269,16 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
 
             {/* Visual */}
             <div className="w-full md:w-5/12 bg-aura-ivory p-5 sm:p-10 flex items-center justify-center shrink-0 border-b md:border-b-0 md:border-r border-zinc-100">
-              <div className="w-full max-w-[360px] aspect-[4/5] bg-white border border-zinc-100 shadow-2xl overflow-hidden">
+              <div className="relative w-full max-w-[360px] aspect-[4/5] bg-white border border-zinc-100 shadow-2xl overflow-hidden">
                 {perfume.imageUrl ? (
-                  <img src={cldn(perfume.imageUrl, 800)} alt={perfume.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  <Image
+                    src={perfume.imageUrl}
+                    alt={perfume.name}
+                    fill
+                    sizes="(max-width: 768px) 90vw, 360px"
+                    loader={smartImageLoader}
+                    className="object-cover"
+                  />
                 ) : (
                   <div className="w-full h-full flex flex-col justify-center items-center p-8 text-center">
                     <h3 className="text-6xl font-luxury font-light text-aura-ink">{perfume.code}</h3>

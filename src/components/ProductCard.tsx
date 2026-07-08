@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -254,8 +255,11 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
   );
 
   function renderModal() {
-    if (!showDetails) return null;
-    return (
+    // Portal a <body>: el modal es position:fixed y las tarjetas viven dentro de
+    // <Reveal> (que tiene transform), lo que anclaría el fixed a la tarjeta y lo
+    // rompería. El portal lo saca de ese contexto y lo centra en la pantalla.
+    if (!showDetails || typeof document === 'undefined') return null;
+    return createPortal(
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-0 sm:p-4 animate-fade-in">
           <div className="absolute inset-0 bg-aura-ink/92 backdrop-blur-xl" onClick={() => setShowDetails(false)} />
           <div className="relative w-full h-full sm:h-auto sm:max-w-4xl bg-white shadow-2xl overflow-y-auto sm:overflow-hidden animate-scale-in flex flex-col md:flex-row sm:max-h-[90vh] z-[1001]">
@@ -395,7 +399,8 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
     );
   }
 };

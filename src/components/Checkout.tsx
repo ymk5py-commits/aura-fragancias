@@ -204,8 +204,9 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       `*Pedido:*\n${itemsText}\n\n` +
       `Subtotal: Gs. ${subtotal.toLocaleString('es-PY')}\n` +
       (discountAmount > 0 ? `Descuento (${discount}%): -Gs. ${discountAmount.toLocaleString('es-PY')}\n` : '') +
-      `Envío: ${isFreeShipping ? 'GRATIS' : 'Consultar al WhatsApp'}\n` +
-      `*TOTAL: Gs. ${total.toLocaleString('es-PY')}${isFreeShipping ? '' : ' + Envío'}*\n\n` +
+      `Envío: ${isFreeShipping ? 'GRATIS' : 'A coordinar según zona'}\n` +
+      `*TOTAL A TRANSFERIR: Gs. ${total.toLocaleString('es-PY')}*\n` +
+      (isFreeShipping ? '\n' : `_El costo del envío se coordina aparte._\n\n`) +
       (receiptUrl
         ? `*Comprobante adjunto:*\n${receiptUrl}`
         : `_Adjunto el comprobante de la transferencia en este chat._`)
@@ -319,7 +320,9 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                     <div>
                       <span className="block text-[9px] font-bold uppercase tracking-[0.25em] text-aura-gold mb-1">Monto a transferir</span>
                       <span className="block text-2xl sm:text-3xl font-bold tabular">Gs. {total.toLocaleString('es-PY')}</span>
-                      {!isFreeShipping && <span className="block text-[9px] text-white/50 uppercase tracking-widest mt-1">+ envío (se coordina por WhatsApp)</span>}
+                      <span className="block text-[9px] text-white/50 uppercase tracking-widest mt-1">
+                        {isFreeShipping ? 'Envío gratis incluido' : 'Envío aparte · lo coordinamos por WhatsApp'}
+                      </span>
                     </div>
                     <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-white/60 text-right shrink-0">
                       Pedido<br /><span className="text-white tabular">{orderId}</span>
@@ -462,20 +465,23 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                   {isFreeShipping ? (
                     <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest bg-green-50 px-2 py-1 rounded-sm">GRATIS</span>
                   ) : (
-                    <span className="text-[9px] sm:text-[10px] font-bold text-aura-gold uppercase tracking-tighter">Consultar al WhatsApp</span>
+                    <span className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest">A coordinar</span>
                   )}
                 </div>
               </div>
 
-              <div className="border-t-[1px] border-dashed border-zinc-200 pt-4 sm:pt-6 flex justify-between items-end mb-6 sm:mb-10">
-                <div className="flex flex-col">
-                  <span className="text-lg sm:text-2xl font-luxury font-bold text-zinc-900">TOTAL</span>
-                  {!isFreeShipping && (
-                    <span className="text-[8px] sm:text-[9px] text-zinc-400 uppercase tracking-widest">+ COSTO DE ENVÍO</span>
-                  )}
-                </div>
+              <div className="border-t-[1px] border-dashed border-zinc-200 pt-4 sm:pt-6 flex justify-between items-end mb-3">
+                <span className="text-lg sm:text-2xl font-luxury font-bold text-zinc-900">TOTAL A TRANSFERIR</span>
                 <span className="text-lg sm:text-2xl font-bold text-zinc-900">Gs. {total.toLocaleString('es-PY')}</span>
               </div>
+
+              {!isFreeShipping && (
+                <p className="text-[10px] sm:text-[11px] text-zinc-500 leading-relaxed mb-6 sm:mb-8">
+                  El envío no está incluido: se cotiza según tu zona y lo coordinamos por WhatsApp
+                  después de tu pedido. Por ahora transferí solamente este monto.
+                </p>
+              )}
+              {isFreeShipping && <div className="mb-6 sm:mb-8" />}
 
               {/* Sellos de confianza */}
               <div className="grid grid-cols-2 gap-2 mb-5">

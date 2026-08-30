@@ -156,6 +156,34 @@ const SettingsForm: React.FC = () => {
         </div>
       </Section>
 
+      <Section title="Datos para transferencia">
+        <p className="text-[12px] text-zinc-500 -mt-1 mb-1 leading-relaxed">
+          Es lo que ve el cliente en el paso de pago del checkout, con botones para copiar cada dato.
+        </p>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <label className="block">
+            <span className={labelCls}>Banco</span>
+            <input value={form.bankName} onChange={(e) => set('bankName', e.target.value)} className={inputCls} placeholder="Banco Ueno" />
+          </label>
+          <label className="block">
+            <span className={labelCls}>Nº de cuenta</span>
+            <input value={form.bankAccount} onChange={(e) => set('bankAccount', e.target.value)} className={inputCls} placeholder="619190379" />
+          </label>
+          <label className="block">
+            <span className={labelCls}>Titular</span>
+            <input value={form.bankHolder} onChange={(e) => set('bankHolder', e.target.value)} className={inputCls} placeholder="Yohana Morales" />
+          </label>
+          <label className="block">
+            <span className={labelCls}>C.I. del titular</span>
+            <input value={form.bankCi} onChange={(e) => set('bankCi', e.target.value)} className={inputCls} placeholder="4673382" />
+          </label>
+          <label className="block">
+            <span className={labelCls}>Alias</span>
+            <input value={form.bankAlias} onChange={(e) => set('bankAlias', e.target.value)} className={inputCls} placeholder="4673382" />
+          </label>
+        </div>
+      </Section>
+
       <div className="sticky bottom-0 bg-zinc-50 py-4 flex items-center gap-3">
         <button
           onClick={handleSave}

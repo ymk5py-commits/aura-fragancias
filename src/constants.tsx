@@ -52,6 +52,11 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   price10: 30000,
   price30: 70000,
   price50: 120000,
+  bankName: 'Banco Ueno',
+  bankAccount: '619190379',
+  bankHolder: 'Yohana Morales',
+  bankCi: '4673382',
+  bankAlias: '4673382',
 };
 
 // ============================================================

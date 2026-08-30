@@ -12,6 +12,7 @@ import ProductForm from './ProductForm';
 import { cldn } from '../lib/img';
 import SettingsForm from './SettingsForm';
 import AdminSales from './AdminSales';
+import AdminOrders from './AdminOrders';
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -22,7 +23,7 @@ const AdminDashboard: React.FC = () => {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [seeding, setSeeding] = useState(false);
   const [toast, setToast] = useState('');
-  const [tab, setTab] = useState<'products' | 'settings' | 'sales'>('products');
+  const [tab, setTab] = useState<'products' | 'orders' | 'settings' | 'sales'>('products');
 
   const notify = (msg: string) => {
     setToast(msg);
@@ -111,6 +112,7 @@ const AdminDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex gap-1">
           {([
             { key: 'products', label: 'Productos' },
+            { key: 'orders', label: 'Pedidos' },
             { key: 'sales', label: 'Ventas' },
             { key: 'settings', label: 'Configuración' },
           ] as const).map((t) => (
@@ -128,6 +130,7 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        {tab === 'orders' && <AdminOrders />}
         {tab === 'settings' && <SettingsForm />}
         {tab === 'sales' && <AdminSales />}
 

@@ -2,12 +2,13 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Info, MessageCircle, Truck, Wallet, Plus, Minus, Trash2, ShieldCheck } from 'lucide-react';
-import { CartItem } from '../types';
+import { ChevronLeft, Info, MessageCircle, Truck, Wallet, Plus, Minus, Trash2, ShieldCheck, Copy, Check, Upload, Loader2, Landmark, FileText, X } from 'lucide-react';
+import { CartItem, Order } from '../types';
 import { useSettings } from '../context/SettingsContext';
 import { trackEvent } from '../lib/pixel';
 import { newEventId, capiTrack } from '../lib/tracking';
 import { toItem, gaBeginCheckout, gaGenerateLead } from '../lib/gtag';
+import { newOrderId, uploadReceipt, saveOrder, validateReceipt, RECEIPT_ACCEPT } from '../lib/ordersService';
 
 interface CheckoutProps {
   cart: CartItem[];
@@ -17,8 +18,39 @@ interface CheckoutProps {
   onBack: () => void;
 }
 
+/** Fila de dato bancario con botón de copiar. */
+const CopyRow: React.FC<{ label: string; value: string; big?: boolean }> = ({ label, value, big }) => {
+  const [copied, setCopied] = useState(false);
+  if (!value) return null;
+  return (
+    <div className="flex items-center justify-between gap-3 py-3 border-b border-zinc-100 last:border-0">
+      <div className="min-w-0">
+        <span className="block text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-400 mb-0.5">{label}</span>
+        <span className={`block text-zinc-900 truncate ${big ? 'text-lg font-bold tabular' : 'text-sm font-semibold'}`}>{value}</span>
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          navigator.clipboard.writeText(value);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1800);
+        }}
+        aria-label={`Copiar ${label}`}
+        className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 border text-[9px] font-bold uppercase tracking-[0.12em] transition-colors ${
+          copied ? 'border-green-200 bg-green-50 text-green-700' : 'border-zinc-200 text-zinc-600 hover:border-aura-ink hover:text-aura-ink'
+        }`}
+      >
+        {copied ? <Check size={12} /> : <Copy size={12} />}
+        {copied ? 'Copiado' : 'Copiar'}
+      </button>
+    </div>
+  );
+};
+
 const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveItem, initialDiscount = 0, onBack }) => {
   const { settings } = useSettings();
+  const [step, setStep] = useState<'datos' | 'pago'>('datos');
+  const [orderId, setOrderId] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -30,10 +62,15 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
   const [coupon, setCoupon] = useState(initialDiscount > 0 ? settings.welcomeCode : '');
   const [couponMsg, setCouponMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Comprobante
+  const [receipt, setReceipt] = useState<File | null>(null);
+  const [receiptErr, setReceiptErr] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
 
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const discountAmount = discount > 0 ? Math.round(subtotal * (discount / 100)) : 0; // PYG entero
   const total = subtotal - discountAmount;
+  const isFreeShipping = subtotal >= 300000;
 
   const applyCoupon = () => {
     const code = coupon.trim().toUpperCase();
@@ -62,21 +99,99 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleCompleteOrder = () => {
+  /** Paso 1 -> 2: valida los datos y muestra los datos bancarios. */
+  const goToPayment = () => {
     if (!formData.name || !formData.phone || !formData.cityAndNeighborhood || !formData.address) {
-      setError("Se debe completar el formulario");
+      setError('Se debe completar el formulario');
       setTimeout(() => setError(null), 3000);
       return;
     }
-
     if (cart.length === 0) {
-      setError("Tu carrito está vacío.");
+      setError('Tu carrito está vacío.');
       setTimeout(() => setError(null), 3000);
       return;
     }
+    setError(null);
+    setOrderId((prev) => prev || newOrderId());
+    setStep('pago');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-    const isFreeShipping = subtotal >= 300000;
-    const orderId = `AURA-${Date.now().toString(36).toUpperCase()}`;
+  const pickReceipt = (file: File | null) => {
+    if (!file) { setReceipt(null); setReceiptErr(null); return; }
+    const err = validateReceipt(file);
+    setReceiptErr(err);
+    setReceipt(err ? null : file);
+  };
+
+  /** Paso 2: sube el comprobante, guarda el pedido y abre WhatsApp. */
+  const handleCompleteOrder = async () => {
+    if (sending) return;
+    setSending(true);
+    setError(null);
+
+    const items = cart.map((item) => ({
+      code: item.perfume.code,
+      name: item.perfume.name,
+      size: item.size,
+      price: item.price,
+      quantity: item.quantity,
+    }));
+
+    // 1) Comprobante (si lo adjuntó). Nunca bloquea la venta si falla.
+    let receiptUrl: string | undefined;
+    if (receipt) {
+      try {
+        receiptUrl = await uploadReceipt(receipt, orderId);
+      } catch (e) {
+        console.warn('[Äura] No se pudo subir el comprobante:', e);
+        setReceiptErr('No se pudo subir el comprobante. Podés enviarlo por WhatsApp.');
+      }
+    }
+
+    // 2) Pedido en Firestore (para verlo en /admin). Tampoco bloquea la venta.
+    const order: Order = {
+      orderId,
+      status: 'pendiente',
+      name: formData.name,
+      phone: formData.phone,
+      cityAndNeighborhood: formData.cityAndNeighborhood,
+      address: formData.address,
+      subtotal,
+      discountPercent: discount,
+      discountAmount,
+      total,
+      freeShipping: isFreeShipping,
+      items,
+      paymentMethod: formData.paymentMethod,
+      ...(receiptUrl ? { receiptUrl } : {}),
+    };
+    try {
+      await saveOrder(order);
+    } catch (e) {
+      console.warn('[Äura] No se pudo guardar el pedido:', e);
+    }
+
+    // 3) Tracking: el redirect a WhatsApp es un Lead (el Purchase real se
+    //    confirma desde /admin cuando se verifica la transferencia).
+    const eventID = newEventId();
+    const contentIds = cart.map(item => item.perfume.code);
+    const contents = cart.map(item => ({ id: item.perfume.code, quantity: item.quantity, item_price: item.price }));
+    const numItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+    trackEvent('Lead', {
+      content_ids: contentIds, content_type: 'product', contents,
+      value: total, currency: 'PYG', num_items: numItems,
+    }, eventID);
+    capiTrack({
+      eventName: 'Lead', eventId: eventID, value: total, currency: 'PYG',
+      contentIds, contents, numItems,
+      userData: { phone: formData.phone, firstName: formData.name, city: formData.cityAndNeighborhood },
+      actionSource: 'website',
+    });
+    gaGenerateLead(cart.map((i) => toItem(i.perfume, i.price, i.size, i.quantity)), total, orderId);
+
+    // 4) WhatsApp con todo el detalle
     const itemsText = cart.map(item => `- ${item.quantity}x ${item.perfume.name} (${item.perfume.code}) ${item.size}: Gs. ${(item.price * item.quantity).toLocaleString('es-PY')}`).join('\n');
     const message = encodeURIComponent(
       `*PEDIDO WEB · ${orderId}*\n\n` +
@@ -90,52 +205,61 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       `Subtotal: Gs. ${subtotal.toLocaleString('es-PY')}\n` +
       (discountAmount > 0 ? `Descuento (${discount}%): -Gs. ${discountAmount.toLocaleString('es-PY')}\n` : '') +
       `Envío: ${isFreeShipping ? 'GRATIS' : 'Consultar al WhatsApp'}\n` +
-      `*TOTAL: Gs. ${total.toLocaleString('es-PY')}${isFreeShipping ? '' : ' + Envío'}*`
+      `*TOTAL: Gs. ${total.toLocaleString('es-PY')}${isFreeShipping ? '' : ' + Envío'}*\n\n` +
+      (receiptUrl
+        ? `*Comprobante adjunto:*\n${receiptUrl}`
+        : `_Adjunto el comprobante de la transferencia en este chat._`)
     );
 
-    // El redirect a WhatsApp NO es un Purchase: se modela como Lead (intención con
-    // datos de envío). El Purchase real se confirma cuando el vendedor cobra (CAPI desde /admin).
-    const eventID = newEventId();
-    const contentIds = cart.map(item => item.perfume.code);
-    const contents = cart.map(item => ({ id: item.perfume.code, quantity: item.quantity, item_price: item.price }));
-    const numItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-
-    trackEvent('Lead', {
-      content_ids: contentIds,
-      content_type: 'product',
-      contents,
-      value: total,
-      currency: 'PYG',
-      num_items: numItems,
-    }, eventID);
-    capiTrack({
-      eventName: 'Lead',
-      eventId: eventID,
-      value: total,
-      currency: 'PYG',
-      contentIds,
-      contents,
-      numItems,
-      userData: { phone: formData.phone, firstName: formData.name, city: formData.cityAndNeighborhood },
-      actionSource: 'website',
-    });
-    gaGenerateLead(cart.map((i) => toItem(i.perfume, i.price, i.size, i.quantity)), total, orderId);
-
+    setSending(false);
     window.open(`https://wa.me/${settings.whatsappNumber}?text=${message}`, '_blank');
   };
+
+  const inputCls = 'w-full bg-zinc-50/50 border-none px-4 sm:px-6 py-4 sm:py-5 rounded-sm focus:ring-1 focus:ring-zinc-900 transition-all placeholder:text-zinc-300 text-sm';
+  const labelCls = 'text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-zinc-600 block mb-2 sm:mb-3';
 
   return (
     <div className="min-h-screen bg-[#F9F9F9] animate-fade-in pb-20">
       {/* Navbar Minimalista */}
       <nav className="bg-white border-b border-zinc-100 py-4 sm:py-6 px-4 sm:px-12 flex items-center sticky top-0 z-50">
-        <button onClick={onBack} className="flex items-center gap-1 sm:gap-2 text-[11px] sm:text-xs font-bold tracking-widest text-zinc-600 hover:text-zinc-900 transition-colors uppercase">
+        <button
+          onClick={() => (step === 'pago' ? setStep('datos') : onBack())}
+          className="flex items-center gap-1 sm:gap-2 text-[11px] sm:text-xs font-bold tracking-widest text-zinc-600 hover:text-zinc-900 transition-colors uppercase"
+        >
           <ChevronLeft size={14} /> VOLVER
         </button>
-        <h1 className="flex-grow text-center text-xl sm:text-4xl font-luxury tracking-[0.1em] sm:tracking-[0.2em] text-zinc-900 uppercase">FINALIZAR PEDIDO</h1>
+        <h1 className="flex-grow text-center text-xl sm:text-4xl font-luxury tracking-[0.1em] sm:tracking-[0.2em] text-zinc-900 uppercase">
+          {step === 'datos' ? 'FINALIZAR PEDIDO' : 'REALIZAR EL PAGO'}
+        </h1>
         <div className="w-16 sm:w-20"></div>
       </nav>
 
-      <div className="container mx-auto px-4 sm:px-12 mt-6 sm:mt-12">
+      {/* Pasos */}
+      <div className="container mx-auto px-4 sm:px-12 mt-6 sm:mt-10">
+        <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-10">
+          {[{ n: 1, k: 'datos', label: 'Tus datos' }, { n: 2, k: 'pago', label: 'Pago y comprobante' }].map((s, i) => {
+            const active = step === s.k;
+            const done = s.k === 'datos' && step === 'pago';
+            return (
+              <React.Fragment key={s.k}>
+                {i > 0 && <span className="h-px w-6 sm:w-12 bg-zinc-200" />}
+                <div className="flex items-center gap-2">
+                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                    done ? 'bg-green-600 text-white' : active ? 'bg-aura-ink text-white' : 'bg-zinc-200 text-zinc-500'
+                  }`}>
+                    {done ? <Check size={12} /> : s.n}
+                  </span>
+                  <span className={`text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.15em] ${active ? 'text-aura-ink' : 'text-zinc-400'}`}>
+                    {s.label}
+                  </span>
+                </div>
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-12">
         {error && (
           <div className="mb-6 bg-red-50 border border-red-100 text-red-600 px-6 py-4 rounded-sm text-xs font-bold tracking-widest uppercase animate-fade-in flex items-center gap-3">
             <Info size={16} />
@@ -143,68 +267,124 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
           </div>
         )}
         <div className="flex flex-col lg:flex-row gap-6 sm:gap-10">
-          
-          {/* Columna Izquierda: Datos */}
+
+          {/* Columna Izquierda */}
           <div className="flex-grow space-y-6 sm:space-y-8">
-            <div className="bg-white p-6 sm:p-12 shadow-sm border border-zinc-50 rounded-sm">
-              <div className="flex items-center gap-3 mb-6 sm:mb-10 border-b border-zinc-100 pb-4 sm:pb-6">
-                <Truck size={18} className="text-zinc-900" />
-                <h2 className="text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-zinc-900">DATOS DE ENVÍO</h2>
-              </div>
-
-              <div className="space-y-6 sm:space-y-8">
-                <div>
-                  <label className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-zinc-600 block mb-2 sm:mb-3">NOMBRE COMPLETO</label>
-                  <input 
-                    type="text" 
-                    placeholder="Juan Pérez"
-                    className="w-full bg-zinc-50/50 border-none px-4 sm:px-6 py-4 sm:py-5 rounded-sm focus:ring-1 focus:ring-zinc-900 transition-all placeholder:text-zinc-300 text-sm"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  />
+            {step === 'datos' ? (
+              <div className="bg-white p-6 sm:p-12 shadow-sm border border-zinc-50 rounded-sm">
+                <div className="flex items-center gap-3 mb-6 sm:mb-10 border-b border-zinc-100 pb-4 sm:pb-6">
+                  <Truck size={18} className="text-zinc-900" />
+                  <h2 className="text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-zinc-900">DATOS DE ENVÍO</h2>
                 </div>
 
-                <div>
-                  <label className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-zinc-600 block mb-2 sm:mb-3">TELÉFONO</label>
-                  <input 
-                    type="tel" 
-                    placeholder="0981 123 456"
-                    className="w-full bg-zinc-50/50 border-none px-4 sm:px-6 py-4 sm:py-5 rounded-sm focus:ring-1 focus:ring-zinc-900 transition-all placeholder:text-zinc-300 text-sm"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-zinc-600 block mb-2 sm:mb-3">CIUDAD Y BARRIO</label>
-                  <input 
-                    type="text" 
-                    placeholder="Ej: Asunción, Barrio Jara"
-                    className="w-full bg-zinc-50/50 border-none px-4 sm:px-6 py-4 sm:py-5 rounded-sm focus:ring-1 focus:ring-zinc-900 transition-all placeholder:text-zinc-300 text-sm"
-                    value={formData.cityAndNeighborhood}
-                    onChange={(e) => setFormData({...formData, cityAndNeighborhood: e.target.value})}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-zinc-600 block mb-2 sm:mb-3">DIRECCIÓN EXACTA</label>
-                  <textarea 
-                    placeholder="Ej: Av. Mcal López 1234 c/ San Martín"
-                    rows={3}
-                    className="w-full bg-zinc-50/50 border-none px-4 sm:px-6 py-4 sm:py-5 rounded-sm focus:ring-1 focus:ring-zinc-900 transition-all placeholder:text-zinc-300 text-sm resize-none"
-                    value={formData.address}
-                    onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-zinc-600 block mb-2 sm:mb-3">MÉTODO DE PAGO</label>
-                  <div className="w-full bg-zinc-50/50 border-none px-4 sm:px-6 py-4 sm:py-5 rounded-sm text-sm text-zinc-900 font-medium">
-                    Transferencia Bancaria / QR
+                <div className="space-y-6 sm:space-y-8">
+                  <div>
+                    <label className={labelCls}>NOMBRE COMPLETO</label>
+                    <input type="text" placeholder="Juan Pérez" className={inputCls} autoComplete="name"
+                      value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>TELÉFONO</label>
+                    <input type="tel" placeholder="0981 123 456" className={inputCls} autoComplete="tel"
+                      value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>CIUDAD Y BARRIO</label>
+                    <input type="text" placeholder="Ej: Asunción, Barrio Jara" className={inputCls}
+                      value={formData.cityAndNeighborhood} onChange={(e) => setFormData({ ...formData, cityAndNeighborhood: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>DIRECCIÓN EXACTA</label>
+                    <textarea placeholder="Ej: Av. Mcal López 1234 c/ San Martín" rows={3} className={`${inputCls} resize-none`}
+                      value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>MÉTODO DE PAGO</label>
+                    <div className="w-full bg-zinc-50/50 border-none px-4 sm:px-6 py-4 sm:py-5 rounded-sm text-sm text-zinc-900 font-medium">
+                      Transferencia Bancaria / QR
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <>
+                {/* Datos bancarios */}
+                <div className="bg-white p-6 sm:p-10 shadow-sm border border-zinc-50 rounded-sm">
+                  <div className="flex items-center gap-3 mb-6 border-b border-zinc-100 pb-4 sm:pb-6">
+                    <Landmark size={18} className="text-zinc-900" />
+                    <h2 className="text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-zinc-900">1 · TRANSFERÍ EL MONTO</h2>
+                  </div>
+
+                  <div className="bg-aura-ink text-white p-5 sm:p-6 rounded-sm mb-6 flex items-center justify-between gap-4">
+                    <div>
+                      <span className="block text-[9px] font-bold uppercase tracking-[0.25em] text-aura-gold mb-1">Monto a transferir</span>
+                      <span className="block text-2xl sm:text-3xl font-bold tabular">Gs. {total.toLocaleString('es-PY')}</span>
+                      {!isFreeShipping && <span className="block text-[9px] text-white/50 uppercase tracking-widest mt-1">+ envío (se coordina por WhatsApp)</span>}
+                    </div>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-white/60 text-right shrink-0">
+                      Pedido<br /><span className="text-white tabular">{orderId}</span>
+                    </span>
+                  </div>
+
+                  <div className="border border-zinc-100 rounded-sm px-4 sm:px-5">
+                    <CopyRow label="Banco" value={settings.bankName} />
+                    <CopyRow label="Nº de cuenta" value={settings.bankAccount} big />
+                    <CopyRow label="Titular" value={settings.bankHolder} />
+                    <CopyRow label="C.I." value={settings.bankCi} />
+                    <CopyRow label="Alias" value={settings.bankAlias} />
+                  </div>
+
+                  <p className="text-[11px] text-zinc-500 leading-relaxed mt-4">
+                    Podés transferir desde tu app bancaria o billetera usando el número de cuenta o el alias.
+                    El pedido se reserva una vez que verificamos la transferencia.
+                  </p>
+                </div>
+
+                {/* Comprobante */}
+                <div className="bg-white p-6 sm:p-10 shadow-sm border border-zinc-50 rounded-sm">
+                  <div className="flex items-center gap-3 mb-6 border-b border-zinc-100 pb-4 sm:pb-6">
+                    <FileText size={18} className="text-zinc-900" />
+                    <h2 className="text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-zinc-900">2 · ADJUNTÁ EL COMPROBANTE</h2>
+                  </div>
+
+                  {receipt ? (
+                    <div className="flex items-center gap-4 border border-green-200 bg-green-50/60 p-4 rounded-sm">
+                      {receipt.type.startsWith('image/') ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={URL.createObjectURL(receipt)} alt="Comprobante" className="w-16 h-20 object-cover border border-zinc-200 rounded-sm" />
+                      ) : (
+                        <div className="w-16 h-20 bg-white border border-zinc-200 rounded-sm flex items-center justify-center">
+                          <FileText size={22} className="text-zinc-400" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900 truncate">{receipt.name}</p>
+                        <p className="text-[11px] text-zinc-500">{(receipt.size / 1024).toFixed(0)} KB · listo para enviar</p>
+                      </div>
+                      <button type="button" onClick={() => pickReceipt(null)} aria-label="Quitar comprobante"
+                        className="p-2 text-zinc-400 hover:text-red-600 transition-colors">
+                        <X size={18} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-zinc-200 hover:border-aura-gold rounded-sm py-10 cursor-pointer transition-colors">
+                      <Upload size={22} className="text-zinc-400" />
+                      <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-600">Subir comprobante</span>
+                      <span className="text-[10px] text-zinc-400">Foto o PDF · hasta 5 MB</span>
+                      <input type="file" accept={RECEIPT_ACCEPT} className="hidden"
+                        onChange={(e) => pickReceipt(e.target.files?.[0] || null)} />
+                    </label>
+                  )}
+
+                  {receiptErr && (
+                    <p className="mt-3 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-sm">{receiptErr}</p>
+                  )}
+                  <p className="text-[11px] text-zinc-400 leading-relaxed mt-4">
+                    Opcional: si preferís, podés mandarlo directamente por WhatsApp en el siguiente paso.
+                  </p>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Columna Derecha: Resumen */}
@@ -215,24 +395,22 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                 <h2 className="text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-zinc-900">RESUMEN</h2>
               </div>
 
-              <div className="bg-zinc-50/50 p-4 sm:p-6 rounded-sm mb-6 sm:mb-10">
-                <label className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-zinc-600 block mb-2 sm:mb-3">CÓDIGO DE DESCUENTO</label>
-                <div className="flex gap-2">
-                  <input 
-                    type="text" 
-                    placeholder="INGRESAR CUPÓN"
-                    className="flex-grow bg-white border border-zinc-100 px-3 sm:px-4 py-2 sm:py-3 rounded-sm text-[9px] sm:text-[10px] focus:outline-none focus:border-zinc-900 transition-all tracking-widest uppercase"
-                    value={coupon}
-                    onChange={(e) => setCoupon(e.target.value)}
-                  />
-                  <button onClick={applyCoupon} className="bg-zinc-900 text-white px-4 sm:px-5 py-2 sm:py-3 rounded-sm text-[9px] sm:text-[10px] font-bold tracking-widest uppercase hover:bg-zinc-800 transition-all">
-                    APLICAR
-                  </button>
+              {step === 'datos' && (
+                <div className="bg-zinc-50/50 p-4 sm:p-6 rounded-sm mb-6 sm:mb-10">
+                  <label className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-zinc-600 block mb-2 sm:mb-3">CÓDIGO DE DESCUENTO</label>
+                  <div className="flex gap-2">
+                    <input type="text" placeholder="INGRESAR CUPÓN"
+                      className="flex-grow bg-white border border-zinc-100 px-3 sm:px-4 py-2 sm:py-3 rounded-sm text-[9px] sm:text-[10px] focus:outline-none focus:border-zinc-900 transition-all tracking-widest uppercase"
+                      value={coupon} onChange={(e) => setCoupon(e.target.value)} />
+                    <button onClick={applyCoupon} className="bg-zinc-900 text-white px-4 sm:px-5 py-2 sm:py-3 rounded-sm text-[9px] sm:text-[10px] font-bold tracking-widest uppercase hover:bg-zinc-800 transition-all">
+                      APLICAR
+                    </button>
+                  </div>
+                  {couponMsg && (
+                    <p className={`mt-2 text-[9px] font-bold uppercase tracking-widest ${discount > 0 ? 'text-green-600' : 'text-red-500'}`}>{couponMsg}</p>
+                  )}
                 </div>
-                {couponMsg && (
-                  <p className={`mt-2 text-[9px] font-bold uppercase tracking-widest ${discount > 0 ? 'text-green-600' : 'text-red-500'}`}>{couponMsg}</p>
-                )}
-              </div>
+              )}
 
               <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-10 border-b border-zinc-100 pb-6 sm:pb-10">
                 {cart.length === 0 ? (
@@ -243,29 +421,24 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                       <div className="flex flex-col">
                         <span className="text-[10px] sm:text-[11px] font-bold text-zinc-900 uppercase tracking-wider line-clamp-1">{item.perfume.name}</span>
                         <span className="text-[8px] sm:text-[9px] text-zinc-400 uppercase tracking-widest">{item.perfume.code} · {item.size}</span>
-                        
-                        {/* Controles de Cantidad */}
-                        <div className="flex items-center gap-3 mt-2">
-                          <button 
-                            onClick={() => onUpdateQuantity(item.id, -1)}
-                            className="p-1 hover:bg-zinc-100 rounded-full transition-colors"
-                          >
-                            <Minus size={12} className="text-zinc-400" />
-                          </button>
-                          <span className="text-[10px] font-bold text-zinc-900">{item.quantity}</span>
-                          <button 
-                            onClick={() => onUpdateQuantity(item.id, 1)}
-                            className="p-1 hover:bg-zinc-100 rounded-full transition-colors"
-                          >
-                            <Plus size={12} className="text-zinc-400" />
-                          </button>
-                          <button 
-                            onClick={() => onRemoveItem(item.id)}
-                            className="ml-2 p-1 hover:bg-red-50 text-zinc-300 hover:text-red-500 rounded-full transition-colors"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
+
+                        {step === 'datos' && (
+                          <div className="flex items-center gap-3 mt-2">
+                            <button onClick={() => onUpdateQuantity(item.id, -1)} className="p-1 hover:bg-zinc-100 rounded-full transition-colors">
+                              <Minus size={12} className="text-zinc-400" />
+                            </button>
+                            <span className="text-[10px] font-bold text-zinc-900">{item.quantity}</span>
+                            <button onClick={() => onUpdateQuantity(item.id, 1)} className="p-1 hover:bg-zinc-100 rounded-full transition-colors">
+                              <Plus size={12} className="text-zinc-400" />
+                            </button>
+                            <button onClick={() => onRemoveItem(item.id)} className="ml-2 p-1 hover:bg-red-50 text-zinc-300 hover:text-red-500 rounded-full transition-colors">
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        )}
+                        {step === 'pago' && (
+                          <span className="text-[9px] text-zinc-400 mt-1">x{item.quantity}</span>
+                        )}
                       </div>
                       <span className="text-[10px] sm:text-[11px] font-bold text-zinc-900 uppercase">Gs. {(item.price * item.quantity).toLocaleString('es-PY')}</span>
                     </div>
@@ -285,10 +458,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                   </div>
                 )}
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-1">
-                    <span className="text-[11px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">ENVÍO</span>
-                  </div>
-                  {subtotal >= 300000 ? (
+                  <span className="text-[11px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">ENVÍO</span>
+                  {isFreeShipping ? (
                     <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest bg-green-50 px-2 py-1 rounded-sm">GRATIS</span>
                   ) : (
                     <span className="text-[9px] sm:text-[10px] font-bold text-aura-gold uppercase tracking-tighter">Consultar al WhatsApp</span>
@@ -299,7 +470,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
               <div className="border-t-[1px] border-dashed border-zinc-200 pt-4 sm:pt-6 flex justify-between items-end mb-6 sm:mb-10">
                 <div className="flex flex-col">
                   <span className="text-lg sm:text-2xl font-luxury font-bold text-zinc-900">TOTAL</span>
-                  {subtotal < 300000 && (
+                  {!isFreeShipping && (
                     <span className="text-[8px] sm:text-[9px] text-zinc-400 uppercase tracking-widest">+ COSTO DE ENVÍO</span>
                   )}
                 </div>
@@ -316,19 +487,30 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                 ))}
               </div>
 
-              <button
-                onClick={handleCompleteOrder}
-                className="w-full bg-aura-ink text-white py-4 sm:py-5 rounded-sm text-[10px] sm:text-[11px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-3 hover:bg-aura-gold transition-all shadow-[0_10px_30px_-10px_rgba(12,10,9,0.4)] active:scale-95"
-              >
-                <MessageCircle size={18} className="text-[#25D366]" fill="currentColor" />
-                COMPLETAR EN WHATSAPP
-              </button>
+              {step === 'datos' ? (
+                <button
+                  onClick={goToPayment}
+                  className="w-full bg-aura-ink text-white py-4 sm:py-5 rounded-sm text-[10px] sm:text-[11px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-3 hover:bg-aura-gold transition-all shadow-[0_10px_30px_-10px_rgba(12,10,9,0.4)] active:scale-95"
+                >
+                  <Landmark size={17} />
+                  CONTINUAR AL PAGO
+                </button>
+              ) : (
+                <button
+                  onClick={handleCompleteOrder}
+                  disabled={sending}
+                  className="w-full bg-aura-ink text-white py-4 sm:py-5 rounded-sm text-[10px] sm:text-[11px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-3 hover:bg-aura-gold transition-all shadow-[0_10px_30px_-10px_rgba(12,10,9,0.4)] active:scale-95 disabled:opacity-60"
+                >
+                  {sending ? <Loader2 size={18} className="animate-spin" /> : <MessageCircle size={18} className="text-[#25D366]" fill="currentColor" />}
+                  {sending ? 'ENVIANDO…' : 'CONFIRMAR PAGO Y ENVIAR'}
+                </button>
+              )}
 
-              <button 
-                onClick={onBack}
+              <button
+                onClick={() => (step === 'pago' ? setStep('datos') : onBack())}
                 className="w-full mt-3 border border-zinc-100 text-zinc-400 py-4 sm:py-5 rounded-sm text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-3 hover:bg-zinc-50 transition-all active:scale-95"
               >
-                SEGUIR COMPRANDO
+                {step === 'pago' ? 'VOLVER A MIS DATOS' : 'SEGUIR COMPRANDO'}
               </button>
             </div>
           </div>

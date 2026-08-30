@@ -56,4 +56,42 @@ export interface SiteSettings {
   price10: number;
   price30: number;
   price50: number;
+  // Datos para transferencia bancaria (editables desde /admin)
+  bankName: string;
+  bankAccount: string;
+  bankHolder: string;
+  bankCi: string;
+  bankAlias: string;
+}
+
+export type OrderStatus = 'pendiente' | 'confirmado' | 'cancelado';
+
+export interface OrderItem {
+  code: string;
+  name: string;
+  size: string;
+  price: number;
+  quantity: number;
+}
+
+export interface Order {
+  id?: string;           // id del documento en Firestore
+  orderId: string;       // código legible: AURA-XXXX
+  createdAt?: unknown;    // serverTimestamp
+  status: OrderStatus;
+  // Cliente
+  name: string;
+  phone: string;
+  cityAndNeighborhood: string;
+  address: string;
+  // Importes
+  subtotal: number;
+  discountPercent: number;
+  discountAmount: number;
+  total: number;
+  freeShipping: boolean;
+  items: OrderItem[];
+  // Pago
+  receiptUrl?: string;   // comprobante de transferencia subido por el cliente
+  paymentMethod: string;
 }

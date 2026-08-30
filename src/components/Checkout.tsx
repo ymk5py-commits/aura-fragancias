@@ -488,7 +488,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
 
               {/* Sellos de confianza */}
               <div className="grid grid-cols-2 gap-2 mb-5">
-                {['Devolución 7 días', 'Envío gratis +300k', 'Extrait 30% macerado 21d', 'Atención por WhatsApp'].map((t) => (
+                {['Envío gratis +300k', 'Extrait 30% macerado 21d', 'Atención por WhatsApp'].map((t) => (
                   <div key={t} className="flex items-center gap-1.5 text-[8px] font-semibold text-zinc-500 uppercase tracking-[0.1em]">
                     <ShieldCheck size={12} className="text-aura-gold-deep shrink-0" />
                     {t}

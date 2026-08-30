@@ -72,15 +72,6 @@ export default async function ProductoPage({ params }: { params: Promise<{ code:
     },
   };
 
-  const returnPolicy = {
-    '@type': 'MerchantReturnPolicy',
-    applicableCountry: 'PY',
-    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
-    merchantReturnDays: 7,
-    returnMethod: 'https://schema.org/ReturnByMail',
-    returnFees: 'https://schema.org/FreeReturn',
-  };
-
   const offers = [
     { size: '10 ML', price: settings.price10 },
     { size: '30 ML', price: settings.price30 },
@@ -96,7 +87,6 @@ export default async function ProductoPage({ params }: { params: Promise<{ code:
     url: productUrl,
     seller: { '@type': 'Organization', name: 'Äura Fragancias' },
     shippingDetails,
-    hasMerchantReturnPolicy: returnPolicy,
   }));
 
   const jsonLd = [

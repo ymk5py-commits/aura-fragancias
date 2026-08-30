@@ -470,9 +470,12 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                 </div>
               </div>
 
-              <div className="border-t-[1px] border-dashed border-zinc-200 pt-4 sm:pt-6 flex justify-between items-end mb-3">
-                <span className="text-lg sm:text-2xl font-luxury font-bold text-zinc-900">TOTAL A TRANSFERIR</span>
-                <span className="text-lg sm:text-2xl font-bold text-zinc-900">Gs. {total.toLocaleString('es-PY')}</span>
+              <div className="border-t-[1px] border-dashed border-zinc-200 pt-4 sm:pt-6 flex justify-between items-end gap-3 mb-3">
+                <div className="flex flex-col leading-none">
+                  <span className="text-lg sm:text-2xl font-luxury font-bold text-zinc-900">TOTAL</span>
+                  <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase tracking-[0.18em] mt-1">a transferir</span>
+                </div>
+                <span className="text-lg sm:text-2xl font-bold text-zinc-900 whitespace-nowrap">Gs. {total.toLocaleString('es-PY')}</span>
               </div>
 
               {!isFreeShipping && (

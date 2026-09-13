@@ -94,4 +94,20 @@ export interface Order {
   // Pago
   receiptUrl?: string;   // comprobante de transferencia subido por el cliente
   paymentMethod: string;
+  // Datos extra que pide Pagopar para pagar con tarjeta
+  email?: string;
+  document?: string;
+  // Pagopar (los escribe el servidor: /api/pagopar/*)
+  pagoparHash?: string;
+  pagoparNumeroPedido?: string;
+  pagoparStatus?: 'pendiente' | 'pagado' | 'reversado';
+  pagoparAttempts?: number;
+  pagoparPayment?: {
+    formaPago?: string;
+    formaPagoId?: string;
+    numeroComprobante?: string;
+    fechaPago?: string;
+    monto?: string;
+  };
+  paidAt?: number;
 }

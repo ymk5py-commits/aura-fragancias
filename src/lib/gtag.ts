@@ -65,6 +65,10 @@ export const gaGenerateLead = (items: GaItem[], value: number, transactionId: st
   }
 };
 
+/** Compra confirmada por Pagopar (pago online real). */
+export const gaPurchase = (items: GaItem[], value: number, transactionId: string) =>
+  ga('purchase', { currency: 'PYG', value, items, transaction_id: transactionId });
+
 /** Remarketing dinámico de Google Ads: el prodid DEBE ser el code (= g:id del feed). */
 export const gaRemarketing = (
   pagetype: 'home' | 'category' | 'product' | 'cart' | 'purchase',

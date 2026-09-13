@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Loader2, FileText, ExternalLink, CheckCircle2, XCircle, PackageOpen, Search, Phone, MapPin, RefreshCw,
+  Loader2, FileText, ExternalLink, CheckCircle2, XCircle, PackageOpen, Search, Phone, MapPin, RefreshCw, CreditCard,
 } from 'lucide-react';
 import { Order, OrderStatus } from '../types';
 import { subscribeOrders, setOrderStatus } from '../lib/ordersService';
@@ -161,6 +161,11 @@ const AdminOrders: React.FC = () => {
                         <ExternalLink size={16} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                       </span>
                     </a>
+                  ) : /pagopar|tarjeta/i.test(o.paymentMethod || '') ? (
+                    <div className={`w-20 h-24 border flex flex-col items-center justify-center gap-1 ${o.pagoparStatus === 'pagado' ? 'border-green-200 bg-green-50 text-green-700' : 'border-dashed border-zinc-200 text-zinc-300'}`}>
+                      <CreditCard size={18} />
+                      <span className="text-[8px] uppercase tracking-wider text-center leading-tight px-1">{o.pagoparStatus === 'pagado' ? 'Pagado' : 'Tarjeta'}<br />Pagopar</span>
+                    </div>
                   ) : (
                     <div className="w-20 h-24 border border-dashed border-zinc-200 flex flex-col items-center justify-center gap-1 text-zinc-300">
                       <FileText size={18} />
@@ -184,6 +189,22 @@ const AdminOrders: React.FC = () => {
                   <p className="text-[11px] text-zinc-500 mt-2 leading-relaxed">
                     {(o.items || []).map((i) => `${i.quantity}× ${i.name} (${i.size})`).join(' · ')}
                   </p>
+                  {/pagopar|tarjeta/i.test(o.paymentMethod || '') && (
+                    <p className={`inline-flex items-center gap-1.5 mt-2 text-[10px] font-bold uppercase tracking-[0.12em] px-2 py-1 border ${
+                      o.pagoparStatus === 'pagado'
+                        ? 'bg-green-50 text-green-700 border-green-200'
+                        : o.pagoparStatus === 'reversado'
+                          ? 'bg-red-50 text-red-700 border-red-200'
+                          : 'bg-zinc-50 text-zinc-500 border-zinc-200'
+                    }`}>
+                      <CreditCard size={11} />
+                      {o.pagoparStatus === 'pagado'
+                        ? `Pagado con Pagopar${o.pagoparPayment?.formaPago ? ` · ${o.pagoparPayment.formaPago}` : ''}${o.pagoparPayment?.numeroComprobante ? ` · Comp. ${o.pagoparPayment.numeroComprobante}` : ''}`
+                        : o.pagoparStatus === 'reversado'
+                          ? 'Pago con tarjeta reversado'
+                          : 'Tarjeta (Pagopar) · pago pendiente'}
+                    </p>
+                  )}
                 </div>
 
                 {/* Importe + acciones */}

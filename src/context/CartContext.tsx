@@ -14,6 +14,7 @@ interface CartContextValue {
   addToCart: (perfume: Perfume, size: string, quantity?: number) => void;
   updateQuantity: (id: string, delta: number) => void;
   removeFromCart: (id: string) => void;
+  clearCart: () => void;
   showCheckout: boolean;
   openCart: () => void;
   closeCheckout: () => void;
@@ -130,6 +131,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const removeFromCart = (id: string) => setCart((prev) => prev.filter((item) => item.id !== id));
 
+  /** Vacía el carrito (después de un pago con tarjeta confirmado). */
+  const clearCart = () => setCart([]);
+
   const openCart = () => {
     if (cart.length > 0) setIsDrawerOpen(true);
     else showNotification('Tu carrito está vacío. Agregá una fragancia para continuar.');
@@ -159,6 +163,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addToCart,
         updateQuantity,
         removeFromCart,
+        clearCart,
         showCheckout,
         openCart,
         closeCheckout: () => setShowCheckout(false),

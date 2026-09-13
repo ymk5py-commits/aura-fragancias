@@ -2,13 +2,14 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Info, MessageCircle, Truck, Wallet, Plus, Minus, Trash2, ShieldCheck, Copy, Check, Upload, Loader2, Landmark, FileText, X } from 'lucide-react';
+import { ChevronLeft, Info, MessageCircle, Truck, Wallet, Plus, Minus, Trash2, ShieldCheck, Copy, Check, Upload, Loader2, Landmark, FileText, X, CreditCard, Lock } from 'lucide-react';
 import { CartItem, Order } from '../types';
 import { useSettings } from '../context/SettingsContext';
 import { trackEvent } from '../lib/pixel';
 import { newEventId, capiTrack } from '../lib/tracking';
 import { toItem, gaBeginCheckout, gaGenerateLead } from '../lib/gtag';
 import { newOrderId, uploadReceipt, saveOrder, validateReceipt, RECEIPT_ACCEPT } from '../lib/ordersService';
+import { PAY_TRANSFER, PAY_CARD, isCardPaymentEnabled, documentDigits, startCardPayment } from '../lib/payments';
 
 interface CheckoutProps {
   cart: CartItem[];
@@ -56,8 +57,14 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     phone: '',
     cityAndNeighborhood: '',
     address: '',
-    paymentMethod: 'Transferencia Bancaria / QR'
+    email: '',
+    document: '',
+    paymentMethod: PAY_TRANSFER,
   });
+  /** Con tarjeta, Pagopar exige correo y C.I. del comprador. */
+  const paysWithCard = isCardPaymentEnabled && formData.paymentMethod === PAY_CARD;
+  // Pedido ya guardado en Firestore para el pago con tarjeta (se reutiliza si el link falla).
+  const [cardDocId, setCardDocId] = useState<string | null>(null);
   const [discount, setDiscount] = useState(initialDiscount);
   const [coupon, setCoupon] = useState(initialDiscount > 0 ? settings.welcomeCode : '');
   const [couponMsg, setCouponMsg] = useState<string | null>(null);
@@ -111,6 +118,18 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       setTimeout(() => setError(null), 3000);
       return;
     }
+    if (paysWithCard) {
+      if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) {
+        setError('Para pagar con tarjeta necesitamos tu correo.');
+        setTimeout(() => setError(null), 3000);
+        return;
+      }
+      if (documentDigits(formData.document).length < 5) {
+        setError('Para pagar con tarjeta necesitamos tu número de C.I.');
+        setTimeout(() => setError(null), 3000);
+        return;
+      }
+    }
     setError(null);
     setOrderId((prev) => prev || newOrderId());
     setStep('pago');
@@ -122,6 +141,50 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     const err = validateReceipt(file);
     setReceiptErr(err);
     setReceipt(err ? null : file);
+  };
+
+  /** Paso 2 (tarjeta): guarda el pedido y redirige al checkout de Pagopar. */
+  const handleCardPayment = async () => {
+    if (sending) return;
+    setSending(true);
+    setError(null);
+    try {
+      let docId = cardDocId;
+      if (!docId) {
+        const order: Order = {
+          orderId,
+          status: 'pendiente',
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim(),
+          document: formData.document.trim(),
+          cityAndNeighborhood: formData.cityAndNeighborhood.trim(),
+          address: formData.address.trim(),
+          subtotal,
+          discountPercent: discount,
+          discountAmount,
+          total,
+          freeShipping: isFreeShipping,
+          items: cart.map((item) => ({
+            code: item.perfume.code,
+            name: item.perfume.name,
+            size: item.size,
+            price: item.price,
+            quantity: item.quantity,
+          })),
+          paymentMethod: PAY_CARD,
+        };
+        docId = await saveOrder(order);
+        setCardDocId(docId);
+      }
+      const url = await startCardPayment(docId);
+      window.location.href = url;
+      // La página se va a Pagopar; si volvemos (botón atrás) el botón vuelve a estar activo.
+      setTimeout(() => setSending(false), 8000);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No pudimos iniciar el pago con tarjeta. Probá con transferencia.');
+      setSending(false);
+    }
   };
 
   /** Paso 2: sube el comprobante, guarda el pedido y abre WhatsApp. */
@@ -238,7 +301,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       {/* Pasos */}
       <div className="container mx-auto px-4 sm:px-12 mt-6 sm:mt-10">
         <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-10">
-          {[{ n: 1, k: 'datos', label: 'Tus datos' }, { n: 2, k: 'pago', label: 'Pago y comprobante' }].map((s, i) => {
+          {[{ n: 1, k: 'datos', label: 'Tus datos' }, { n: 2, k: 'pago', label: paysWithCard ? 'Pago con tarjeta' : 'Pago y comprobante' }].map((s, i) => {
             const active = step === s.k;
             const done = s.k === 'datos' && step === 'pago';
             return (
@@ -301,11 +364,85 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                   </div>
                   <div>
                     <label className={labelCls}>MÉTODO DE PAGO</label>
-                    <div className="w-full bg-zinc-50/50 border-none px-4 sm:px-6 py-4 sm:py-5 rounded-sm text-sm text-zinc-900 font-medium">
-                      Transferencia Bancaria / QR
-                    </div>
+                    {isCardPaymentEnabled ? (
+                      <div className="space-y-2">
+                        {[
+                          { id: PAY_TRANSFER, label: 'Transferencia bancaria / QR', hint: 'Te mostramos los datos de la cuenta y adjuntás el comprobante.', icon: Landmark },
+                          { id: PAY_CARD, label: 'Tarjeta de crédito o débito', hint: 'Pago online seguro procesado por Pagopar (Bancard).', icon: CreditCard },
+                        ].map((opt) => {
+                          const active = formData.paymentMethod === opt.id;
+                          const Icon = opt.icon;
+                          return (
+                            <label key={opt.id}
+                              className={`flex items-start gap-4 px-4 sm:px-6 py-4 rounded-sm border cursor-pointer transition-colors ${
+                                active ? 'border-aura-ink bg-zinc-50' : 'border-zinc-100 bg-zinc-50/50 hover:border-zinc-300'
+                              }`}>
+                              <input type="radio" name="paymentMethod" value={opt.id} checked={active}
+                                onChange={() => setFormData({ ...formData, paymentMethod: opt.id })}
+                                className="mt-1 accent-aura-ink" />
+                              <Icon size={18} className="mt-0.5 shrink-0 text-zinc-900" />
+                              <span className="min-w-0">
+                                <span className="block text-sm font-semibold text-zinc-900">{opt.label}</span>
+                                <span className="block text-[11px] text-zinc-500 leading-relaxed mt-0.5">{opt.hint}</span>
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="w-full bg-zinc-50/50 border-none px-4 sm:px-6 py-4 sm:py-5 rounded-sm text-sm text-zinc-900 font-medium">
+                        Transferencia Bancaria / QR
+                      </div>
+                    )}
                   </div>
+                  {paysWithCard && (
+                    <>
+                      <div>
+                        <label className={labelCls}>CORREO ELECTRÓNICO</label>
+                        <input type="email" placeholder="tu@correo.com" className={inputCls} autoComplete="email"
+                          value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                        <p className="text-[11px] text-zinc-400 mt-2">Lo pide Pagopar para el pago con tarjeta.</p>
+                      </div>
+                      <div>
+                        <label className={labelCls}>C.I. (SOLO NÚMEROS)</label>
+                        <input type="text" inputMode="numeric" placeholder="4348713" className={inputCls}
+                          value={formData.document} onChange={(e) => setFormData({ ...formData, document: e.target.value })} />
+                        <p className="text-[11px] text-zinc-400 mt-2">Sin puntos ni dígito verificador. Lo pide Pagopar para el pago con tarjeta.</p>
+                      </div>
+                    </>
+                  )}
                 </div>
+              </div>
+            ) : paysWithCard ? (
+              <div className="bg-white p-6 sm:p-10 shadow-sm border border-zinc-50 rounded-sm">
+                <div className="flex items-center gap-3 mb-6 border-b border-zinc-100 pb-4 sm:pb-6">
+                  <CreditCard size={18} className="text-zinc-900" />
+                  <h2 className="text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-zinc-900">PAGO CON TARJETA</h2>
+                </div>
+
+                <div className="bg-aura-ink text-white p-5 sm:p-6 rounded-sm mb-6 flex items-center justify-between gap-4">
+                  <div>
+                    <span className="block text-[9px] font-bold uppercase tracking-[0.25em] text-aura-gold mb-1">Monto a pagar</span>
+                    <span className="block text-2xl sm:text-3xl font-bold tabular">Gs. {total.toLocaleString('es-PY')}</span>
+                    <span className="block text-[9px] text-white/50 uppercase tracking-widest mt-1">
+                      {isFreeShipping ? 'Envío gratis incluido' : 'Envío aparte · lo coordinamos por WhatsApp'}
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-white/60 text-right shrink-0">
+                    Pedido<br /><span className="text-white tabular">{orderId}</span>
+                  </span>
+                </div>
+
+                <p className="text-sm text-zinc-700 leading-relaxed">
+                  Al tocar <strong>Pagar con tarjeta</strong> te llevamos al checkout seguro de <strong>Pagopar</strong>,
+                  donde podés pagar con tarjeta de crédito o débito (Visa, Mastercard y otras, con cuotas según tu banco),
+                  código QR o billetera electrónica. Al terminar volvés a Äura con la confirmación del pago.
+                </p>
+                <ul className="mt-5 space-y-2 text-[11px] text-zinc-500">
+                  <li className="flex items-center gap-2"><Lock size={12} className="text-aura-gold-deep shrink-0" /> Tus datos de tarjeta los procesa Pagopar/Bancard; nunca pasan por nuestra web.</li>
+                  <li className="flex items-center gap-2"><Check size={12} className="text-aura-gold-deep shrink-0" /> El pedido se confirma solo cuando Pagopar aprueba el pago.</li>
+                  <li className="flex items-center gap-2"><MessageCircle size={12} className="text-aura-gold-deep shrink-0" /> El envío lo coordinamos por WhatsApp después de la confirmación.</li>
+                </ul>
               </div>
             ) : (
               <>
@@ -473,7 +610,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
               <div className="border-t-[1px] border-dashed border-zinc-200 pt-4 sm:pt-6 flex justify-between items-end gap-3 mb-3">
                 <div className="flex flex-col leading-none">
                   <span className="text-lg sm:text-2xl font-luxury font-bold text-zinc-900">TOTAL</span>
-                  <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase tracking-[0.18em] mt-1">a transferir</span>
+                  <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase tracking-[0.18em] mt-1">{paysWithCard ? 'a pagar' : 'a transferir'}</span>
                 </div>
                 <span className="text-lg sm:text-2xl font-bold text-zinc-900 whitespace-nowrap">Gs. {total.toLocaleString('es-PY')}</span>
               </div>
@@ -481,7 +618,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
               {!isFreeShipping && (
                 <p className="text-[10px] sm:text-[11px] text-zinc-500 leading-relaxed mb-6 sm:mb-8">
                   El envío no está incluido: se cotiza según tu zona y lo coordinamos por WhatsApp
-                  después de tu pedido. Por ahora transferí solamente este monto.
+                  después de tu pedido. Por ahora {paysWithCard ? 'pagás' : 'transferí'} solamente este monto.
                 </p>
               )}
               {isFreeShipping && <div className="mb-6 sm:mb-8" />}
@@ -501,8 +638,17 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                   onClick={goToPayment}
                   className="w-full bg-aura-ink text-white py-4 sm:py-5 rounded-sm text-[10px] sm:text-[11px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-3 hover:bg-aura-gold transition-all shadow-[0_10px_30px_-10px_rgba(12,10,9,0.4)] active:scale-95"
                 >
-                  <Landmark size={17} />
+                  {paysWithCard ? <CreditCard size={17} /> : <Landmark size={17} />}
                   CONTINUAR AL PAGO
+                </button>
+              ) : paysWithCard ? (
+                <button
+                  onClick={handleCardPayment}
+                  disabled={sending}
+                  className="w-full bg-aura-ink text-white py-4 sm:py-5 rounded-sm text-[10px] sm:text-[11px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-3 hover:bg-aura-gold transition-all shadow-[0_10px_30px_-10px_rgba(12,10,9,0.4)] active:scale-95 disabled:opacity-60"
+                >
+                  {sending ? <Loader2 size={18} className="animate-spin" /> : <CreditCard size={18} />}
+                  {sending ? 'ABRIENDO PAGOPAR…' : 'PAGAR CON TARJETA'}
                 </button>
               ) : (
                 <button

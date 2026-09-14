@@ -43,7 +43,7 @@ const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] mb-5 text-aura-gold">Navegación</h4>
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.25em] mb-5 text-aura-gold">Navegación</h3>
             <ul className="space-y-3.5 text-sm text-white/65 font-medium">
               <li><Link href="/hombres" className="hover:text-white transition-colors">Hombres</Link></li>
               <li><Link href="/mujeres" className="hover:text-white transition-colors">Mujeres</Link></li>
@@ -53,7 +53,7 @@ const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] mb-5 text-aura-gold">Legal</h4>
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.25em] mb-5 text-aura-gold">Legal</h3>
             <ul className="space-y-3.5 text-sm text-white/65 font-medium">
               <li><Link href="/sobre-inspiraciones" className="hover:text-white transition-colors">Inspiraciones</Link></li>
               <li><Link href="/terminos-y-condiciones" className="hover:text-white transition-colors">Términos y Condiciones</Link></li>
@@ -62,7 +62,7 @@ const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] mb-5 text-aura-gold">Seguinos</h4>
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.25em] mb-5 text-aura-gold">Seguinos</h3>
             <div className="flex gap-3">
               {[
                 { href: INSTAGRAM_URL, icon: Instagram, label: 'Instagram' },

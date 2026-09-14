@@ -26,21 +26,21 @@ const Wholesale: React.FC = () => {
               <div className="flex gap-4">
                 <CheckCircle className="text-aura-gold shrink-0" />
                 <div>
-                  <h4 className="font-bold text-white uppercase text-xs tracking-widest mb-1">Baja Inversión</h4>
+                  <h3 className="font-bold text-white uppercase text-xs tracking-widest mb-1">Baja Inversión</h3>
                   <p className="text-zinc-500 text-sm">Escalas flexibles para comenzar tu negocio hoy mismo.</p>
                 </div>
               </div>
               <div className="flex gap-4">
                 <CheckCircle className="text-aura-gold shrink-0" />
                 <div>
-                  <h4 className="font-bold text-white uppercase text-xs tracking-widest mb-1">Calidad Garantizada</h4>
+                  <h3 className="font-bold text-white uppercase text-xs tracking-widest mb-1">Calidad Garantizada</h3>
                   <p className="text-zinc-500 text-sm">Tu cliente vuelve siempre por la fijación del 30%.</p>
                 </div>
               </div>
               <div className="flex gap-4">
                 <CheckCircle className="text-aura-gold shrink-0" />
                 <div>
-                  <h4 className="font-bold text-white uppercase text-xs tracking-widest mb-1">Asesoramiento</h4>
+                  <h3 className="font-bold text-white uppercase text-xs tracking-widest mb-1">Asesoramiento</h3>
                   <p className="text-zinc-500 text-sm">Te ayudamos a elegir los perfumes más vendidos de la temporada.</p>
                 </div>
               </div>

@@ -4,9 +4,9 @@ import Wholesale from '../../../components/Wholesale';
 import { SITE } from '../../../lib/site';
 
 export const metadata: Metadata = {
-  title: 'Perfumes por Mayor en Paraguay — Ventas Mayoristas | Äura Fragancias',
+  title: 'Perfumes por Mayor en Paraguay — Mayoristas | Äura',
   description:
-    'Revendé perfumes Extrait de Parfum (30% de concentración) con margen sugerido superior al 100%. Escalas desde 10 unidades, asesoramiento y envíos a todo Paraguay. Solicitá la lista mayorista por WhatsApp.',
+    'Revendé perfumes Extrait de Parfum 30% con margen sugerido superior al 100%. Escalas desde 10 unidades, asesoramiento y envíos a todo Paraguay. Pedí la lista por WhatsApp.',
   alternates: { canonical: '/mayoristas' },
 };
 

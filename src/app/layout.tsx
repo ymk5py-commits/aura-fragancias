@@ -38,9 +38,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
-  title: 'Äura Fragancias | Perfumes de Lujo Accesible en Paraguay · Extrait de Parfum 30%',
+  title: 'Äura Fragancias | Perfumes Extrait de Parfum 30% en Paraguay',
   description:
-    'Alta perfumería en Paraguay con 30% de concentración (Extrait de Parfum). Inspiraciones olfativas premium de las fragancias más icónicas, con fijación y estela excepcionales. Envío gratis desde Gs. 300.000.',
+    'Alta perfumería en Paraguay: inspiraciones olfativas premium con 30% de concentración (Extrait de Parfum), fijación 12 h+ y envío gratis desde Gs. 300.000.',
   keywords: [
     'perfumes Paraguay', 'fragancias de lujo', 'Äura', 'perfumes premium Asunción',
     'inspiraciones olfativas', 'extrait de parfum', 'perfumes importados', 'perfumes mayoristas Paraguay',
@@ -102,7 +102,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [settings, productsData] = await Promise.all([getSettings(), getProducts()]);
 
   return (
-    <html lang="es" className={`${bodoni.variable} ${jost.variable}`}>
+    <html lang="es-PY" className={`${bodoni.variable} ${jost.variable}`}>
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
         {/* Consent Mode v2 — default DENIED antes de cargar gtag (Ley 7593/2025 PY + EU/UK) */}

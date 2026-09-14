@@ -80,7 +80,7 @@ const SizeSelectorModal: React.FC<SizeSelectorModalProps> = ({ onClose, perfume 
                 className="w-full group flex items-center justify-between p-4 sm:p-5 bg-zinc-50 border border-zinc-100 hover:border-zinc-900 hover:bg-white transition-all rounded-sm text-left active-scale"
               >
                 <div>
-                  <h4 className="text-lg sm:text-xl font-luxury font-bold text-zinc-900">{item.size}</h4>
+                  <p className="text-lg sm:text-xl font-luxury font-bold text-zinc-900">{item.size}</p>
                   <p className="text-xs sm:text-sm text-zinc-500">{item.label}</p>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-white border border-zinc-200 flex items-center justify-center text-zinc-300 group-hover:bg-zinc-900 group-hover:text-white group-hover:border-zinc-900 transition-all shadow-sm">

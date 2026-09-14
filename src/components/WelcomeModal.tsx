@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { X, CheckCircle2 } from 'lucide-react';
+import { X, CheckCircle2, Gift } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 
 interface WelcomeModalProps {
@@ -9,83 +9,77 @@ interface WelcomeModalProps {
   onReject: () => void;
 }
 
+/**
+ * Regalo de bienvenida como barra compacta abajo, no como modal a pantalla
+ * completa: no tapa la tienda, se puede seguir navegando y —importante para
+ * Core Web Vitals— su texto es chico, así nunca se convierte en el LCP
+ * (el modal grande aparecía a los 12 s y Google medía ese momento como LCP).
+ */
 const WelcomeModal: React.FC<WelcomeModalProps> = ({ onAccept, onReject }) => {
   const { settings } = useSettings();
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 400);
+    const timer = setTimeout(() => setIsVisible(true), 300);
     return () => clearTimeout(timer);
   }, []);
 
   const handleClose = (callback: () => void) => {
     setIsClosing(true);
-    setTimeout(callback, 500);
+    setTimeout(callback, 400);
   };
 
   if (!isVisible) return null;
 
   return (
-    <div className={`fixed inset-0 z-[300] flex items-center justify-center px-4 transition-all duration-500 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
-      <div className="absolute inset-0 bg-aura-ink/85 backdrop-blur-md" onClick={() => handleClose(onReject)}></div>
-
-      <div className={`relative w-full max-w-md overflow-hidden bg-aura-charcoal border border-white/10 shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)] transition-all duration-500 transform ${isClosing ? 'scale-95 translate-y-10' : 'scale-100 translate-y-0'}`}>
-        {/* Filete dorado superior */}
+    <div
+      role="dialog"
+      aria-label="Regalo de bienvenida"
+      className={`fixed inset-x-3 bottom-3 z-[300] sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[420px] transition-all duration-400 ${
+        isClosing ? 'translate-y-4 opacity-0' : 'translate-y-0 opacity-100 animate-slide-up'
+      }`}
+    >
+      <div className="relative overflow-hidden bg-aura-charcoal border border-white/10 shadow-[0_30px_80px_-24px_rgba(0,0,0,0.85)]">
         <div className="h-px bg-gradient-to-r from-transparent via-aura-gold to-transparent w-full" />
-
         <button
+          type="button"
           onClick={() => handleClose(onReject)}
           aria-label="Cerrar"
-          className="absolute top-4 right-4 p-2 text-white/40 hover:text-white transition-colors z-10"
+          className="absolute top-2.5 right-2.5 p-2 text-white/40 hover:text-white transition-colors"
         >
-          <X size={20} />
+          <X size={16} />
         </button>
 
-        <div className="p-8 sm:p-12 text-center">
-          <img
-            src="/logo.svg"
-            alt="Äura Fragancias"
-            className="w-16 h-16 rounded-full mx-auto mb-7 ring-1 ring-aura-gold/40 ring-offset-4 ring-offset-aura-charcoal"
-            width={64}
-            height={64}
-          />
-
-          <span className="text-aura-gold font-semibold tracking-[0.35em] text-[10px] uppercase mb-4 block">
-            Regalo de bienvenida
+        <div className="flex items-center gap-4 p-4 sm:p-5">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-aura-gold/40 text-aura-gold">
+            <Gift size={18} strokeWidth={1.6} />
           </span>
-          <h2 className="text-3xl sm:text-4xl font-luxury text-white leading-tight mb-4">
-            {settings.welcomePercent}% OFF en tu primera compra
-          </h2>
-
-          <p className="text-white/55 text-sm mb-8 leading-relaxed font-light max-w-xs mx-auto">
-            Un beneficio exclusivo para conocer la alta perfumería Äura.
-          </p>
-
-          <div className="border border-dashed border-aura-gold/40 bg-white/[0.03] p-4 mb-8">
-            <span className="text-[9px] font-semibold text-white/40 uppercase tracking-[0.3em] block mb-1.5">Tu código</span>
-            <span className="text-xl font-semibold text-champagne tracking-[0.25em] uppercase">{settings.welcomeCode}</span>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={() => handleClose(() => onAccept(settings.welcomeCode))}
-              className="w-full bg-aura-gold text-aura-ink py-4 text-[11px] font-bold tracking-[0.25em] uppercase hover:bg-white transition-colors duration-300 flex items-center justify-center gap-2 active:scale-[0.98]"
-            >
-              <CheckCircle2 size={15} />
-              Aplicar mi descuento
-            </button>
-            <button
-              onClick={() => handleClose(onReject)}
-              className="w-full py-3 text-[10px] font-semibold text-white/35 hover:text-white/70 transition-colors tracking-[0.25em] uppercase"
-            >
-              Ahora no
-            </button>
+          <div className="min-w-0 flex-1 pr-6">
+            <p className="text-[9px] font-semibold uppercase tracking-[0.3em] text-aura-gold">Regalo de bienvenida</p>
+            <p className="mt-1 text-sm text-white leading-snug">
+              <strong className="font-semibold">{settings.welcomePercent}% OFF</strong> en tu primera compra con el código{' '}
+              <span className="font-semibold tracking-[0.15em] text-champagne">{settings.welcomeCode}</span>.
+            </p>
           </div>
         </div>
 
-        <div className="border-t border-white/5 p-4 text-center">
-          <p className="text-[9px] text-white/30 uppercase tracking-[0.25em]">Válido por tiempo limitado en toda la tienda</p>
+        <div className="flex gap-2 px-4 pb-4 sm:px-5 sm:pb-5">
+          <button
+            type="button"
+            onClick={() => handleClose(() => onAccept(settings.welcomeCode))}
+            className="flex-1 bg-aura-gold text-aura-ink py-3 text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-white transition-colors duration-300 flex items-center justify-center gap-2 active:scale-[0.98]"
+          >
+            <CheckCircle2 size={14} />
+            Aplicar descuento
+          </button>
+          <button
+            type="button"
+            onClick={() => handleClose(onReject)}
+            className="px-4 py-3 text-[10px] font-semibold text-white/45 hover:text-white/80 transition-colors tracking-[0.2em] uppercase"
+          >
+            Ahora no
+          </button>
         </div>
       </div>
     </div>

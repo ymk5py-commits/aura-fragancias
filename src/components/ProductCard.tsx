@@ -168,6 +168,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
           <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2.5 opacity-0 group-hover:opacity-100 transition-all duration-500 bg-aura-ink/30 backdrop-blur-[2px]">
             <button
               onClick={(e) => { e.stopPropagation(); setShowDetails(true); }}
+              aria-label={`Vista rápida de ${perfume.name}`}
               className="bg-white text-aura-ink w-11 h-11 sm:w-auto sm:px-7 sm:py-3 text-[9px] font-bold tracking-[0.25em] uppercase shadow-xl transform translate-y-3 group-hover:translate-y-0 transition-transform duration-500 flex items-center justify-center gap-2 hover:bg-aura-gold hover:text-white active-scale"
             >
               <Eye size={13} strokeWidth={2.2} />
@@ -175,6 +176,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); setShowDetails(true); }}
+              aria-label={`Agregar ${perfume.name} al carrito`}
               className="bg-aura-gold text-white w-11 h-11 sm:w-auto sm:px-7 sm:py-3 text-[9px] font-bold tracking-[0.25em] uppercase shadow-xl transform translate-y-5 group-hover:translate-y-0 transition-transform duration-700 flex items-center justify-center gap-2 hover:bg-aura-ink active-scale"
             >
               <ShoppingBag size={13} />
@@ -196,7 +198,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
               <span className="text-[10px] font-bold tracking-[0.5em] text-aura-ink uppercase text-center opacity-70">ÄURA</span>
               <div className="flex-grow flex flex-col justify-center items-center text-center">
                 <h3 className="text-3xl sm:text-5xl font-luxury font-light text-aura-ink tracking-tight">{perfume.code}</h3>
-                <h4 className="text-xs sm:text-base font-luxury font-semibold text-aura-ink mt-2 line-clamp-2">{perfume.name}</h4>
+                <h3 className="text-xs sm:text-base font-luxury font-semibold text-aura-ink mt-2 line-clamp-2">{perfume.name}</h3>
               </div>
             </div>
           )}
@@ -286,7 +288,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
                 ) : (
                   <div className="w-full h-full flex flex-col justify-center items-center p-8 text-center">
                     <h3 className="text-6xl font-luxury font-light text-aura-ink">{perfume.code}</h3>
-                    <h4 className="text-2xl font-luxury font-semibold text-aura-ink mt-4">{perfume.name}</h4>
+                    <h3 className="text-2xl font-luxury font-semibold text-aura-ink mt-4">{perfume.name}</h3>
                   </div>
                 )}
               </div>
@@ -333,7 +335,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
 
               <div className="space-y-8 flex-grow">
                 <div>
-                  <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 mb-4">Presentación</h4>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 mb-4">Presentación</p>
                   <div className="grid grid-cols-3 gap-2.5">
                     {PRICES.map((p) => (
                       <button
@@ -354,18 +356,18 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
 
                 <div className="grid grid-cols-2 gap-8 py-7 border-y border-zinc-100">
                   <div className="flex flex-col gap-3">
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Intensidad</h4>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Intensidad</p>
                     <IntensityBar level={perfume.intensity} />
                   </div>
                   <div className="flex flex-col gap-3">
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Longevidad</h4>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Longevidad</p>
                     <span className="text-sm text-aura-ink font-bold tracking-[0.15em] uppercase">{perfume.duration}</span>
                   </div>
                 </div>
 
                 {perfume.notes?.length > 0 && (
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 mb-4">Notas Olfativas</h4>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 mb-4">Notas Olfativas</p>
                     <div className="flex flex-wrap gap-2">
                       {perfume.notes.map((n) => (
                         <span key={n} className="text-[9px] font-semibold uppercase tracking-[0.12em] text-zinc-600 bg-aura-ivory border border-zinc-100 px-3 py-1.5">
@@ -379,7 +381,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
 
               <div className="mt-10 flex flex-col gap-4">
                 <div className="flex items-center gap-4">
-                  <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Cantidad</h4>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Cantidad</p>
                   <div className="flex items-center border border-zinc-200">
                     <button onClick={(e) => { e.stopPropagation(); setQuantity((q) => Math.max(1, q - 1)); }} className="p-3 hover:bg-zinc-50 text-zinc-600">
                       <Minus size={14} />

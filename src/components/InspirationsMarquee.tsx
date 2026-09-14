@@ -22,7 +22,7 @@ const InspirationsMarquee: React.FC = () => {
         <div className="flex w-max animate-marquee whitespace-nowrap will-change-transform">
           {loop.map((b, i) => (
             <span key={i} className="flex items-center">
-              <span className="font-luxury text-2xl sm:text-4xl text-zinc-400 hover:text-aura-ink transition-colors duration-300">
+              <span className="font-luxury text-2xl sm:text-4xl text-zinc-500 hover:text-aura-ink transition-colors duration-300">
                 {b}
               </span>
               <Diamond />

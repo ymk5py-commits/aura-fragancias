@@ -6,7 +6,7 @@
    ============================================================ */
 @theme {
   --color-aura-gold: #c5a059;
-  --color-aura-gold-deep: #9a7b3f;
+  --color-aura-gold-deep: #85692f; /* antes #9a7b3f: 3.98:1 sobre blanco, ahora 5.2:1 */
   --color-aura-gold-soft: #e3d2ad;
   --color-aura-ivory: #faf9f7;
   --color-aura-ink: #0c0a09;

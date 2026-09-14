@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
   const { code } = await params;
   const perfume = await findProduct(code);
   if (!perfume) return { title: 'Producto no encontrado | Äura Fragancias' };
-  const title = `${perfume.name} — Inspiración ${perfume.inspiration} | Äura Fragancias`;
+  const title = `${perfume.name} — Inspiración ${perfume.inspiration} | Äura`;
   const description = `${perfume.name}: inspiración olfativa de ${perfume.inspiration}, familia ${perfume.family}. Extrait de Parfum 30%, fijación ${perfume.duration}. Envío a todo Paraguay.`;
   const image = cldn(perfume.imageUrl, 800) || `${SITE}/logo-512.png`;
   return {

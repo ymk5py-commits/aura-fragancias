@@ -53,7 +53,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
   const getBadgeStyles = (badge: string) => {
     switch (badge) {
       case 'Bestseller': return 'bg-aura-ink text-white border-aura-ink';
-      case 'Recommended': return 'bg-aura-gold text-white border-aura-gold';
+      case 'Recommended': return 'bg-aura-gold text-aura-ink border-aura-gold';
       case 'New': return 'bg-white text-aura-ink border-aura-ink/20';
       default: return 'bg-white text-zinc-400 border-zinc-200';
     }
@@ -177,7 +177,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
             <button
               onClick={(e) => { e.stopPropagation(); setShowDetails(true); }}
               aria-label={`Agregar ${perfume.name} al carrito`}
-              className="bg-aura-gold text-white w-11 h-11 sm:w-auto sm:px-7 sm:py-3 text-[9px] font-bold tracking-[0.25em] uppercase shadow-xl transform translate-y-5 group-hover:translate-y-0 transition-transform duration-700 flex items-center justify-center gap-2 hover:bg-aura-ink active-scale"
+              className="bg-aura-gold text-aura-ink w-11 h-11 sm:w-auto sm:px-7 sm:py-3 text-[9px] font-bold tracking-[0.25em] uppercase shadow-xl transform translate-y-5 group-hover:translate-y-0 transition-transform duration-700 flex items-center justify-center gap-2 hover:bg-aura-ink active-scale"
             >
               <ShoppingBag size={13} />
               <span className="hidden sm:inline">Agregar</span>
@@ -204,7 +204,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
           )}
 
           {rank === 1 ? (
-            <div className="absolute top-3 left-3 flex items-center gap-1 bg-aura-gold text-white px-2.5 py-1 text-[7px] sm:text-[8px] font-bold tracking-[0.15em] border border-aura-gold z-20 shadow-md">
+            <div className="absolute top-3 left-3 flex items-center gap-1 bg-aura-gold text-aura-ink px-2.5 py-1 text-[7px] sm:text-[8px] font-bold tracking-[0.15em] border border-aura-gold z-20 shadow-md">
               <span className="text-[9px] leading-none">★</span> Nº1 EN VENTAS
             </div>
           ) : perfume.badge ? (

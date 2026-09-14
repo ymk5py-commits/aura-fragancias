@@ -85,7 +85,7 @@ const Header: React.FC = () => {
               <div className="relative">
                 <ShoppingBag size={16} strokeWidth={1.75} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-aura-gold text-white text-[7px] font-bold w-3.5 h-3.5 flex items-center justify-center rounded-full">{cartCount}</span>
+                  <span className="absolute -top-2 -right-2 bg-aura-gold text-aura-ink text-[7px] font-bold w-3.5 h-3.5 flex items-center justify-center rounded-full">{cartCount}</span>
                 )}
               </div>
               Mi Carrito
@@ -96,7 +96,7 @@ const Header: React.FC = () => {
             <button onClick={openCart} aria-label="Abrir carrito" className="relative p-2 text-white">
               <ShoppingBag size={22} strokeWidth={1.75} />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-aura-gold text-white text-[8px] font-bold w-4 h-4 flex items-center justify-center rounded-full">{cartCount}</span>
+                <span className="absolute top-0 right-0 bg-aura-gold text-aura-ink text-[8px] font-bold w-4 h-4 flex items-center justify-center rounded-full">{cartCount}</span>
               )}
             </button>
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Abrir menú" className="p-2 text-white">

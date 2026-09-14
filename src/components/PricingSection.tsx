@@ -46,7 +46,7 @@ const PricingSection: React.FC = () => {
                 )}
                 
                 {item.bestValue && (
-                  <div className="flex items-center gap-1.5 bg-aura-gold text-white px-4 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-[0.2em] shadow-lg animate-fade-in">
+                  <div className="flex items-center gap-1.5 bg-aura-gold text-aura-ink px-4 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-[0.2em] shadow-lg animate-fade-in">
                     <Award size={10} fill="currentColor" /> MEJOR RELACIÓN
                   </div>
                 )}

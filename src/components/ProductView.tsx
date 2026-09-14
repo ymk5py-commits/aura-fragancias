@@ -117,7 +117,7 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
 
             <div className="space-y-12">
               <div>
-                <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-6">Presentación</h3>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-6">Presentación</p>
                 <div className="grid grid-cols-3 gap-4">
                   {PRICES.map((p) => (
                     <button key={p.size} onClick={() => setSelectedSize(p.size)} className={`relative py-6 px-2 border transition-all duration-300 rounded-sm ${selectedSize === p.size ? 'border-zinc-900 bg-zinc-900 text-white shadow-xl' : 'border-zinc-100 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'}`}>
@@ -130,18 +130,18 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
 
               <div className="grid grid-cols-2 gap-12 py-10 border-y border-zinc-100">
                 <div className="flex flex-col gap-4">
-                  <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Intensidad</h3>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Intensidad</p>
                   <IntensityBar level={perfume.intensity} />
                 </div>
                 <div className="flex flex-col gap-4">
-                  <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Longevidad</h3>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Longevidad</p>
                   <span className="text-xl text-zinc-900 font-bold tracking-[0.2em] uppercase">{perfume.duration}</span>
                 </div>
               </div>
 
               {perfume.notes?.length > 0 && (
                 <div>
-                  <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-4">Notas Olfativas</h3>
+                  <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-4">Notas Olfativas</h2>
                   <div className="flex flex-wrap gap-2">
                     {perfume.notes.map((n) => (
                       <span key={n} className="text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600 bg-aura-ivory border border-zinc-100 px-3 py-1.5">{n}</span>
@@ -152,14 +152,14 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
 
               {description && (
                 <div>
-                  <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-4">Sobre esta fragancia</h3>
+                  <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-4">Sobre esta fragancia</h2>
                   <p className="text-[15px] leading-relaxed text-zinc-600 font-light max-w-prose">{description}</p>
                 </div>
               )}
 
               <div className="flex flex-col gap-6">
                 <div className="flex items-center gap-6">
-                  <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Cantidad</h3>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Cantidad</p>
                   <div className="flex items-center border border-zinc-100 rounded-sm">
                     <button type="button" aria-label="Restar una unidad" onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="p-4 hover:bg-zinc-50 text-zinc-600"><Minus size={16} /></button>
                     <span className="w-14 text-center text-lg font-bold text-zinc-900 tabular">{quantity}</span>

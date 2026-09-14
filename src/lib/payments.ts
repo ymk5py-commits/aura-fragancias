@@ -43,7 +43,8 @@ export interface CardPaymentRequest {
   address: string;
   cityAndNeighborhood: string;
   discountPercent: number;
-  items: OrderItem[];
+  /** Ítems con la foto del producto (Pagopar la muestra en su checkout). */
+  items: Array<OrderItem & { image?: string }>;
   /** Factura con RUC (opcional): va al comprador de Pagopar. */
   ruc?: string;
   razonSocial?: string;

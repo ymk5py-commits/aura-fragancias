@@ -9,6 +9,7 @@ import { trackEvent } from '../lib/pixel';
 import { newEventId, capiTrack } from '../lib/tracking';
 import { toItem, gaBeginCheckout, gaGenerateLead } from '../lib/gtag';
 import { newOrderId, uploadReceipt, saveOrder, validateReceipt, RECEIPT_ACCEPT } from '../lib/ordersService';
+import { cldn } from '../lib/img';
 import { PAY_TRANSFER, PAY_CARD, isCardPaymentEnabled, startCardPayment, savePaymentSnapshot } from '../lib/payments';
 import {
   normalizePhone, normalizeRuc, validateAddress, validateCity, validateDocument, validateEmail, validateName,
@@ -194,7 +195,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
           address: formData.address.trim(),
           cityAndNeighborhood: formData.cityAndNeighborhood.trim(),
           discountPercent: discount,
-          items,
+          // La foto va solo a Pagopar (para su checkout), no se guarda en el pedido.
+          items: items.map((i, idx) => ({ ...i, image: cldn(cart[idx]?.perfume.imageUrl, 400) })),
           ...(invoice ? { ruc: invoice.ruc, razonSocial: invoice.razonSocial } : {}),
         });
         setCardStart(start);

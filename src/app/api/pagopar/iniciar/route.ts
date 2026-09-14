@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { documentNumber, hubCall, PagoparError } from '../../../../lib/server/pagopar';
 import { currentPricing } from '../../../../lib/server/pricing';
+import { SITE } from '../../../../lib/site';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -22,6 +23,15 @@ interface Item {
   size?: string;
   price?: number;
   quantity?: number;
+  image?: string;
+}
+
+/** Solo URLs https absolutas (o rutas del sitio) para la foto que muestra Pagopar. */
+function imageUrl(value: unknown): string {
+  const v = String(value || '').trim();
+  if (/^https:\/\/[^\s"'<>]+$/i.test(v)) return v.slice(0, 500);
+  if (/^\/[^\s"'<>]+$/.test(v)) return `${SITE}${v}`.slice(0, 500);
+  return '';
 }
 
 interface Body {
@@ -75,6 +85,7 @@ export async function POST(req: NextRequest) {
         cantidad: quantity,
         precioTotal: price * quantity,
         idProducto: String(i.code || 'aura').slice(0, 40),
+        urlImagen: imageUrl(i.image),
       };
     });
 

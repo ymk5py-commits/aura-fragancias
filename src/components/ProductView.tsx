@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSettings } from '../context/SettingsContext';
@@ -11,7 +11,10 @@ import { newEventId } from '../lib/tracking';
 import { toItem, gaViewItem, gaRemarketing } from '../lib/gtag';
 import { ShoppingBag, Truck, Minus, Plus, ChevronRight, CreditCard, QrCode, Wallet, Landmark, Lock } from 'lucide-react';
 import { isCardPaymentEnabled } from '../lib/payments';
-import { Perfume } from '../types';
+import { Perfume, Review } from '../types';
+import { ProductReviews, Stars } from './Reviews';
+import StickyBuyBar from './StickyBuyBar';
+import { summarize } from '../lib/reviewsService';
 
 const IntensityBar = ({ level }: { level: number }) => (
   <div className="flex gap-1.5 justify-start">
@@ -26,14 +29,18 @@ interface ProductViewProps {
   description?: string;
   related?: Perfume[];
   breadcrumb?: { genderLabel: string; genderPath: string };
+  reviews?: Review[];
 }
 
-const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related = [], breadcrumb }) => {
+const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related = [], breadcrumb, reviews = [] }) => {
   const { prices: PRICES } = useSettings();
   const { addToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState<string>(PRICES[1].size);
   const [quantity, setQuantity] = useState(1);
   const [copied, setCopied] = useState(false);
+  const buyRef = useRef<HTMLButtonElement | null>(null);
+  const rating = summarize(reviews);
+  const selectedPrice = PRICES.find((p) => p.size === selectedSize)?.price || PRICES[1].price;
 
   // ViewContent (Meta, pool de retargeting DPA) + view_item (GA4) + remarketing.
   useEffect(() => {
@@ -93,6 +100,11 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
             <div className="mb-10">
               <span className="text-aura-gold-deep font-bold tracking-[0.4em] text-[10px] uppercase mb-3 block">Inspiración {perfume.inspiration}</span>
               <h1 className="text-5xl sm:text-6xl font-luxury text-zinc-900 leading-none mb-3">{perfume.name}</h1>
+              {rating.count > 0 && (
+                <a href="#resenas" className="mt-3 inline-flex items-center gap-2 text-[12px] text-zinc-600 hover:text-zinc-900">
+                  <Stars value={rating.average} /> {rating.average.toFixed(1)} · {rating.count} {rating.count === 1 ? 'reseña' : 'reseñas'}
+                </a>
+              )}
               <p className="text-xs text-zinc-500 font-medium tracking-[0.25em] uppercase mb-6">{perfume.family}</p>
 
               <div className="flex flex-wrap items-center gap-3">
@@ -167,7 +179,7 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
                     <button type="button" aria-label="Sumar una unidad" onClick={() => setQuantity((q) => q + 1)} className="p-4 hover:bg-zinc-50 text-zinc-600"><Plus size={16} /></button>
                   </div>
                 </div>
-                <button onClick={() => addToCart(perfume, selectedSize, quantity)} className="w-full bg-aura-ink text-white py-6 rounded-sm text-[12px] font-bold tracking-[0.4em] uppercase flex items-center justify-center gap-4 hover:bg-aura-gold transition-all active:scale-[0.98] shadow-2xl">
+                <button ref={buyRef} onClick={() => addToCart(perfume, selectedSize, quantity)} className="w-full bg-aura-ink text-white py-6 rounded-sm text-[12px] font-bold tracking-[0.4em] uppercase flex items-center justify-center gap-4 hover:bg-aura-gold transition-all active:scale-[0.98] shadow-2xl">
                   <ShoppingBag size={20} /> Agregar al Carrito
                 </button>
                 {isCardPaymentEnabled && (
@@ -183,6 +195,15 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
             </div>
           </div>
         </div>
+
+        <ProductReviews productId={perfume.code} productName={perfume.name} reviews={reviews} />
+
+        <StickyBuyBar
+          anchor={buyRef}
+          price={selectedPrice * quantity}
+          hint={`${perfume.name} · ${selectedSize}${quantity > 1 ? ` × ${quantity}` : ''}`}
+          onClick={() => addToCart(perfume, selectedSize, quantity)}
+        />
 
         {related.length > 0 && (
           <section aria-labelledby="relacionados" className="mt-20 sm:mt-28 border-t border-zinc-100 pt-14">

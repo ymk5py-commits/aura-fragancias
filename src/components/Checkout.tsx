@@ -70,7 +70,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     document: '',
     ruc: '',
     razonSocial: '',
-    paymentMethod: PAY_TRANSFER,
+    // Tarjeta por defecto cuando está habilitada; si no, transferencia.
+    paymentMethod: isCardPaymentEnabled ? PAY_CARD : PAY_TRANSFER,
   });
   const [wantsInvoice, setWantsInvoice] = useState(false);
   /** Datos de factura listos para guardar (solo si la pidió). */
@@ -463,8 +464,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                     {isCardPaymentEnabled ? (
                       <div className="space-y-2">
                         {[
-                          { id: PAY_TRANSFER, label: 'Transferencia bancaria / QR', hint: 'Te mostramos los datos de la cuenta y adjuntás el comprobante.', icon: Landmark },
-                          { id: PAY_CARD, label: 'Tarjeta de crédito o débito', hint: 'Pago online seguro procesado por Pagopar (Bancard).', icon: CreditCard },
+                          { id: PAY_CARD, label: 'Tarjeta de crédito o débito', hint: 'Pago online seguro procesado por Pagopar. También QR y billeteras.', icon: CreditCard },
+                          { id: PAY_TRANSFER, label: 'Transferencia bancaria', hint: 'Te mostramos los datos de la cuenta y adjuntás el comprobante.', icon: Landmark },
                         ].map((opt) => {
                           const active = formData.paymentMethod === opt.id;
                           const Icon = opt.icon;

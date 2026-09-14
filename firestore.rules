@@ -37,5 +37,30 @@ service cloud.firestore {
         && request.resource.data.items.size() > 0
         && request.resource.data.items.size() <= 50;
     }
+
+    // Reseñas de clientes.
+    // - create: público, queda pendiente (approved=false) con campos validados.
+    // - read: cualquiera lee las aprobadas; el admin lee todas.
+    // - update/delete (aprobar, ocultar, borrar): solo admin.
+    match /reviews/{id} {
+      allow get, list: if resource.data.approved == true || request.auth != null;
+      allow create: if request.auth != null || (
+        request.resource.data.approved == false
+        && request.resource.data.productId is string
+        && request.resource.data.productId.size() > 0
+        && request.resource.data.productId.size() <= 40
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 2
+        && request.resource.data.name.size() <= 60
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 10
+        && request.resource.data.text.size() <= 600
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.createdAt is int
+      );
+      allow update, delete: if request.auth != null;
+    }
   }
 }

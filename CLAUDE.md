@@ -44,5 +44,13 @@ Tienda de perfumes (Paraguay). **Next.js 16 (App Router) + React 19 + Tailwind v
   `src/lib/payments.ts`, validación de campos `src/lib/validation.ts`,
   `src/components/{Checkout,PagoResultado}.tsx`, `src/admin/AdminOrders.tsx`.
 
+## Reseñas (13 sep 2026)
+- Colección `reviews`: el cliente escribe desde la ficha (`approved: false`); en /admin → Reseñas se
+  aprueba, oculta, borra o carga una a mano. Las páginas públicas leen las aprobadas por SSR
+  (`src/lib/server/reviews.ts`, revalida 5 min) y la ficha suma `aggregateRating`/`review` al
+  JSON-LD. **Hay que publicar las reglas** de `firestore.rules` (bloque `reviews`) en la consola de
+  Firebase; hasta entonces no se leen ni se guardan (sin romper nada).
+- Ficha en móvil: `StickyBuyBar` con precio y "Agregar" cuando el botón principal sale de la vista.
+
 ## Comandos
 - Dev: `npm run dev` (localhost:3000) · Build: `npm run build` · Typecheck: `npm run lint`

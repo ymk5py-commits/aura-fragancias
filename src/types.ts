@@ -113,3 +113,18 @@ export interface Order {
   };
   paidAt?: number;
 }
+/* ---------- reseñas ---------- */
+
+export interface Review {
+  id: string;
+  /** código del perfume */
+  productId: string;
+  productName?: string;
+  name: string;
+  city?: string;
+  rating: 1 | 2 | 3 | 4 | 5;
+  text: string;
+  /** Solo las aprobadas se muestran en la tienda. */
+  approved: boolean;
+  createdAt: number;
+}

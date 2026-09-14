@@ -4,6 +4,8 @@ import PricingSection from '../../components/PricingSection';
 import Wholesale from '../../components/Wholesale';
 import TechnicalSection from '../../components/TechnicalSection';
 import HomeFaq from '../../components/HomeFaq';
+import { HomeReviews } from '../../components/Reviews';
+import { getApprovedReviews } from '../../lib/server/reviews';
 import Reveal from '../../components/Reveal';
 import ProductCard from '../../components/ProductCard';
 import ScentFamilies from '../../components/ScentFamilies';
@@ -12,7 +14,7 @@ import { getVisibleProducts, getSettings } from '../../lib/serverData';
 import { SALES_BY_CODE, TOP_SELLERS_COUNT } from '../../constants';
 
 export default async function HomePage() {
-  const [products, settings] = await Promise.all([getVisibleProducts(), getSettings()]);
+  const [products, settings, reviews] = await Promise.all([getVisibleProducts(), getSettings(), getApprovedReviews(undefined, 30)]);
 
   const bestSellers = [...products]
     .map((p) => ({ p, score: (p.salesScore || 0) || SALES_BY_CODE[p.code] || (p.badge === 'Bestseller' ? 1 : 0) }))
@@ -55,6 +57,7 @@ export default async function HomePage() {
 
       <ScentFamilies />
       <PricingSection />
+      <HomeReviews reviews={reviews} />
       <Wholesale />
       <TechnicalSection />
       <HomeFaq />

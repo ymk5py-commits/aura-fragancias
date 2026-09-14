@@ -6,6 +6,7 @@ import { cldn } from '../../../../lib/img';
 import { SITE } from '../../../../lib/site';
 import { buildProductDescription } from '../../../../lib/productCopy';
 import { Perfume } from '../../../../types';
+import { getApprovedReviews, ratingJsonLd } from '../../../../lib/server/reviews';
 
 async function findProduct(code: string) {
   const { products } = await getProducts();
@@ -53,6 +54,7 @@ export default async function ProductoPage({ params }: { params: Promise<{ code:
   const { code } = await params;
   const [perfume, settings, { products }] = await Promise.all([findProduct(code), getSettings(), getProducts()]);
   if (!perfume) notFound();
+  const reviews = await getApprovedReviews(perfume.code);
 
   const genderLabel = perfume.gender === 'Man' ? 'Hombre' : perfume.gender === 'Woman' ? 'Mujer' : 'Nicho & Unisex';
   const genderPath = perfume.gender === 'Man' ? '/hombres' : perfume.gender === 'Woman' ? '/mujeres' : '/unisex';
@@ -100,6 +102,8 @@ export default async function ProductoPage({ params }: { params: Promise<{ code:
       mpn: perfume.code,
       category: 'Health & Beauty > Personal Care > Cosmetics > Fragrance',
       brand: { '@type': 'Brand', name: 'Äura Fragancias' },
+      // aggregateRating + review solo con reseñas visibles en la página.
+      ...ratingJsonLd(reviews),
       offers,
     },
     {
@@ -121,6 +125,7 @@ export default async function ProductoPage({ params }: { params: Promise<{ code:
         description={description}
         related={related}
         breadcrumb={{ genderLabel, genderPath }}
+        reviews={reviews}
       />
     </>
   );

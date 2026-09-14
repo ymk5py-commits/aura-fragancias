@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Instagram, Facebook, MessageCircle, Music2 as Tiktok } from 'lucide-react';
+import { Instagram, Facebook, MessageCircle, Music2 as Tiktok, CreditCard, QrCode, Wallet, Landmark } from 'lucide-react';
 import { BRAND_NAME, INSTAGRAM_URL, FACEBOOK_URL, TIKTOK_URL, CATALOG_URL } from '../constants';
 import { useSettings } from '../context/SettingsContext';
 
@@ -85,7 +85,16 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-10 text-center text-white/40 text-[10px] uppercase tracking-[0.2em] font-medium leading-relaxed">
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-white/10 pt-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">
+          <span className="text-aura-gold">Medios de pago</span>
+          <span className="flex items-center gap-1.5"><CreditCard size={13} strokeWidth={1.6} /> Tarjeta</span>
+          <span className="flex items-center gap-1.5"><QrCode size={13} strokeWidth={1.6} /> QR</span>
+          <span className="flex items-center gap-1.5"><Wallet size={13} strokeWidth={1.6} /> Billeteras</span>
+          <span className="flex items-center gap-1.5"><Landmark size={13} strokeWidth={1.6} /> Transferencia</span>
+          <span className="text-white/35">Pago seguro · Pagopar</span>
+        </div>
+
+        <div className="mt-8 text-center text-white/40 text-[10px] uppercase tracking-[0.2em] font-medium leading-relaxed">
           &copy; {new Date().getFullYear()} Äura Perfumes · Todos los derechos reservados.
           <br />
           Los productos aquí mencionados son perfumes de inspiración olfativa.

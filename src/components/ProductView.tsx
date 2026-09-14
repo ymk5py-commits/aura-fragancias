@@ -9,7 +9,8 @@ import smartImageLoader from '../lib/imageLoader';
 import { trackEvent } from '../lib/pixel';
 import { newEventId } from '../lib/tracking';
 import { toItem, gaViewItem, gaRemarketing } from '../lib/gtag';
-import { ShoppingBag, Truck, Minus, Plus, ChevronRight } from 'lucide-react';
+import { ShoppingBag, Truck, Minus, Plus, ChevronRight, CreditCard, QrCode, Wallet, Landmark, Lock } from 'lucide-react';
+import { isCardPaymentEnabled } from '../lib/payments';
 import { Perfume } from '../types';
 
 const IntensityBar = ({ level }: { level: number }) => (
@@ -169,6 +170,15 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
                 <button onClick={() => addToCart(perfume, selectedSize, quantity)} className="w-full bg-aura-ink text-white py-6 rounded-sm text-[12px] font-bold tracking-[0.4em] uppercase flex items-center justify-center gap-4 hover:bg-aura-gold transition-all active:scale-[0.98] shadow-2xl">
                   <ShoppingBag size={20} /> Agregar al Carrito
                 </button>
+                {isCardPaymentEnabled && (
+                  <ul className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-500">
+                    <li className="flex items-center gap-1.5"><CreditCard size={13} strokeWidth={1.6} /> Tarjeta</li>
+                    <li className="flex items-center gap-1.5"><QrCode size={13} strokeWidth={1.6} /> QR</li>
+                    <li className="flex items-center gap-1.5"><Wallet size={13} strokeWidth={1.6} /> Billeteras</li>
+                    <li className="flex items-center gap-1.5"><Landmark size={13} strokeWidth={1.6} /> Transferencia</li>
+                    <li className="flex items-center gap-1.5 text-zinc-400"><Lock size={12} strokeWidth={1.6} /> Pago seguro · Pagopar</li>
+                  </ul>
+                )}
               </div>
             </div>
           </div>

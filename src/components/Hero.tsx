@@ -27,7 +27,7 @@ const Hero: React.FC<HeroProps> = ({
   return (
     <section
       className={`relative w-full flex items-center justify-center overflow-hidden bg-aura-ink ${
-        isHome ? 'min-h-dvh' : 'min-h-[62vh] sm:min-h-[68vh]'
+        isHome ? 'min-h-[92dvh] sm:min-h-dvh' : 'min-h-[62vh] sm:min-h-[68vh]'
       }`}
     >
       {/* Cinematic background */}
@@ -42,7 +42,7 @@ const Hero: React.FC<HeroProps> = ({
           loader={smartImageLoader}
           className="object-cover animate-kenburns"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-aura-ink/85 via-aura-ink/55 to-aura-ink/95" />
+        <div className="absolute inset-0 bg-gradient-to-b from-aura-ink/70 via-aura-ink/40 to-aura-ink/90 sm:from-aura-ink/85 sm:via-aura-ink/55 sm:to-aura-ink/95" />
         <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_30%,transparent_30%,rgba(12,10,9,0.75)_100%)]" />
       </div>
 

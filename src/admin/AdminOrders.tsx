@@ -240,6 +240,12 @@ const AdminOrders: React.FC = () => {
                   <p className="text-[11px] text-zinc-500 mt-2 leading-relaxed">
                     {(o.items || []).map((i) => `${i.quantity}× ${i.name} (${i.size})`).join(' · ')}
                   </p>
+                  {o.invoice?.ruc && (
+                    <p className="text-[11px] text-zinc-700 mt-1.5">
+                      <span className="font-bold uppercase tracking-[0.12em] text-[9px] text-aura-gold-deep mr-1.5">Factura</span>
+                      RUC {o.invoice.ruc} · {o.invoice.razonSocial}
+                    </p>
+                  )}
                   {/pagopar|tarjeta/i.test(o.paymentMethod || '') && (
                     <p className={`inline-flex items-center gap-1.5 mt-2 text-[10px] font-bold uppercase tracking-[0.12em] px-2 py-1 border ${
                       o.pagoparStatus === 'pagado'

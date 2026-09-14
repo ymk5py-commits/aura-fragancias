@@ -69,3 +69,41 @@ export function validateDocument(value: string, required = false): string | null
   if (digits.length < 5 || digits.length > 8) return 'Revisá la C.I.: tiene entre 5 y 8 números.';
   return null;
 }
+
+/* ---------- RUC (factura) ---------- */
+
+/** Dígito verificador del RUC paraguayo (módulo 11, pesos 2..11 desde la derecha). */
+export function rucCheckDigit(base: string): number {
+  let k = 2;
+  let total = 0;
+  for (let i = base.length - 1; i >= 0; i--) {
+    if (k > 11) k = 2;
+    total += Number(base[i]) * k;
+    k++;
+  }
+  const rest = total % 11;
+  return rest > 1 ? 11 - rest : 0;
+}
+
+/** "4.673.382-1" → "4673382-1". Devuelve null si el formato no es de RUC. */
+export function normalizeRuc(value: string): string | null {
+  const v = String(value || '').replace(/[.\s]/g, '');
+  const m = v.match(/^(\d{5,8})-?(\d)$/);
+  return m ? `${m[1]}-${m[2]}` : null;
+}
+
+export function validateRuc(value: string): string | null {
+  if (!value.trim()) return 'Escribí el RUC para la factura.';
+  const ruc = normalizeRuc(value);
+  if (!ruc) return 'Escribí el RUC con su dígito verificador, ej.: 80009735-1.';
+  const [base, dv] = ruc.split('-');
+  if (rucCheckDigit(base) !== Number(dv)) return 'El dígito verificador del RUC no es correcto. Revisalo.';
+  return null;
+}
+
+export function validateRazonSocial(value: string): string | null {
+  const v = value.trim();
+  if (v.length < 3) return 'Escribí el nombre o razón social que va en la factura.';
+  if (v.length > 120) return 'La razón social es demasiado larga.';
+  return null;
+}

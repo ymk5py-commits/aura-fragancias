@@ -97,6 +97,8 @@ export interface Order {
   // Datos extra que pide Pagopar para pagar con tarjeta
   email?: string;
   document?: string;
+  // Factura con RUC (opcional)
+  invoice?: { ruc: string; razonSocial: string };
   // Pagopar (los escribe el servidor: /api/pagopar/*)
   pagoparHash?: string;
   pagoparNumeroPedido?: string;

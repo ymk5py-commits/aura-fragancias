@@ -34,6 +34,8 @@ interface Body {
   cityAndNeighborhood?: string;
   discountPercent?: number;
   items?: Item[];
+  ruc?: string;
+  razonSocial?: string;
 }
 
 const bad = (error: string, status = 400) => NextResponse.json({ error }, { status });
@@ -103,6 +105,8 @@ export async function POST(req: NextRequest) {
         documento,
         direccion: String(b.address || '').trim(),
         referencia: String(b.cityAndNeighborhood || '').trim(),
+        ruc: String(b.ruc || '').replace(/[^\d-]/g, '').slice(0, 12),
+        razonSocial: String(b.razonSocial || '').trim().slice(0, 120),
       },
       items: hubItems,
     });

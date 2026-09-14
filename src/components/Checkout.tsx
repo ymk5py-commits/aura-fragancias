@@ -11,7 +11,8 @@ import { toItem, gaBeginCheckout, gaGenerateLead } from '../lib/gtag';
 import { newOrderId, uploadReceipt, saveOrder, validateReceipt, RECEIPT_ACCEPT } from '../lib/ordersService';
 import { PAY_TRANSFER, PAY_CARD, isCardPaymentEnabled, startCardPayment, savePaymentSnapshot } from '../lib/payments';
 import {
-  normalizePhone, validateAddress, validateCity, validateDocument, validateEmail, validateName, validatePhone,
+  normalizePhone, normalizeRuc, validateAddress, validateCity, validateDocument, validateEmail, validateName,
+  validatePhone, validateRazonSocial, validateRuc,
 } from '../lib/validation';
 
 interface CheckoutProps {
@@ -66,13 +67,20 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     address: '',
     email: '',
     document: '',
+    ruc: '',
+    razonSocial: '',
     paymentMethod: PAY_TRANSFER,
   });
+  const [wantsInvoice, setWantsInvoice] = useState(false);
+  /** Datos de factura listos para guardar (solo si la pidió). */
+  const invoice = wantsInvoice
+    ? { ruc: normalizeRuc(formData.ruc) || formData.ruc.trim(), razonSocial: formData.razonSocial.trim() }
+    : undefined;
   /** Con tarjeta, Pagopar exige correo y C.I. del comprador. */
   const paysWithCard = isCardPaymentEnabled && formData.paymentMethod === PAY_CARD;
   // Transacción de Pagopar ya creada (se reutiliza si el guardado falla y se reintenta).
   const [cardStart, setCardStart] = useState<{ hash: string; url: string } | null>(null);
-  type Field = 'name' | 'phone' | 'cityAndNeighborhood' | 'address' | 'email' | 'document';
+  type Field = 'name' | 'phone' | 'cityAndNeighborhood' | 'address' | 'email' | 'document' | 'ruc' | 'razonSocial';
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<Field, string>>>({});
   const setField = (field: Field, value: string) => {
     setFormData((f) => ({ ...f, [field]: value }));
@@ -131,6 +139,10 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     check('address', validateAddress(formData.address));
     check('email', validateEmail(formData.email, paysWithCard));
     check('document', validateDocument(formData.document, paysWithCard));
+    if (wantsInvoice) {
+      check('ruc', validateRuc(formData.ruc));
+      check('razonSocial', validateRazonSocial(formData.razonSocial));
+    }
     setFieldErrors(errs);
     if (Object.keys(errs).length) {
       setError('Revisá los datos marcados.');
@@ -183,6 +195,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
           cityAndNeighborhood: formData.cityAndNeighborhood.trim(),
           discountPercent: discount,
           items,
+          ...(invoice ? { ruc: invoice.ruc, razonSocial: invoice.razonSocial } : {}),
         });
         setCardStart(start);
       }
@@ -206,6 +219,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
         paymentMethod: PAY_CARD,
         pagoparHash: start.hash,
         pagoparStatus: 'pendiente',
+        ...(invoice ? { invoice } : {}),
       };
       let docId: string | undefined;
       try {
@@ -267,6 +281,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       freeShipping: isFreeShipping,
       items,
       paymentMethod: formData.paymentMethod,
+      ...(invoice ? { invoice } : {}),
       ...(receiptUrl ? { receiptUrl } : {}),
     };
     try {
@@ -303,7 +318,9 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       `Teléfono: ${phoneClean}\n` +
       `Ciudad y Barrio: ${formData.cityAndNeighborhood}\n` +
       `Dirección: ${formData.address}\n` +
-      `Pago: ${formData.paymentMethod}\n\n` +
+      `Pago: ${formData.paymentMethod}\n` +
+      (invoice ? `Factura: RUC ${invoice.ruc} — ${invoice.razonSocial}\n` : '') +
+      `\n` +
       `*Pedido:*\n${itemsText}\n\n` +
       `Subtotal: Gs. ${subtotal.toLocaleString('es-PY')}\n` +
       (discountAmount > 0 ? `Descuento (${discount}%): -Gs. ${discountAmount.toLocaleString('es-PY')}\n` : '') +
@@ -409,6 +426,35 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                       aria-invalid={Boolean(fieldErrors.address)}
                       value={formData.address} onChange={(e) => setField('address', e.target.value)} />
                     <FieldError msg={fieldErrors.address} />
+                  </div>
+                  <div className="border border-zinc-100 rounded-sm p-4 sm:p-5 bg-zinc-50/30">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" checked={wantsInvoice}
+                        onChange={(e) => { setWantsInvoice(e.target.checked); setFieldErrors((er) => ({ ...er, ruc: undefined, razonSocial: undefined })); }}
+                        className="mt-0.5 h-4 w-4 accent-aura-ink" />
+                      <span>
+                        <span className="block text-sm font-semibold text-zinc-900">Quiero factura con RUC</span>
+                        <span className="block text-[11px] text-zinc-500 leading-relaxed mt-0.5">Si no la pedís, la factura sale a nombre de consumidor final.</span>
+                      </span>
+                    </label>
+                    {wantsInvoice && (
+                      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className={labelCls}>RUC</label>
+                          <input type="text" inputMode="numeric" placeholder="80009735-1" className={inputCls} maxLength={14}
+                            aria-invalid={Boolean(fieldErrors.ruc)}
+                            value={formData.ruc} onChange={(e) => setField('ruc', e.target.value.replace(/[^\d.\s-]/g, ''))} />
+                          <FieldError msg={fieldErrors.ruc} />
+                        </div>
+                        <div>
+                          <label className={labelCls}>RAZÓN SOCIAL</label>
+                          <input type="text" placeholder="Nombre o empresa que va en la factura" className={inputCls} maxLength={120}
+                            aria-invalid={Boolean(fieldErrors.razonSocial)}
+                            value={formData.razonSocial} onChange={(e) => setField('razonSocial', e.target.value)} />
+                          <FieldError msg={fieldErrors.razonSocial} />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className={labelCls}>MÉTODO DE PAGO</label>

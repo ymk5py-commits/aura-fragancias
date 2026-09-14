@@ -44,6 +44,9 @@ export interface CardPaymentRequest {
   cityAndNeighborhood: string;
   discountPercent: number;
   items: OrderItem[];
+  /** Factura con RUC (opcional): va al comprador de Pagopar. */
+  ruc?: string;
+  razonSocial?: string;
 }
 
 export interface CardPaymentStart {

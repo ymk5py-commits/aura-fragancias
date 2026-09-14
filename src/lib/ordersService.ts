@@ -66,3 +66,9 @@ export async function setOrderStatus(id: string, status: OrderStatus): Promise<v
   const [db, { doc, updateDoc }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
   await updateDoc(doc(db, COLLECTION, id), { status });
 }
+
+/** Actualiza campos sueltos de un pedido (solo /admin). */
+export async function updateOrderFields(id: string, fields: Partial<Order>): Promise<void> {
+  const [db, { doc, updateDoc }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
+  await updateDoc(doc(db, COLLECTION, id), { ...fields });
+}

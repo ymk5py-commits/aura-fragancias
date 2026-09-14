@@ -25,23 +25,24 @@ Tienda de perfumes (Paraguay). **Next.js 16 (App Router) + React 19 + Tailwind v
 - Reglas de seguridad y pasos de consola: ver `FIREBASE_SETUP.md`.
 
 ## Pagopar (pago con tarjeta) — desde 13 sep 2026
-- Misma cuenta de comercio **"Albastore"** que albastore.lat. Pagopar admite UNA URL de
-  respuesta y UNA de redirección por comercio, y apuntan a ALBA:
-  `https://albastore.lat/api/pagopar/respuesta` y `https://albastore.lat/pago/($hash)`.
-  ALBA busca el hash en sus pedidos; si no es suyo, reenvía el webhook a
-  `/api/pagopar/respuesta` de acá y redirige a la clienta a `/pago/[hash]` de acá
-  (variable `PAGOPAR_PEER_STORES` en el Vercel de ALBA).
-- Código: `src/lib/server/{pagopar,firestoreRest,pagoparOrders,types}.ts` (solo servidor),
-  rutas `src/app/api/pagopar/{iniciar,respuesta,estado}`, cliente `src/lib/payments.ts`,
-  checkout `src/components/Checkout.tsx`, resultado `src/components/PagoResultado.tsx`.
-- Firestore desde el servidor: usuario de Firebase Auth dedicado (`FIREBASE_SERVER_EMAIL` /
-  `FIREBASE_SERVER_PASSWORD`); las reglas ya permiten read/update de `orders` a cualquier
-  usuario autenticado. Tokens en `PAGOPAR_PUBLIC_KEY` / `PAGOPAR_PRIVATE_KEY` (los mismos
-  que ALBA). La opción aparece en el checkout con `NEXT_PUBLIC_PAGOPAR_ENABLED=true`.
-- Un pedido pagado por Pagopar queda `status: confirmado` + `pagoparStatus: pagado` y el
-  servidor manda el Purchase a Meta por CAPI (mismo event_id que el Pixel de `/pago`).
-- Pagopar rechaza el documento con puntos o guion: el servidor manda solo dígitos.
-- `id_pedido_comercio` = `orderId` (AURA-…) más `-N` en cada reintento; nunca se repite.
+- Misma cuenta de comercio **"Albastore"** que albastore.lat. **Äura no tiene tokens de Pagopar
+  ni acceso al servidor de Firebase**: todo pasa por el hub de ALBA
+  (`https://albastore.lat/api/pagopar/hub`, secreto compartido `PAGOPAR_HUB_SECRET` en los
+  dos proyectos de Vercel).
+- Flujo: checkout → `POST /api/pagopar/iniciar` (valida precios contra `settings/site` de
+  Firestore, pide al hub la transacción) → el navegador guarda el pedido en Firestore con
+  `pagoparHash` → Pagopar. Pagopar redirige a ALBA, ALBA manda a `/pago/[hash]`, que consulta
+  `GET /api/pagopar/estado?hash=` (hub → `pedidos/1.1/traer`). El detalle del pedido en esa
+  página sale de localStorage (`aura_pago_<hash>`), guardado por el checkout.
+- El webhook de Pagopar llega a ALBA y ALBA lo reenvía a `/api/pagopar/respuesta` (firmado con
+  el secreto); acá solo se registra en el log. **Pagopar es la fuente de verdad**: el panel
+  (`/admin` → Pedidos) verifica los pedidos con tarjeta pendientes al abrir la bandeja y con el
+  botón "Verificar pago", y los deja `confirmado` + `pagoparStatus: pagado`.
+- Reintento de pago = volver al mismo link de Pagopar (`pagopar.com/pagos/<hash>`); no se crea
+  otra transacción. `id_pedido_comercio` = `orderId` (AURA-…).
+- Código: `src/lib/server/{pagopar,pricing}.ts`, rutas `src/app/api/pagopar/*`, cliente
+  `src/lib/payments.ts`, validación de campos `src/lib/validation.ts`,
+  `src/components/{Checkout,PagoResultado}.tsx`, `src/admin/AdminOrders.tsx`.
 
 ## Comandos
 - Dev: `npm run dev` (localhost:3000) · Build: `npm run build` · Typecheck: `npm run lint`

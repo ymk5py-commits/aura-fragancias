@@ -5,7 +5,8 @@ import {
   Loader2, FileText, ExternalLink, CheckCircle2, XCircle, PackageOpen, Search, Phone, MapPin, RefreshCw, CreditCard,
 } from 'lucide-react';
 import { Order, OrderStatus } from '../types';
-import { subscribeOrders, setOrderStatus } from '../lib/ordersService';
+import { subscribeOrders, setOrderStatus, updateOrderFields } from '../lib/ordersService';
+import { fetchPaymentStatus, isCardPayment } from '../lib/payments';
 
 const STATUS_STYLE: Record<OrderStatus, string> = {
   pendiente: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -34,6 +35,56 @@ const AdminOrders: React.FC = () => {
   }, []);
 
   const notify = (m: string) => { setToast(m); setTimeout(() => setToast(''), 4000); };
+
+  /**
+   * Pedidos con tarjeta: Pagopar es la fuente de verdad. Consultamos el
+   * estado real y, si está pagado, dejamos el pedido confirmado con los
+   * datos del cobro (forma de pago, comprobante).
+   */
+  const verifyCard = async (o: Order, silent = false): Promise<boolean> => {
+    if (!o.id || !o.pagoparHash) return false;
+    setBusy(o.id);
+    try {
+      const st = await fetchPaymentStatus(o.pagoparHash);
+      if (st.pagado) {
+        await updateOrderFields(o.id, {
+          status: 'confirmado',
+          pagoparStatus: 'pagado',
+          paidAt: Date.now(),
+          pagoparPayment: {
+            formaPago: st.formaPago,
+            formaPagoId: st.formaPagoId,
+            numeroComprobante: st.numeroComprobante,
+            fechaPago: st.fechaPago,
+            monto: st.monto,
+          },
+        });
+        if (!silent) notify(`✓ ${o.orderId} pagado con ${st.formaPago || 'Pagopar'}.`);
+        return true;
+      }
+      if (!silent) notify(`${o.orderId}: ${st.titulo || 'todavía sin pagar'}.`);
+    } catch (e) {
+      if (!silent) notify(e instanceof Error ? e.message : 'No se pudo consultar Pagopar.');
+    } finally {
+      setBusy(null);
+    }
+    return false;
+  };
+
+  // Al abrir la bandeja, verificamos una vez los pedidos con tarjeta pendientes.
+  const verified = React.useRef(false);
+  useEffect(() => {
+    if (loading || verified.current) return;
+    const pending = orders.filter((o) => o.status === 'pendiente' && o.pagoparHash && o.pagoparStatus !== 'pagado');
+    if (!pending.length) return;
+    verified.current = true;
+    (async () => {
+      let paid = 0;
+      for (const o of pending) if (await verifyCard(o, true)) paid++;
+      if (paid) notify(`✓ ${paid} ${paid === 1 ? 'pago con tarjeta confirmado' : 'pagos con tarjeta confirmados'} por Pagopar.`);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, orders]);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -214,6 +265,12 @@ const AdminOrders: React.FC = () => {
                     {o.discountAmount > 0 && <span className="block text-[10px] text-aura-gold-deep">−{fmt(o.discountAmount)} ({o.discountPercent}%)</span>}
                     <span className="block text-[10px] text-zinc-400">{o.freeShipping ? 'Envío gratis' : '+ envío'}</span>
                   </div>
+                  {o.status === 'pendiente' && isCardPayment(o.paymentMethod) && o.pagoparHash && (
+                    <button onClick={() => void verifyCard(o)} disabled={busy === o.id}
+                      className="inline-flex items-center gap-1.5 border border-zinc-200 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-600 hover:border-aura-ink hover:text-aura-ink transition-colors disabled:opacity-50">
+                      {busy === o.id ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />} Verificar pago
+                    </button>
+                  )}
                   {o.status === 'pendiente' && (
                     <div className="flex gap-2">
                       <button onClick={() => cancel(o)} disabled={busy === o.id}

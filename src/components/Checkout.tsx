@@ -9,7 +9,10 @@ import { trackEvent } from '../lib/pixel';
 import { newEventId, capiTrack } from '../lib/tracking';
 import { toItem, gaBeginCheckout, gaGenerateLead } from '../lib/gtag';
 import { newOrderId, uploadReceipt, saveOrder, validateReceipt, RECEIPT_ACCEPT } from '../lib/ordersService';
-import { PAY_TRANSFER, PAY_CARD, isCardPaymentEnabled, documentDigits, startCardPayment } from '../lib/payments';
+import { PAY_TRANSFER, PAY_CARD, isCardPaymentEnabled, startCardPayment, savePaymentSnapshot } from '../lib/payments';
+import {
+  normalizePhone, validateAddress, validateCity, validateDocument, validateEmail, validateName, validatePhone,
+} from '../lib/validation';
 
 interface CheckoutProps {
   cart: CartItem[];
@@ -18,6 +21,10 @@ interface CheckoutProps {
   initialDiscount?: number;
   onBack: () => void;
 }
+
+/** Mensaje de error debajo de un campo. */
+const FieldError: React.FC<{ msg?: string }> = ({ msg }) =>
+  msg ? <p className="mt-2 text-[11px] font-semibold text-red-600" role="alert">{msg}</p> : null;
 
 /** Fila de dato bancario con botón de copiar. */
 const CopyRow: React.FC<{ label: string; value: string; big?: boolean }> = ({ label, value, big }) => {
@@ -63,8 +70,16 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
   });
   /** Con tarjeta, Pagopar exige correo y C.I. del comprador. */
   const paysWithCard = isCardPaymentEnabled && formData.paymentMethod === PAY_CARD;
-  // Pedido ya guardado en Firestore para el pago con tarjeta (se reutiliza si el link falla).
-  const [cardDocId, setCardDocId] = useState<string | null>(null);
+  // Transacción de Pagopar ya creada (se reutiliza si el guardado falla y se reintenta).
+  const [cardStart, setCardStart] = useState<{ hash: string; url: string } | null>(null);
+  type Field = 'name' | 'phone' | 'cityAndNeighborhood' | 'address' | 'email' | 'document';
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<Field, string>>>({});
+  const setField = (field: Field, value: string) => {
+    setFormData((f) => ({ ...f, [field]: value }));
+    setFieldErrors((e) => (e[field] ? { ...e, [field]: undefined } : e));
+  };
+  /** Celular normalizado (09XXXXXXXX) para guardar y para WhatsApp. */
+  const phoneClean = normalizePhone(formData.phone) || formData.phone.trim();
   const [discount, setDiscount] = useState(initialDiscount);
   const [coupon, setCoupon] = useState(initialDiscount > 0 ? settings.welcomeCode : '');
   const [couponMsg, setCouponMsg] = useState<string | null>(null);
@@ -108,27 +123,26 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
 
   /** Paso 1 -> 2: valida los datos y muestra los datos bancarios. */
   const goToPayment = () => {
-    if (!formData.name || !formData.phone || !formData.cityAndNeighborhood || !formData.address) {
-      setError('Se debe completar el formulario');
+    const errs: Partial<Record<Field, string>> = {};
+    const check = (field: Field, msg: string | null) => { if (msg) errs[field] = msg; };
+    check('name', validateName(formData.name));
+    check('phone', validatePhone(formData.phone));
+    check('cityAndNeighborhood', validateCity(formData.cityAndNeighborhood));
+    check('address', validateAddress(formData.address));
+    check('email', validateEmail(formData.email, paysWithCard));
+    check('document', validateDocument(formData.document, paysWithCard));
+    setFieldErrors(errs);
+    if (Object.keys(errs).length) {
+      setError('Revisá los datos marcados.');
       setTimeout(() => setError(null), 3000);
+      const first = document.querySelector('[aria-invalid="true"]') as HTMLElement | null;
+      first?.focus();
       return;
     }
     if (cart.length === 0) {
       setError('Tu carrito está vacío.');
       setTimeout(() => setError(null), 3000);
       return;
-    }
-    if (paysWithCard) {
-      if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) {
-        setError('Para pagar con tarjeta necesitamos tu correo.');
-        setTimeout(() => setError(null), 3000);
-        return;
-      }
-      if (documentDigits(formData.document).length < 5) {
-        setError('Para pagar con tarjeta necesitamos tu número de C.I.');
-        setTimeout(() => setError(null), 3000);
-        return;
-      }
     }
     setError(null);
     setOrderId((prev) => prev || newOrderId());
@@ -143,43 +157,69 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     setReceipt(err ? null : file);
   };
 
-  /** Paso 2 (tarjeta): guarda el pedido y redirige al checkout de Pagopar. */
+  /** Paso 2 (tarjeta): crea la transacción en Pagopar, guarda el pedido y redirige. */
   const handleCardPayment = async () => {
     if (sending) return;
     setSending(true);
     setError(null);
+    const items = cart.map((item) => ({
+      code: item.perfume.code,
+      name: item.perfume.name,
+      size: item.size,
+      price: item.price,
+      quantity: item.quantity,
+    }));
     try {
-      let docId = cardDocId;
-      if (!docId) {
-        const order: Order = {
+      // 1) Transacción en Pagopar (el servidor valida los precios).
+      let start = cardStart;
+      if (!start) {
+        start = await startCardPayment({
           orderId,
-          status: 'pendiente',
           name: formData.name.trim(),
-          phone: formData.phone.trim(),
+          phone: phoneClean,
           email: formData.email.trim(),
           document: formData.document.trim(),
-          cityAndNeighborhood: formData.cityAndNeighborhood.trim(),
           address: formData.address.trim(),
-          subtotal,
+          cityAndNeighborhood: formData.cityAndNeighborhood.trim(),
           discountPercent: discount,
-          discountAmount,
-          total,
-          freeShipping: isFreeShipping,
-          items: cart.map((item) => ({
-            code: item.perfume.code,
-            name: item.perfume.name,
-            size: item.size,
-            price: item.price,
-            quantity: item.quantity,
-          })),
-          paymentMethod: PAY_CARD,
-        };
-        docId = await saveOrder(order);
-        setCardDocId(docId);
+          items,
+        });
+        setCardStart(start);
       }
-      const url = await startCardPayment(docId);
-      window.location.href = url;
-      // La página se va a Pagopar; si volvemos (botón atrás) el botón vuelve a estar activo.
+
+      // 2) Pedido en Firestore, con el hash para que el panel pueda verificar el pago.
+      const order: Order = {
+        orderId,
+        status: 'pendiente',
+        name: formData.name.trim(),
+        phone: phoneClean,
+        email: formData.email.trim(),
+        document: formData.document.trim(),
+        cityAndNeighborhood: formData.cityAndNeighborhood.trim(),
+        address: formData.address.trim(),
+        subtotal,
+        discountPercent: discount,
+        discountAmount,
+        total,
+        freeShipping: isFreeShipping,
+        items,
+        paymentMethod: PAY_CARD,
+        pagoparHash: start.hash,
+        pagoparStatus: 'pendiente',
+      };
+      let docId: string | undefined;
+      try {
+        docId = await saveOrder(order);
+      } catch (e) {
+        // No bloquea el pago: el panel igual lo encuentra por el número de pedido en Pagopar.
+        console.warn('[Äura] No se pudo guardar el pedido:', e);
+      }
+
+      // 3) Memoria local para la página de resultado (mismo navegador).
+      savePaymentSnapshot(start.hash, { orderId, docId, name: formData.name.trim(), total, items, createdAt: Date.now() });
+
+      // 4) A Pagopar.
+      window.location.href = start.url;
       setTimeout(() => setSending(false), 8000);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No pudimos iniciar el pago con tarjeta. Probá con transferencia.');
@@ -216,10 +256,10 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     const order: Order = {
       orderId,
       status: 'pendiente',
-      name: formData.name,
-      phone: formData.phone,
-      cityAndNeighborhood: formData.cityAndNeighborhood,
-      address: formData.address,
+      name: formData.name.trim(),
+      phone: phoneClean,
+      cityAndNeighborhood: formData.cityAndNeighborhood.trim(),
+      address: formData.address.trim(),
       subtotal,
       discountPercent: discount,
       discountAmount,
@@ -249,7 +289,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     capiTrack({
       eventName: 'Lead', eventId: eventID, value: total, currency: 'PYG',
       contentIds, contents, numItems,
-      userData: { phone: formData.phone, firstName: formData.name, city: formData.cityAndNeighborhood },
+      userData: { phone: phoneClean, firstName: formData.name, city: formData.cityAndNeighborhood },
       actionSource: 'website',
     });
     gaGenerateLead(cart.map((i) => toItem(i.perfume, i.price, i.size, i.quantity)), total, orderId);
@@ -260,7 +300,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       `*PEDIDO WEB · ${orderId}*\n\n` +
       `*Datos del Cliente:*\n` +
       `Nombre: ${formData.name}\n` +
-      `Teléfono: ${formData.phone}\n` +
+      `Teléfono: ${phoneClean}\n` +
       `Ciudad y Barrio: ${formData.cityAndNeighborhood}\n` +
       `Dirección: ${formData.address}\n` +
       `Pago: ${formData.paymentMethod}\n\n` +
@@ -279,7 +319,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     window.open(`https://wa.me/${settings.whatsappNumber}?text=${message}`, '_blank');
   };
 
-  const inputCls = 'w-full bg-zinc-50/50 border-none px-4 sm:px-6 py-4 sm:py-5 rounded-sm focus:ring-1 focus:ring-zinc-900 transition-all placeholder:text-zinc-300 text-sm';
+  const inputCls = 'w-full bg-zinc-50/50 border-none px-4 sm:px-6 py-4 sm:py-5 rounded-sm focus:ring-1 focus:ring-zinc-900 transition-all placeholder:text-zinc-300 text-sm aria-[invalid=true]:ring-1 aria-[invalid=true]:ring-red-500 aria-[invalid=true]:bg-red-50/40';
   const labelCls = 'text-[11px] sm:text-xs font-bold uppercase tracking-[0.15em] text-zinc-600 block mb-2 sm:mb-3';
 
   return (
@@ -343,24 +383,32 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
 
                 <div className="space-y-6 sm:space-y-8">
                   <div>
-                    <label className={labelCls}>NOMBRE COMPLETO</label>
-                    <input type="text" placeholder="Juan Pérez" className={inputCls} autoComplete="name"
-                      value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                    <label className={labelCls}>NOMBRE Y APELLIDO</label>
+                    <input type="text" placeholder="Juan Pérez" className={inputCls} autoComplete="name" maxLength={80}
+                      aria-invalid={Boolean(fieldErrors.name)}
+                      value={formData.name} onChange={(e) => setField('name', e.target.value)} />
+                    <FieldError msg={fieldErrors.name} />
                   </div>
                   <div>
-                    <label className={labelCls}>TELÉFONO</label>
-                    <input type="tel" placeholder="0981 123 456" className={inputCls} autoComplete="tel"
-                      value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+                    <label className={labelCls}>CELULAR (WHATSAPP)</label>
+                    <input type="tel" inputMode="tel" placeholder="0981 123 456" className={inputCls} autoComplete="tel" maxLength={20}
+                      aria-invalid={Boolean(fieldErrors.phone)}
+                      value={formData.phone} onChange={(e) => setField('phone', e.target.value.replace(/[^\d\s+()-]/g, ''))} />
+                    <FieldError msg={fieldErrors.phone} />
                   </div>
                   <div>
                     <label className={labelCls}>CIUDAD Y BARRIO</label>
-                    <input type="text" placeholder="Ej: Asunción, Barrio Jara" className={inputCls}
-                      value={formData.cityAndNeighborhood} onChange={(e) => setFormData({ ...formData, cityAndNeighborhood: e.target.value })} />
+                    <input type="text" placeholder="Ej: Asunción, Barrio Jara" className={inputCls} maxLength={80}
+                      aria-invalid={Boolean(fieldErrors.cityAndNeighborhood)}
+                      value={formData.cityAndNeighborhood} onChange={(e) => setField('cityAndNeighborhood', e.target.value)} />
+                    <FieldError msg={fieldErrors.cityAndNeighborhood} />
                   </div>
                   <div>
                     <label className={labelCls}>DIRECCIÓN EXACTA</label>
-                    <textarea placeholder="Ej: Av. Mcal López 1234 c/ San Martín" rows={3} className={`${inputCls} resize-none`}
-                      value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
+                    <textarea placeholder="Ej: Av. Mcal López 1234 c/ San Martín" rows={3} className={`${inputCls} resize-none`} maxLength={300}
+                      aria-invalid={Boolean(fieldErrors.address)}
+                      value={formData.address} onChange={(e) => setField('address', e.target.value)} />
+                    <FieldError msg={fieldErrors.address} />
                   </div>
                   <div>
                     <label className={labelCls}>MÉTODO DE PAGO</label>
@@ -399,14 +447,18 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                     <>
                       <div>
                         <label className={labelCls}>CORREO ELECTRÓNICO</label>
-                        <input type="email" placeholder="tu@correo.com" className={inputCls} autoComplete="email"
-                          value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                        <input type="email" placeholder="tu@correo.com" className={inputCls} autoComplete="email" maxLength={120}
+                          aria-invalid={Boolean(fieldErrors.email)}
+                          value={formData.email} onChange={(e) => setField('email', e.target.value)} />
+                        <FieldError msg={fieldErrors.email} />
                         <p className="text-[11px] text-zinc-400 mt-2">Lo pide Pagopar para el pago con tarjeta.</p>
                       </div>
                       <div>
                         <label className={labelCls}>C.I. (SOLO NÚMEROS)</label>
-                        <input type="text" inputMode="numeric" placeholder="4348713" className={inputCls}
-                          value={formData.document} onChange={(e) => setFormData({ ...formData, document: e.target.value })} />
+                        <input type="text" inputMode="numeric" placeholder="4348713" className={inputCls} maxLength={12}
+                          aria-invalid={Boolean(fieldErrors.document)}
+                          value={formData.document} onChange={(e) => setField('document', e.target.value.replace(/[^\d.\s-]/g, ''))} />
+                        <FieldError msg={fieldErrors.document} />
                         <p className="text-[11px] text-zinc-400 mt-2">Sin puntos ni dígito verificador. Lo pide Pagopar para el pago con tarjeta.</p>
                       </div>
                     </>

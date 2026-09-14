@@ -5,30 +5,41 @@ import Link from 'next/link';
 import { CheckCircle2, Clock, Loader2, MessageCircle, RefreshCw, CreditCard, XCircle } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { useCart } from '../context/CartContext';
-import { fetchPaymentStatus, startCardPayment, type PaymentStatus } from '../lib/payments';
+import {
+  fetchPaymentStatus,
+  pagoparCheckoutUrl,
+  readPaymentSnapshot,
+  type PaymentSnapshot,
+  type PaymentStatus,
+} from '../lib/payments';
 import { trackEvent } from '../lib/pixel';
+import { capiTrack } from '../lib/tracking';
 import { gaPurchase } from '../lib/gtag';
 
 const POLL_MS = 5000;
-const POLL_MAX = 24; // ~2 minutos: el webhook de Pagopar suele llegar en segundos
+const POLL_MAX = 24; // ~2 minutos: Pagopar suele confirmar en segundos
 
 const fmt = (n: number) => `Gs. ${(n || 0).toLocaleString('es-PY')}`;
 const montoNumber = (s: string) => Math.round(Number(String(s || '').replace(/[^\d.]/g, '')) || 0);
 
 /**
- * Resultado del pago con tarjeta. Pagopar redirige acá con el hash del
- * pedido; consultamos el estado real y, si está pagado, registramos el
- * Purchase (Pixel con el mismo event_id que manda el servidor por CAPI).
+ * Resultado del pago con tarjeta. Pagopar redirige a ALBA (única URL de
+ * la cuenta) y ALBA manda acá con el hash. Consultamos el estado real a
+ * Pagopar y, si está pagado, registramos el Purchase (Pixel + CAPI con el
+ * mismo event_id). El detalle del pedido sale de la memoria local que dejó
+ * el checkout en este navegador.
  */
 const PagoResultado: React.FC<{ hash: string }> = ({ hash }) => {
   const { settings } = useSettings();
   const { clearCart } = useCart();
   const [status, setStatus] = useState<PaymentStatus | null>(null);
+  const [snap, setSnap] = useState<PaymentSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [retrying, setRetrying] = useState(false);
   const polls = useRef(0);
   const tracked = useRef(false);
+
+  useEffect(() => setSnap(readPaymentSnapshot(hash)), [hash]);
 
   const load = useCallback(async () => {
     try {
@@ -44,7 +55,7 @@ const PagoResultado: React.FC<{ hash: string }> = ({ hash }) => {
 
   useEffect(() => { void load(); }, [load]);
 
-  // Mientras esté pendiente, re-consultamos cada 5 s por si el webhook se demora.
+  // Mientras esté pendiente, re-consultamos cada 5 s.
   useEffect(() => {
     if (!status || status.pagado || status.cancelado) return;
     if (polls.current >= POLL_MAX) return;
@@ -57,43 +68,45 @@ const PagoResultado: React.FC<{ hash: string }> = ({ hash }) => {
     if (!status?.pagado || tracked.current) return;
     tracked.current = true;
     clearCart();
-    const key = `aura_purchase_${status.number || status.orderId}`;
+    const orderId = snap?.orderId || status.orderId || hash;
+    const key = `aura_purchase_${orderId}`;
     try {
       if (localStorage.getItem(key)) return;
       localStorage.setItem(key, '1');
     } catch { /* noop */ }
-    const value = status.total || montoNumber(status.monto);
-    const contents = (status.items || []).map((i) => ({ id: i.code, quantity: i.quantity, item_price: i.price }));
+    const value = snap?.total || montoNumber(status.monto);
+    const items = snap?.items || [];
+    const contents = items.map((i) => ({ id: i.code, quantity: i.quantity, item_price: i.price }));
+    const numItems = items.reduce((a, i) => a + i.quantity, 0);
     trackEvent('Purchase', {
-      content_ids: (status.items || []).map((i) => i.code),
+      content_ids: items.map((i) => i.code),
       content_type: 'product',
       contents,
       value,
       currency: 'PYG',
-      num_items: (status.items || []).reduce((a, i) => a + i.quantity, 0),
-    }, status.number || status.orderId);
+      num_items: numItems,
+    }, orderId);
+    capiTrack({
+      eventName: 'Purchase', eventId: orderId, value, currency: 'PYG',
+      contentIds: items.map((i) => i.code), contents, numItems,
+      userData: { firstName: snap?.name },
+      actionSource: 'website',
+    });
     gaPurchase(
-      (status.items || []).map((i) => ({ item_id: i.code, item_name: i.name, item_brand: 'Äura Fragancias', item_category: 'Perfumes', item_variant: i.size, price: i.price, quantity: i.quantity })),
+      items.map((i) => ({ item_id: i.code, item_name: i.name, item_brand: 'Äura Fragancias', item_category: 'Perfumes', item_variant: i.size, price: i.price, quantity: i.quantity })),
       value,
-      status.number || status.orderId
+      orderId
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
-  const retry = async () => {
-    if (!status || retrying) return;
-    setRetrying(true);
-    try {
-      window.location.href = await startCardPayment(status.orderId);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'No pudimos abrir el pago.');
-      setRetrying(false);
-    }
-  };
-
-  const waText = status
-    ? encodeURIComponent(`Hola Äura 👋 Pagué con tarjeta el pedido ${status.number} (${fmt(status.total)}). Quiero coordinar el envío.`)
-    : encodeURIComponent('Hola Äura 👋 Tengo una consulta sobre mi pago con tarjeta.');
+  const orderLabel = snap?.orderId || status?.orderId || '';
+  const total = snap?.total || montoNumber(status?.monto || '');
+  const waText = encodeURIComponent(
+    orderLabel
+      ? `Hola Äura 👋 Pagué con tarjeta el pedido ${orderLabel}${total ? ` (${fmt(total)})` : ''}. Quiero coordinar el envío.`
+      : 'Hola Äura 👋 Tengo una consulta sobre mi pago con tarjeta.'
+  );
   const waHref = `https://wa.me/${settings.whatsappNumber}?text=${waText}`;
 
   return (
@@ -107,12 +120,18 @@ const PagoResultado: React.FC<{ hash: string }> = ({ hash }) => {
         ) : error && !status ? (
           <>
             <XCircle size={40} className="mx-auto text-zinc-300 mb-6" />
-            <h1 className="font-luxury text-3xl sm:text-4xl text-aura-ink mb-4">No encontramos ese pago</h1>
+            <h1 className="font-luxury text-3xl sm:text-4xl text-aura-ink mb-4">No pudimos verificar el pago</h1>
             <p className="text-sm text-zinc-500 leading-relaxed mb-8">{error}</p>
-            <a href={waHref} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-aura-ink text-white px-8 py-4 rounded-sm text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-aura-gold transition-colors">
-              <MessageCircle size={16} /> Escribinos por WhatsApp
-            </a>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button type="button" onClick={() => { setLoading(true); void load(); }}
+                className="inline-flex items-center justify-center gap-2 border border-zinc-200 text-zinc-600 px-8 py-4 rounded-sm text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-zinc-50 transition-colors">
+                <RefreshCw size={14} /> Reintentar
+              </button>
+              <a href={waHref} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 bg-aura-ink text-white px-8 py-4 rounded-sm text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-aura-gold transition-colors">
+                <MessageCircle size={16} /> Escribinos por WhatsApp
+              </a>
+            </div>
           </>
         ) : status?.pagado ? (
           <>
@@ -121,17 +140,18 @@ const PagoResultado: React.FC<{ hash: string }> = ({ hash }) => {
             </span>
             <h1 className="font-luxury text-3xl sm:text-5xl text-aura-ink mb-4">¡Pago confirmado!</h1>
             <p className="text-sm text-zinc-600 leading-relaxed">
-              Recibimos <strong>{fmt(status.total || montoNumber(status.monto))}</strong>
-              {status.formaPago ? ` con ${status.formaPago}` : ''} por el pedido <strong className="tabular">{status.number}</strong>.
+              Recibimos <strong>{fmt(total)}</strong>
+              {status.formaPago ? ` con ${status.formaPago}` : ''}
+              {orderLabel ? <> por el pedido <strong className="tabular">{orderLabel}</strong></> : ''}.
               {status.numeroComprobante ? ` Comprobante N.º ${status.numeroComprobante}.` : ''}
             </p>
             <p className="text-sm text-zinc-500 leading-relaxed mt-3">
-              Ahora coordinamos el envío por WhatsApp{status.name ? `, ${status.name.split(' ')[0]}` : ''}. Tocá el botón y te respondemos con el costo según tu zona.
+              Ahora coordinamos el envío por WhatsApp{snap?.name ? `, ${snap.name.split(' ')[0]}` : ''}. Tocá el botón y te respondemos con el costo según tu zona.
             </p>
 
-            {status.items?.length > 0 && (
+            {snap?.items && snap.items.length > 0 && (
               <div className="mt-8 border border-zinc-100 rounded-sm text-left divide-y divide-zinc-100">
-                {status.items.map((i, idx) => (
+                {snap.items.map((i, idx) => (
                   <div key={`${i.code}-${idx}`} className="flex justify-between items-center px-5 py-3 text-[12px]">
                     <span className="text-zinc-700"><span className="font-semibold">{i.quantity}×</span> {i.name} <span className="text-zinc-400">· {i.size}</span></span>
                     <span className="font-semibold text-zinc-900 tabular">{fmt(i.price * i.quantity)}</span>
@@ -156,22 +176,21 @@ const PagoResultado: React.FC<{ hash: string }> = ({ hash }) => {
               <Clock size={28} />
             </span>
             <h1 className="font-luxury text-3xl sm:text-5xl text-aura-ink mb-4">
-              {status?.pagoparStatus === 'reversado' ? 'El pago se reversó' : status?.cancelado ? 'El pago se canceló' : 'Pago pendiente'}
+              {status?.cancelado ? 'El pago se canceló' : 'Pago pendiente'}
             </h1>
             <p className="text-sm text-zinc-600 leading-relaxed">
-              {status?.pagoparStatus === 'reversado'
-                ? 'La transacción no se completó y el dinero volvió a tu cuenta. Podés reintentar o escribirnos para pagar de otra forma.'
-                : `Todavía no recibimos la confirmación de Pagopar para el pedido ${status?.number || ''}. Si cerraste la página de pago antes de terminar, podés retomarlo desde acá.`}
+              {status?.cancelado
+                ? 'La transacción no se completó. Podés reintentar o escribirnos para pagar de otra forma.'
+                : `Todavía no recibimos la confirmación de Pagopar${orderLabel ? ` para el pedido ${orderLabel}` : ''}. Si cerraste la página de pago antes de terminar, podés retomarlo desde acá.`}
             </p>
             {status?.descripcion && <p className="text-[12px] text-zinc-400 mt-3">{status.descripcion}</p>}
             {error && <p className="text-[12px] text-red-600 mt-3">{error}</p>}
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center mt-10">
-              <button type="button" onClick={() => void retry()} disabled={retrying}
-                className="inline-flex items-center justify-center gap-2 bg-aura-ink text-white px-8 py-4 rounded-sm text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-aura-gold transition-colors disabled:opacity-60">
-                {retrying ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}
-                {retrying ? 'Abriendo Pagopar…' : 'Reintentar pago con tarjeta'}
-              </button>
+              <a href={pagoparCheckoutUrl(hash)}
+                className="inline-flex items-center justify-center gap-2 bg-aura-ink text-white px-8 py-4 rounded-sm text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-aura-gold transition-colors">
+                <CreditCard size={16} /> Retomar el pago con tarjeta
+              </a>
               <button type="button" onClick={() => { setLoading(true); void load(); }}
                 className="inline-flex items-center justify-center gap-2 border border-zinc-200 text-zinc-600 px-8 py-4 rounded-sm text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-zinc-50 transition-colors">
                 <RefreshCw size={14} /> Actualizar estado

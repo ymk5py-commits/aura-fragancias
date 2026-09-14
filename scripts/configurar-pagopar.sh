@@ -17,6 +17,8 @@
 #  Requiere: vercel CLI logueada, curl, openssl, jq.
 # ============================================================
 set -euo pipefail
+trap 'echo; echo "✗ El script se cortó en el paso \"$STEP\" (línea $LINENO). Corregí lo que indica arriba y volvé a correrlo: es seguro repetirlo."' ERR
+STEP="inicio"
 
 AURA_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 ALBA_DIR="${ALBA_DIR:-$AURA_DIR/../alba-store}"
@@ -30,7 +32,7 @@ trap 'rm -rf "$TMP"' EXIT
 say() { printf '\n\033[1m%s\033[0m\n' "$*"; }
 
 # ---------- 1. Tokens de Pagopar ----------
-say "1/4 · Tokens de Pagopar"
+STEP="1/4 tokens"; say "1/4 · Tokens de Pagopar"
 PUBLIC_KEY=""; PRIVATE_KEY=""
 if [ -d "$ALBA_DIR" ]; then
   if (cd "$ALBA_DIR" && vercel env pull --environment=production "$TMP/alba.env" --yes >/dev/null 2>&1); then
@@ -48,7 +50,7 @@ fi
 [ -n "$PUBLIC_KEY" ] && [ -n "$PRIVATE_KEY" ] || { echo "   Faltan tokens. Abortado."; exit 1; }
 
 # ---------- 2. Usuario de servicio en Firebase Auth ----------
-say "2/4 · Usuario de servicio $SERVICE_EMAIL en Firebase (aura-fragancias)"
+STEP="2/4 usuario Firebase"; say "2/4 · Usuario de servicio $SERVICE_EMAIL en Firebase (aura-fragancias)"
 SERVICE_PASSWORD="$(openssl rand -base64 33 | tr -d '/+=' | cut -c1-32)"
 RESP="$(curl -s -X POST "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$FIREBASE_API_KEY" \
   -H 'Content-Type: application/json' \
@@ -67,15 +69,34 @@ else
     echo "$CHECK" | jq -e '.idToken' >/dev/null 2>&1 || { echo "   Contraseña incorrecta. Abortado."; exit 1; }
     echo "   Contraseña verificada."
   else
-    echo "   Firebase respondió: $ERR"
-    echo "   Si dice ADMIN_ONLY_OPERATION u OPERATION_NOT_ALLOWED: en Firebase → Authentication → Settings"
-    echo "   habilitá 'Permitir crear cuentas' (o creá el usuario a mano y volvé a correr esto)."
-    exit 1
+    # El proyecto no deja crear cuentas desde la web (ADMIN_ONLY_OPERATION /
+    # OPERATION_NOT_ALLOWED): la creamos a mano en la consola con esta contraseña.
+    echo "   Firebase no dejó crear el usuario desde acá ($ERR)."
+    echo
+    echo "   Crealo a mano (1 minuto):"
+    echo "     1. Abrí https://console.firebase.google.com/project/aura-fragancias/authentication/users"
+    echo "     2. 'Agregar usuario' → correo: $SERVICE_EMAIL"
+    echo "     3. Contraseña (copiala tal cual, no se vuelve a mostrar):"
+    echo
+    echo "        $SERVICE_PASSWORD"
+    echo
+    while true; do
+      read -rp "   Cuando esté creado, apretá Enter (o escribí 'salir'): " GO
+      [ "$GO" = "salir" ] && exit 1
+      CHECK="$(curl -s -X POST "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$FIREBASE_API_KEY" \
+        -H 'Content-Type: application/json' \
+        -d "$(jq -cn --arg e "$SERVICE_EMAIL" --arg p "$SERVICE_PASSWORD" '{email:$e,password:$p,returnSecureToken:true}')")"
+      if echo "$CHECK" | jq -e '.idToken' >/dev/null 2>&1; then
+        echo "   Usuario verificado."
+        break
+      fi
+      echo "   Todavía no puedo entrar con ese usuario ($(echo "$CHECK" | jq -r '.error.message // "sin respuesta"')). Revisá correo y contraseña."
+    done
   fi
 fi
 
 # ---------- 3. Variables en Vercel ----------
-say "3/4 · Variables en Vercel (production)"
+STEP="3/4 variables Vercel"; say "3/4 · Variables en Vercel (production)"
 cd "$AURA_DIR"
 setenv() {
   vercel env rm "$1" production --yes >/dev/null 2>&1 || true
@@ -90,7 +111,15 @@ setenv NEXT_PUBLIC_PAGOPAR_ENABLED "true"
 unset PUBLIC_KEY PRIVATE_KEY SERVICE_PASSWORD
 
 # ---------- 4. Deploy ----------
-say "4/4 · Deploy a producción"
+STEP="4/4 deploy"; say "4/4 · Deploy a producción"
 vercel --prod --yes
 
+say "Verificación"
+RESP="$(curl -s -m 30 -X POST https://www.aurafragancias.store/api/pagopar/iniciar -H 'Content-Type: application/json' -d '{"orderId":"prueba-000000"}')"
+if echo "$RESP" | grep -q "No encontramos el pedido"; then
+  echo "   ✓ Tokens de Pagopar y usuario de Firebase funcionando en producción."
+else
+  echo "   ✗ El servidor respondió: $RESP"
+  echo "     (esperado: 'No encontramos el pedido.'). Revisá las variables con: vercel env ls production"
+fi
 say "Listo. Probá: https://www.aurafragancias.store → carrito → Finalizar pedido → Tarjeta."

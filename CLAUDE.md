@@ -4,8 +4,9 @@ Tienda de perfumes (Paraguay). **Next.js 16 (App Router) + React 19 + Tailwind v
 
 ## Deploy
 - **Hosting: Vercel**, proyecto `aura-fragancias` (team `croman-mvp-s-projects`), dominio canónico `www.aurafragancias.store` (también `aura-fragancias.vercel.app`).
-- ⚠️ **El auto-deploy desde GitHub NO está activo.** Hay que desplegar a mano:
-  `vercel deploy --prod --yes` (la carpeta está vinculada con `.vercel/`).
+- **Auto-deploy desde GitHub activo** (verificado 19 sep 2026: push a `main` → deploy `source: git`
+  en ~40 s). Si no aparece, `vercel deploy --prod --yes` (CLI logueada como `ymk5py-commits`, team
+  `croman-mvp-s-projects`; ojo, `vercel login` a veces queda en otra cuenta → `vercel switch`).
 - ⚠️ **Siempre tener `.vercelignore`** con `03_AURA_PERFUMES/` — esa carpeta (≈500MB de
   catálogos/dossiers internos) NO debe subirse al deploy (quedaría pública) ni a git.
 - `vercel.json` tiene rewrite SPA para que `/admin`, `/hombres`, etc. funcionen con BrowserRouter.

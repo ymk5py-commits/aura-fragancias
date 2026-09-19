@@ -12,6 +12,7 @@ import {
   type PaymentSnapshot,
   type PaymentStatus,
 } from '../lib/payments';
+import { errorText, reportIncident } from '../lib/incidentsService';
 import { trackEvent } from '../lib/pixel';
 import { capiTrack } from '../lib/tracking';
 import { gaPurchase } from '../lib/gtag';
@@ -38,6 +39,7 @@ const PagoResultado: React.FC<{ hash: string }> = ({ hash }) => {
   const [loading, setLoading] = useState(true);
   const polls = useRef(0);
   const tracked = useRef(false);
+  const reported = useRef(false);
 
   useEffect(() => setSnap(readPaymentSnapshot(hash)), [hash]);
 
@@ -47,7 +49,22 @@ const PagoResultado: React.FC<{ hash: string }> = ({ hash }) => {
       setStatus(data);
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'No pudimos consultar el pago.');
+      const message = errorText(e, 'No pudimos consultar el pago.');
+      setError(message);
+      // Una sola alerta por visita: el cliente ya pagó (o cree que pagó) y no ve el resultado.
+      if (!reported.current) {
+        reported.current = true;
+        const snapshot = readPaymentSnapshot(hash);
+        reportIncident({
+          source: 'verificacion-pago',
+          message,
+          detail: `hash ${hash}`,
+          orderId: snapshot?.orderId,
+          paymentMethod: 'tarjeta',
+          total: snapshot?.total,
+          customerName: snapshot?.name,
+        });
+      }
     } finally {
       setLoading(false);
     }

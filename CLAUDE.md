@@ -48,9 +48,29 @@ Tienda de perfumes (Paraguay). **Next.js 16 (App Router) + React 19 + Tailwind v
 - Colección `reviews`: el cliente escribe desde la ficha (`approved: false`); en /admin → Reseñas se
   aprueba, oculta, borra o carga una a mano. Las páginas públicas leen las aprobadas por SSR
   (`src/lib/server/reviews.ts`, revalida 5 min) y la ficha suma `aggregateRating`/`review` al
-  JSON-LD. **Hay que publicar las reglas** de `firestore.rules` (bloque `reviews`) en la consola de
-  Firebase; hasta entonces no se leen ni se guardan (sin romper nada).
+  JSON-LD. Reglas del bloque `reviews` publicadas el 19 sep 2026 (hasta ese día las reseñas fallaban
+  en silencio en producción: lo publicado era del 30/08).
 - Ficha en móvil: `StickyBuyBar` con precio y "Agregar" cuando el botón principal sale de la vista.
+
+## Reglas de Firestore (desde 19 sep 2026: por CLI, nunca a mano)
+- `firestore.rules` es la fuente de verdad. `npm run rules:deploy` las publica en `aura-fragancias`
+  (la carpeta está asociada a `ymk5py@gmail.com` con `firebase login:use`; el binario es
+  `~/.nvm/versions/node/v22.22.2/bin/firebase`). Copiar en la consola fue lo que las dejó viejas.
+- `npm run test:rules` corre `scripts/test-rules.mjs` contra el emulador (necesita Java): lo que
+  hace la tienda sin login y lo que debe seguir cerrado. Cada cambio de reglas → sumar caso → tests → deploy.
+
+## Alertas (19 sep 2026) — /admin → Alertas
+- Colección `incidents`: cada compra que no se pudo completar. La escribe el **navegador**
+  (`src/lib/incidentsService.ts`, `reportIncident`, nunca lanza) porque Äura no tiene usuario de
+  servicio en Firebase; las reglas permiten crear (validado, nace `seen:false`) y solo el admin lee,
+  marca (`seen`/`seenAt`) y borra.
+- Orígenes: `pedido-no-guardado` (saveOrder falló, tarjeta o transferencia), `pago-tarjeta`
+  (startCardPayment falló: hub/Pagopar), `comprobante` (uploadReceipt falló), `verificacion-pago`
+  (`/pago/[hash]` no pudo consultar el estado; una por visita).
+- Panel: pestaña Alertas con contador rojo, aviso arriba de las otras pestañas, filtro sin
+  revisar/todas, marcar revisada, borrar y botón de WhatsApp para recuperar la venta. Tiempo real
+  (`subscribeIncidents`, onSnapshot) desde `AdminDashboard`.
 
 ## Comandos
 - Dev: `npm run dev` (localhost:3000) · Build: `npm run build` · Typecheck: `npm run lint`
+- Reglas: `npm run test:rules` · `npm run rules:deploy`

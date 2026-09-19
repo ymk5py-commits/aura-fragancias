@@ -9,6 +9,7 @@ import { trackEvent } from '../lib/pixel';
 import { newEventId, capiTrack } from '../lib/tracking';
 import { toItem, gaBeginCheckout, gaGenerateLead } from '../lib/gtag';
 import { newOrderId, uploadReceipt, saveOrder, validateReceipt, RECEIPT_ACCEPT } from '../lib/ordersService';
+import { errorDetail, errorText, reportIncident } from '../lib/incidentsService';
 import { cldn } from '../lib/img';
 import { PAY_TRANSFER, PAY_CARD, isCardPaymentEnabled, startCardPayment, savePaymentSnapshot } from '../lib/payments';
 import {
@@ -230,6 +231,16 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       } catch (e) {
         // No bloquea el pago: el panel igual lo encuentra por el número de pedido en Pagopar.
         console.warn('[Äura] No se pudo guardar el pedido:', e);
+        reportIncident({
+          source: 'pedido-no-guardado',
+          message: errorText(e, 'No se pudo guardar el pedido (tarjeta).'),
+          detail: errorDetail(e),
+          orderId,
+          paymentMethod: PAY_CARD,
+          total,
+          customerName: formData.name.trim(),
+          customerPhone: phoneClean,
+        });
       }
 
       // 3) Memoria local para la página de resultado (mismo navegador).
@@ -239,8 +250,20 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       window.location.href = start.url;
       setTimeout(() => setSending(false), 8000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'No pudimos iniciar el pago con tarjeta. Probá con transferencia.');
+      const message = errorText(e, 'No pudimos iniciar el pago con tarjeta. Probá con transferencia.');
+      setError(message);
       setSending(false);
+      // La venta se frena acá: que el panel se entere, con datos para recuperarla.
+      reportIncident({
+        source: 'pago-tarjeta',
+        message,
+        detail: errorDetail(e),
+        orderId,
+        paymentMethod: PAY_CARD,
+        total,
+        customerName: formData.name.trim(),
+        customerPhone: phoneClean,
+      });
     }
   };
 
@@ -266,6 +289,18 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       } catch (e) {
         console.warn('[Äura] No se pudo subir el comprobante:', e);
         setReceiptErr('No se pudo subir el comprobante. Podés enviarlo por WhatsApp.');
+        reportIncident({
+          source: 'comprobante',
+          message: errorText(e, 'No se pudo subir el comprobante.'),
+          detail: [errorDetail(e), `${receipt.name} · ${Math.round(receipt.size / 1024)} KB · ${receipt.type || 'sin tipo'}`]
+            .filter(Boolean)
+            .join(' · '),
+          orderId,
+          paymentMethod: formData.paymentMethod,
+          total,
+          customerName: formData.name.trim(),
+          customerPhone: phoneClean,
+        });
       }
     }
 
@@ -291,6 +326,16 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       await saveOrder(order);
     } catch (e) {
       console.warn('[Äura] No se pudo guardar el pedido:', e);
+      reportIncident({
+        source: 'pedido-no-guardado',
+        message: errorText(e, 'No se pudo guardar el pedido.'),
+        detail: errorDetail(e),
+        orderId,
+        paymentMethod: formData.paymentMethod,
+        total,
+        customerName: formData.name.trim(),
+        customerPhone: phoneClean,
+      });
     }
 
     // 3) Tracking: el redirect a WhatsApp es un Lead (el Purchase real se

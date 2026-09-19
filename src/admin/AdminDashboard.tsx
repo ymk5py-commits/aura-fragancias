@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Plus, Search, Eye, EyeOff, Pencil, Trash2, LogOut, Download, Loader2, ExternalLink, PackageOpen,
+  Plus, Search, Eye, EyeOff, Pencil, Trash2, LogOut, Download, Loader2, ExternalLink, PackageOpen, AlertTriangle,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../context/ProductsContext';
@@ -14,6 +14,9 @@ import SettingsForm from './SettingsForm';
 import AdminSales from './AdminSales';
 import AdminOrders from './AdminOrders';
 import AdminReviews from './AdminReviews';
+import AdminAlertas from './AdminAlertas';
+import { subscribeIncidents, INCIDENT_LABELS } from '../lib/incidentsService';
+import type { Incident } from '../types';
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -24,7 +27,18 @@ const AdminDashboard: React.FC = () => {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [seeding, setSeeding] = useState(false);
   const [toast, setToast] = useState('');
-  const [tab, setTab] = useState<'products' | 'orders' | 'settings' | 'sales' | 'reviews'>('products');
+  const [tab, setTab] = useState<'products' | 'orders' | 'settings' | 'sales' | 'reviews' | 'alertas'>('products');
+
+  // Alertas en tiempo real: el contador rojo de la pestaña y el aviso de arriba
+  // salen de esta misma suscripción.
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [incidentsLoading, setIncidentsLoading] = useState(true);
+  useEffect(() => {
+    let unsub: (() => void) | undefined;
+    subscribeIncidents((list) => { setIncidents(list); setIncidentsLoading(false); }).then((u) => { unsub = u; });
+    return () => unsub?.();
+  }, []);
+  const unseen = useMemo(() => incidents.filter((i) => !i.seen), [incidents]);
 
   const notify = (msg: string) => {
     setToast(msg);
@@ -116,23 +130,49 @@ const AdminDashboard: React.FC = () => {
             { key: 'orders', label: 'Pedidos' },
             { key: 'sales', label: 'Ventas' },
             { key: 'reviews', label: 'Reseñas' },
+            { key: 'alertas', label: 'Alertas' },
             { key: 'settings', label: 'Configuración' },
           ] as const).map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] border-b-2 transition-colors ${
+              className={`inline-flex items-center gap-2 px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] border-b-2 transition-colors ${
                 tab === t.key ? 'border-aura-ink text-aura-ink' : 'border-transparent text-zinc-400 hover:text-zinc-600'
               }`}
             >
               {t.label}
+              {t.key === 'alertas' && unseen.length > 0 && (
+                <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white" aria-label={`${unseen.length} alertas sin revisar`}>
+                  {unseen.length > 99 ? '99+' : unseen.length}
+                </span>
+              )}
             </button>
           ))}
         </div>
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        {tab !== 'alertas' && unseen.length > 0 && (
+          <div className="bg-red-50 border border-red-200 p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <AlertTriangle size={20} className="text-red-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-red-900">
+                  {unseen.length === 1 ? 'Un cliente no pudo terminar la compra' : `${unseen.length} clientes no pudieron terminar la compra`}
+                </p>
+                <p className="text-[12px] text-red-700 mt-0.5">
+                  Última: {INCIDENT_LABELS[unseen[0].source] || unseen[0].source}
+                  {unseen[0].customerName ? ` · ${unseen[0].customerName}` : ''} — “{unseen[0].message}”
+                </p>
+              </div>
+            </div>
+            <button onClick={() => setTab('alertas')} className="shrink-0 inline-flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-red-700 transition-colors">
+              Ver alertas
+            </button>
+          </div>
+        )}
         {tab === 'orders' && <AdminOrders />}
+        {tab === 'alertas' && <AdminAlertas incidents={incidents} loading={incidentsLoading} />}
         {tab === 'settings' && <SettingsForm />}
         {tab === 'sales' && <AdminSales />}
         {tab === 'reviews' && <AdminReviews />}

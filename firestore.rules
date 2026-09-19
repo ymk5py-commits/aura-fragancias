@@ -38,6 +38,30 @@ service cloud.firestore {
         && request.resource.data.items.size() <= 50;
     }
 
+    // Alertas: compras que no se pudieron completar (ver src/lib/incidentsService.ts).
+    // - create: público y validado (el cliente no está logueado; Äura no tiene
+    //   usuario de servicio, así que escribe el navegador). Nace sin revisar.
+    // - read: solo admin. update: solo marcar revisada. delete: admin.
+    match /incidents/{id} {
+      allow get, list: if request.auth != null;
+      allow create: if
+        request.resource.data.source is string
+        && request.resource.data.source.size() > 0
+        && request.resource.data.source.size() <= 40
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 500
+        && request.resource.data.createdAt is int
+        && request.resource.data.seen == false
+        && (!('detail' in request.resource.data) || (request.resource.data.detail is string && request.resource.data.detail.size() <= 2000))
+        && (!('customerPhone' in request.resource.data) || (request.resource.data.customerPhone is string && request.resource.data.customerPhone.size() <= 40))
+        && (!('customerName' in request.resource.data) || (request.resource.data.customerName is string && request.resource.data.customerName.size() <= 120))
+        && (!('userAgent' in request.resource.data) || (request.resource.data.userAgent is string && request.resource.data.userAgent.size() <= 300));
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen', 'seenAt']);
+      allow delete: if request.auth != null;
+    }
+
     // Reseñas de clientes.
     // - create: público, queda pendiente (approved=false) con campos validados.
     // - read: cualquiera lee las aprobadas; el admin lee todas.

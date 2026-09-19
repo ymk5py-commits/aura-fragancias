@@ -51,7 +51,12 @@ Agregá las mismas 6 variables (Production + Preview) y volvé a desplegar.
 
 ## 6. Reglas de seguridad (¡importante!)
 
-**Firestore** (Rules → pegar y Publicar): la tienda puede LEER, solo un admin logueado puede ESCRIBIR.
+> **Desde el 19/09/2026 las reglas se publican desde la CLI**, no copiando en la consola:
+> `npm run rules:deploy` (publica `firestore.rules`, la fuente de verdad) y antes `npm run test:rules`
+> (emulador). Lo de abajo queda como referencia de cómo era el proceso manual y de qué hace cada bloque;
+> el archivo `firestore.rules` del repo es siempre más completo (pedidos, reseñas, alertas).
+
+**Firestore**: la tienda puede LEER, solo un admin logueado puede ESCRIBIR.
 
 ```
 rules_version = '2';

@@ -113,6 +113,33 @@ export interface Order {
   };
   paidAt?: number;
 }
+/* ---------- alertas (compras que no se pudieron completar) ---------- */
+
+export type IncidentSource =
+  | 'pedido-no-guardado' // el pedido no se pudo guardar en Firestore
+  | 'pago-tarjeta' // no se consiguió el link de pago (hub / Pagopar)
+  | 'comprobante' // el comprobante de transferencia no se pudo subir
+  | 'verificacion-pago'; // la página /pago no pudo consultar el estado
+
+/** Una falla que le impidió comprar a un cliente. Se ve en /admin → Alertas. */
+export interface Incident {
+  id: string;
+  source: IncidentSource;
+  message: string;
+  detail?: string;
+  orderId?: string;
+  paymentMethod?: string;
+  total?: number;
+  customerName?: string;
+  customerPhone?: string;
+  page?: string;
+  userAgent?: string;
+  createdAt: number;
+  /** Ya la revisó alguien del panel. */
+  seen: boolean;
+  seenAt?: number;
+}
+
 /* ---------- reseñas ---------- */
 
 export interface Review {

@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { documentNumber, hubCall, PagoparError } from '../../../../lib/server/pagopar';
 import { currentPricing } from '../../../../lib/server/pricing';
 import { SITE } from '../../../../lib/site';
+import { MAX_SHIPPING_COST } from '../../../../lib/validation';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -43,6 +44,7 @@ interface Body {
   address?: string;
   cityAndNeighborhood?: string;
   discountPercent?: number;
+  shippingCost?: number;
   items?: Item[];
   ruc?: string;
   razonSocial?: string;
@@ -92,7 +94,13 @@ export async function POST(req: NextRequest) {
     const discountPercent = Math.max(0, Math.min(100, Math.round(Number(b.discountPercent) || 0)));
     if (discountPercent > pricing.welcomePercent) return bad('El descuento no es válido.');
     const discountAmount = discountPercent > 0 ? Math.round(subtotal * (discountPercent / 100)) : 0;
-    const total = subtotal - discountAmount;
+    const productsTotal = subtotal - discountAmount;
+
+    // Delivery ya coordinado por WhatsApp (opcional): lo carga el cliente y
+    // se cobra en la misma transacción, como un ítem más.
+    const shippingCost = Math.max(0, Math.round(Number(b.shippingCost) || 0));
+    if (shippingCost > MAX_SHIPPING_COST) return bad('Revisá el monto del delivery.');
+    const total = productsTotal + shippingCost;
     if (total < MIN_AMOUNT) return bad(`El monto mínimo para pagar con tarjeta es Gs. ${MIN_AMOUNT}.`);
     if (total > MAX_AMOUNT) return bad(`El monto máximo para pagar con tarjeta es Gs. ${MAX_AMOUNT}.`);
 
@@ -102,6 +110,15 @@ export async function POST(req: NextRequest) {
       const last = hubItems[hubItems.length - 1];
       last.precioTotal = Math.max(0, last.precioTotal - discountAmount);
       last.nombre = `${last.nombre} (con ${discountPercent}% de descuento)`.slice(0, 200);
+    }
+    if (shippingCost > 0) {
+      hubItems.push({
+        nombre: 'Delivery',
+        cantidad: 1,
+        precioTotal: shippingCost,
+        idProducto: 'delivery',
+        urlImagen: '',
+      });
     }
 
     const result = await hubCall<{ hash: string; url: string; numeroPedido: string }>({
@@ -123,7 +140,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!result?.hash) return bad('Pagopar no devolvió el link de pago.', 502);
-    return NextResponse.json({ hash: result.hash, url: result.url, numeroPedido: result.numeroPedido, total });
+    return NextResponse.json({ hash: result.hash, url: result.url, numeroPedido: result.numeroPedido, total, shippingCost });
   } catch (error) {
     if (error instanceof PagoparError) return bad(error.message, 502);
     console.error('[pagopar/iniciar]', error);

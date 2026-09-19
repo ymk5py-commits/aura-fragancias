@@ -89,6 +89,8 @@ export interface Order {
   discountPercent: number;
   discountAmount: number;
   total: number;
+  /** Delivery ya coordinado que el cliente cargó en el checkout (opcional). No está en `total`. */
+  shippingCost?: number;
   freeShipping: boolean;
   items: OrderItem[];
   // Pago

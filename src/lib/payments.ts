@@ -43,6 +43,8 @@ export interface CardPaymentRequest {
   address: string;
   cityAndNeighborhood: string;
   discountPercent: number;
+  /** Delivery ya coordinado (opcional): se cobra en la misma transacción como un ítem más. */
+  shippingCost?: number;
   /** Ítems con la foto del producto (Pagopar la muestra en su checkout). */
   items: Array<OrderItem & { image?: string }>;
   /** Factura con RUC (opcional): va al comprador de Pagopar. */
@@ -102,7 +104,10 @@ export interface PaymentSnapshot {
   orderId: string;
   docId?: string;
   name: string;
+  /** Productos (con descuento), sin el delivery. */
   total: number;
+  /** Delivery cobrado junto con el pedido, si el cliente lo cargó. */
+  shippingCost?: number;
   items: OrderItem[];
   createdAt: number;
 }

@@ -13,8 +13,8 @@ import { errorDetail, errorText, reportIncident } from '../lib/incidentsService'
 import { cldn } from '../lib/img';
 import { PAY_TRANSFER, PAY_CARD, isCardPaymentEnabled, startCardPayment, savePaymentSnapshot } from '../lib/payments';
 import {
-  normalizePhone, normalizeRuc, validateAddress, validateCity, validateDocument, validateEmail, validateName,
-  validatePhone, validateRazonSocial, validateRuc,
+  normalizePhone, normalizeRuc, parseGs, validateAddress, validateCity, validateDocument, validateEmail, validateName,
+  validatePhone, validateRazonSocial, validateRuc, validateShippingCost,
 } from '../lib/validation';
 
 interface CheckoutProps {
@@ -83,7 +83,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
   const paysWithCard = isCardPaymentEnabled && formData.paymentMethod === PAY_CARD;
   // Transacción de Pagopar ya creada (se reutiliza si el guardado falla y se reintenta).
   const [cardStart, setCardStart] = useState<{ hash: string; url: string } | null>(null);
-  type Field = 'name' | 'phone' | 'cityAndNeighborhood' | 'address' | 'email' | 'document' | 'ruc' | 'razonSocial';
+  type Field = 'name' | 'phone' | 'cityAndNeighborhood' | 'address' | 'email' | 'document' | 'ruc' | 'razonSocial' | 'shippingCost';
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<Field, string>>>({});
   const setField = (field: Field, value: string) => {
     setFormData((f) => ({ ...f, [field]: value }));
@@ -102,8 +102,15 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
 
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const discountAmount = discount > 0 ? Math.round(subtotal * (discount / 100)) : 0; // PYG entero
+  /** Productos con descuento. El delivery va aparte, igual que en el panel. */
   const total = subtotal - discountAmount;
   const isFreeShipping = subtotal >= 300000;
+  /** Delivery ya coordinado por WhatsApp, si el cliente quiere pagarlo junto con el pedido (opcional). */
+  const [delivery, setDelivery] = useState(0);
+  const shippingCost = isFreeShipping ? 0 : delivery;
+  /** Lo que se paga con tarjeta o se transfiere: productos + delivery. */
+  const totalACobrar = total + shippingCost;
+  const fmtGs = (n: number) => `Gs. ${n.toLocaleString('es-PY')}`;
 
   const applyCoupon = () => {
     const code = coupon.trim().toUpperCase();
@@ -142,6 +149,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
     check('address', validateAddress(formData.address));
     check('email', validateEmail(formData.email, paysWithCard));
     check('document', validateDocument(formData.document, paysWithCard));
+    check('shippingCost', validateShippingCost(shippingCost));
     if (wantsInvoice) {
       check('ruc', validateRuc(formData.ruc));
       check('razonSocial', validateRazonSocial(formData.razonSocial));
@@ -197,6 +205,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
           address: formData.address.trim(),
           cityAndNeighborhood: formData.cityAndNeighborhood.trim(),
           discountPercent: discount,
+          ...(shippingCost > 0 ? { shippingCost } : {}),
           // La foto va solo a Pagopar (para su checkout), no se guarda en el pedido.
           items: items.map((i, idx) => ({ ...i, image: cldn(cart[idx]?.perfume.imageUrl, 400) })),
           ...(invoice ? { ruc: invoice.ruc, razonSocial: invoice.razonSocial } : {}),
@@ -218,6 +227,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
         discountPercent: discount,
         discountAmount,
         total,
+        ...(shippingCost > 0 ? { shippingCost } : {}),
         freeShipping: isFreeShipping,
         items,
         paymentMethod: PAY_CARD,
@@ -244,7 +254,9 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       }
 
       // 3) Memoria local para la página de resultado (mismo navegador).
-      savePaymentSnapshot(start.hash, { orderId, docId, name: formData.name.trim(), total, items, createdAt: Date.now() });
+      savePaymentSnapshot(start.hash, {
+        orderId, docId, name: formData.name.trim(), total, ...(shippingCost > 0 ? { shippingCost } : {}), items, createdAt: Date.now(),
+      });
 
       // 4) A Pagopar.
       window.location.href = start.url;
@@ -260,7 +272,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
         detail: errorDetail(e),
         orderId,
         paymentMethod: PAY_CARD,
-        total,
+        total: totalACobrar,
         customerName: formData.name.trim(),
         customerPhone: phoneClean,
       });
@@ -316,6 +328,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       discountPercent: discount,
       discountAmount,
       total,
+      ...(shippingCost > 0 ? { shippingCost } : {}),
       freeShipping: isFreeShipping,
       items,
       paymentMethod: formData.paymentMethod,
@@ -372,9 +385,9 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       `*Pedido:*\n${itemsText}\n\n` +
       `Subtotal: Gs. ${subtotal.toLocaleString('es-PY')}\n` +
       (discountAmount > 0 ? `Descuento (${discount}%): -Gs. ${discountAmount.toLocaleString('es-PY')}\n` : '') +
-      `Envío: ${isFreeShipping ? 'GRATIS' : 'A coordinar según zona'}\n` +
-      `*TOTAL A TRANSFERIR: Gs. ${total.toLocaleString('es-PY')}*\n` +
-      (isFreeShipping ? '\n' : `_El costo del envío se coordina aparte._\n\n`) +
+      `Envío: ${isFreeShipping ? 'GRATIS' : shippingCost > 0 ? fmtGs(shippingCost) : 'A coordinar según zona'}\n` +
+      `*TOTAL A TRANSFERIR: ${fmtGs(totalACobrar)}*\n` +
+      (isFreeShipping ? '\n' : shippingCost > 0 ? `_Incluye el delivery ya coordinado._\n\n` : `_El costo del envío se coordina aparte._\n\n`) +
       (receiptUrl
         ? `*Comprobante adjunto:*\n${receiptUrl}`
         : `_Adjunto el comprobante de la transferencia en este chat._`)
@@ -475,6 +488,23 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                       value={formData.address} onChange={(e) => setField('address', e.target.value)} />
                     <FieldError msg={fieldErrors.address} />
                   </div>
+                  {!isFreeShipping && (
+                    <div className="border border-zinc-100 rounded-sm p-4 sm:p-5 bg-zinc-50/30">
+                      <label className={labelCls}>COSTO DEL DELIVERY (OPCIONAL)</label>
+                      <input type="text" inputMode="numeric" placeholder="Gs. 0" className={inputCls} maxLength={14}
+                        aria-invalid={Boolean(fieldErrors.shippingCost)}
+                        value={delivery ? fmtGs(delivery) : ''}
+                        onChange={(e) => {
+                          setDelivery(parseGs(e.target.value));
+                          setFieldErrors((er) => (er.shippingCost ? { ...er, shippingCost: undefined } : er));
+                        }} />
+                      <FieldError msg={fieldErrors.shippingCost} />
+                      <p className="text-[11px] text-zinc-500 leading-relaxed mt-2">
+                        Si ya coordinaste el envío con Äura, cargá el monto y lo {paysWithCard ? 'pagás con la tarjeta' : 'sumás a la transferencia'} junto
+                        con el pedido. Si lo dejás vacío, te lo cotizamos por WhatsApp según tu zona.
+                      </p>
+                    </div>
+                  )}
                   <div className="border border-zinc-100 rounded-sm p-4 sm:p-5 bg-zinc-50/30">
                     <label className="flex items-start gap-3 cursor-pointer">
                       <input type="checkbox" checked={wantsInvoice}
@@ -569,9 +599,9 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                 <div className="bg-aura-ink text-white p-5 sm:p-6 rounded-sm mb-6 flex items-center justify-between gap-4">
                   <div>
                     <span className="block text-[9px] font-bold uppercase tracking-[0.25em] text-aura-gold mb-1">Monto a pagar</span>
-                    <span className="block text-2xl sm:text-3xl font-bold tabular">Gs. {total.toLocaleString('es-PY')}</span>
+                    <span className="block text-2xl sm:text-3xl font-bold tabular">{fmtGs(totalACobrar)}</span>
                     <span className="block text-[9px] text-white/50 uppercase tracking-widest mt-1">
-                      {isFreeShipping ? 'Envío gratis incluido' : 'Envío aparte · lo coordinamos por WhatsApp'}
+                      {isFreeShipping ? 'Envío gratis incluido' : shippingCost > 0 ? `Incluye ${fmtGs(shippingCost)} de delivery` : 'Envío aparte · lo coordinamos por WhatsApp'}
                     </span>
                   </div>
                   <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-white/60 text-right shrink-0">
@@ -587,7 +617,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                 <ul className="mt-5 space-y-2 text-[11px] text-zinc-500">
                   <li className="flex items-center gap-2"><Lock size={12} className="text-aura-gold-deep shrink-0" /> Tus datos de tarjeta los procesa Pagopar/Bancard; nunca pasan por nuestra web.</li>
                   <li className="flex items-center gap-2"><Check size={12} className="text-aura-gold-deep shrink-0" /> El pedido se confirma solo cuando Pagopar aprueba el pago.</li>
-                  <li className="flex items-center gap-2"><MessageCircle size={12} className="text-aura-gold-deep shrink-0" /> El envío lo coordinamos por WhatsApp después de la confirmación.</li>
+                  <li className="flex items-center gap-2"><MessageCircle size={12} className="text-aura-gold-deep shrink-0" /> {shippingCost > 0 ? 'El delivery ya queda pago: después de la confirmación coordinamos la entrega por WhatsApp.' : 'El envío lo coordinamos por WhatsApp después de la confirmación.'}</li>
                 </ul>
               </div>
             ) : (
@@ -602,9 +632,9 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                   <div className="bg-aura-ink text-white p-5 sm:p-6 rounded-sm mb-6 flex items-center justify-between gap-4">
                     <div>
                       <span className="block text-[9px] font-bold uppercase tracking-[0.25em] text-aura-gold mb-1">Monto a transferir</span>
-                      <span className="block text-2xl sm:text-3xl font-bold tabular">Gs. {total.toLocaleString('es-PY')}</span>
+                      <span className="block text-2xl sm:text-3xl font-bold tabular">{fmtGs(totalACobrar)}</span>
                       <span className="block text-[9px] text-white/50 uppercase tracking-widest mt-1">
-                        {isFreeShipping ? 'Envío gratis incluido' : 'Envío aparte · lo coordinamos por WhatsApp'}
+                        {isFreeShipping ? 'Envío gratis incluido' : shippingCost > 0 ? `Incluye ${fmtGs(shippingCost)} de delivery` : 'Envío aparte · lo coordinamos por WhatsApp'}
                       </span>
                     </div>
                     <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-white/60 text-right shrink-0">
@@ -747,6 +777,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                   <span className="text-[11px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">ENVÍO</span>
                   {isFreeShipping ? (
                     <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest bg-green-50 px-2 py-1 rounded-sm">GRATIS</span>
+                  ) : shippingCost > 0 ? (
+                    <span className="text-[11px] sm:text-xs font-bold text-zinc-600">{fmtGs(shippingCost)}</span>
                   ) : (
                     <span className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest">A coordinar</span>
                   )}
@@ -758,13 +790,19 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                   <span className="text-lg sm:text-2xl font-luxury font-bold text-zinc-900">TOTAL</span>
                   <span className="text-[9px] sm:text-[10px] text-zinc-400 uppercase tracking-[0.18em] mt-1">{paysWithCard ? 'a pagar' : 'a transferir'}</span>
                 </div>
-                <span className="text-lg sm:text-2xl font-bold text-zinc-900 whitespace-nowrap">Gs. {total.toLocaleString('es-PY')}</span>
+                <span className="text-lg sm:text-2xl font-bold text-zinc-900 whitespace-nowrap">{fmtGs(totalACobrar)}</span>
               </div>
 
-              {!isFreeShipping && (
+              {!isFreeShipping && shippingCost === 0 && (
                 <p className="text-[10px] sm:text-[11px] text-zinc-500 leading-relaxed mb-6 sm:mb-8">
                   El envío no está incluido: se cotiza según tu zona y lo coordinamos por WhatsApp
                   después de tu pedido. Por ahora {paysWithCard ? 'pagás' : 'transferí'} solamente este monto.
+                  Si ya lo coordinaste, podés cargarlo en el formulario y pagarlo junto con el pedido.
+                </p>
+              )}
+              {!isFreeShipping && shippingCost > 0 && (
+                <p className="text-[10px] sm:text-[11px] text-zinc-500 leading-relaxed mb-6 sm:mb-8">
+                  Incluye {fmtGs(total)} de productos y {fmtGs(shippingCost)} de delivery.
                 </p>
               )}
               {isFreeShipping && <div className="mb-6 sm:mb-8" />}

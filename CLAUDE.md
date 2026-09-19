@@ -41,6 +41,12 @@ Tienda de perfumes (Paraguay). **Next.js 16 (App Router) + React 19 + Tailwind v
   botón "Verificar pago", y los deja `confirmado` + `pagoparStatus: pagado`.
 - Reintento de pago = volver al mismo link de Pagopar (`pagopar.com/pagos/<hash>`); no se crea
   otra transacción. `id_pedido_comercio` = `orderId` (AURA-…).
+- **Delivery opcional (19 sep 2026):** el checkout tiene "Costo del delivery (opcional)" (oculto con
+  envío gratis ≥ 300k). Si el cliente lo carga, se guarda como `shippingCost` en el pedido (aparte de
+  `total`, que sigue siendo productos) y se cobra con la tarjeta en la misma transacción: `iniciar`
+  lo suma al `monto` y lo manda al hub como ítem "Delivery" (el hub exige suma de ítems = total).
+  Con transferencia se suma al "monto a transferir" y al mensaje de WhatsApp. Vacío = se cotiza
+  por WhatsApp como antes. Snapshot `aura_pago_<hash>` lleva `shippingCost` para `/pago/[hash]`.
 - Código: `src/lib/server/{pagopar,pricing}.ts`, rutas `src/app/api/pagopar/*`, cliente
   `src/lib/payments.ts`, validación de campos `src/lib/validation.ts`,
   `src/components/{Checkout,PagoResultado}.tsx`, `src/admin/AdminOrders.tsx`.

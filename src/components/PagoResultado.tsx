@@ -118,10 +118,12 @@ const PagoResultado: React.FC<{ hash: string }> = ({ hash }) => {
   }, [status]);
 
   const orderLabel = snap?.orderId || status?.orderId || '';
-  const total = snap?.total || montoNumber(status?.monto || '');
+  // Lo que cobró Pagopar: productos + delivery (si el cliente lo cargó en el checkout).
+  const shippingCost = snap?.shippingCost || 0;
+  const total = (snap ? snap.total + shippingCost : 0) || montoNumber(status?.monto || '');
   const waText = encodeURIComponent(
     orderLabel
-      ? `Hola Äura 👋 Pagué con tarjeta el pedido ${orderLabel}${total ? ` (${fmt(total)})` : ''}. Quiero coordinar el envío.`
+      ? `Hola Äura 👋 Pagué con tarjeta el pedido ${orderLabel}${total ? ` (${fmt(total)})` : ''}. Quiero coordinar ${shippingCost > 0 ? 'la entrega' : 'el envío'}.`
       : 'Hola Äura 👋 Tengo una consulta sobre mi pago con tarjeta.'
   );
   const waHref = `https://wa.me/${settings.whatsappNumber}?text=${waText}`;
@@ -163,7 +165,9 @@ const PagoResultado: React.FC<{ hash: string }> = ({ hash }) => {
               {status.numeroComprobante ? ` Comprobante N.º ${status.numeroComprobante}.` : ''}
             </p>
             <p className="text-sm text-zinc-500 leading-relaxed mt-3">
-              Ahora coordinamos el envío por WhatsApp{snap?.name ? `, ${snap.name.split(' ')[0]}` : ''}. Tocá el botón y te respondemos con el costo según tu zona.
+              {shippingCost > 0
+                ? <>El delivery ({fmt(shippingCost)}) ya está pago. Ahora coordinamos la entrega por WhatsApp{snap?.name ? `, ${snap.name.split(' ')[0]}` : ''}: tocá el botón y te confirmamos el día.</>
+                : <>Ahora coordinamos el envío por WhatsApp{snap?.name ? `, ${snap.name.split(' ')[0]}` : ''}. Tocá el botón y te respondemos con el costo según tu zona.</>}
             </p>
 
             {snap?.items && snap.items.length > 0 && (

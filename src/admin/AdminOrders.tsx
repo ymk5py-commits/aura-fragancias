@@ -267,9 +267,11 @@ const AdminOrders: React.FC = () => {
                 {/* Importe + acciones */}
                 <div className="shrink-0 flex lg:flex-col items-center lg:items-end justify-between gap-3 lg:w-52">
                   <div className="text-right">
-                    <span className="block text-lg font-bold text-aura-ink tabular">{fmt(o.total)}</span>
+                    <span className="block text-lg font-bold text-aura-ink tabular">{fmt(o.total + (o.shippingCost || 0))}</span>
                     {o.discountAmount > 0 && <span className="block text-[10px] text-aura-gold-deep">−{fmt(o.discountAmount)} ({o.discountPercent}%)</span>}
-                    <span className="block text-[10px] text-zinc-400">{o.freeShipping ? 'Envío gratis' : '+ envío'}</span>
+                    <span className="block text-[10px] text-zinc-400">
+                      {o.freeShipping ? 'Envío gratis' : (o.shippingCost || 0) > 0 ? `incluye ${fmt(o.shippingCost || 0)} de delivery` : '+ envío'}
+                    </span>
                   </div>
                   {o.status === 'pendiente' && isCardPayment(o.paymentMethod) && o.pagoparHash && (
                     <button onClick={() => void verifyCard(o)} disabled={busy === o.id}

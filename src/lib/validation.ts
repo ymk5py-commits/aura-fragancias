@@ -101,6 +101,23 @@ export function validateRuc(value: string): string | null {
   return null;
 }
 
+/** Tope para el delivery que carga el cliente: más que esto es un error de tipeo. */
+export const MAX_SHIPPING_COST = 1_000_000;
+
+/** "₲ 25.000" → 25000. Solo dígitos; vacío → 0. */
+export function parseGs(value: string): number {
+  const digits = String(value || '').replace(/\D/g, '');
+  return digits ? parseInt(digits, 10) : 0;
+}
+
+/** Delivery opcional: vacío (0) o entre Gs. 1.000 y el tope. */
+export function validateShippingCost(value: number): string | null {
+  if (!value) return null;
+  if (value > MAX_SHIPPING_COST) return 'Revisá el monto del delivery.';
+  if (value < 1000) return 'El monto del delivery no puede ser menor a Gs. 1.000.';
+  return null;
+}
+
 export function validateRazonSocial(value: string): string | null {
   const v = value.trim();
   if (v.length < 3) return 'Escribí el nombre o razón social que va en la factura.';

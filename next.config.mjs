@@ -8,7 +8,13 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
-      { protocol: 'https', hostname: '*.firebasestorage.app' },
+      // Fotos subidas desde el panel. Firebase Storage sirve las descargas desde
+      // firebasestorage.googleapis.com con el bucket en la ruta, no como host.
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+        pathname: '/v0/b/aura-fragancias.firebasestorage.app/o/**',
+      },
     ],
   },
 };

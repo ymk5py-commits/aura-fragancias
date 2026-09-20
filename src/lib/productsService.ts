@@ -50,16 +50,22 @@ export async function toggleVisible(id: string, visible: boolean): Promise<void>
   await updateProductFields(id, { visible });
 }
 
-/** Sube una imagen a Storage y devuelve su URL pública. */
+/**
+ * Sube una imagen a Storage y devuelve su URL pública.
+ * Antes de subir la comprime en el navegador (JPEG, ver imageCompress.ts):
+ * una foto del panel pasa de ~2 MB a unos cientos de KB.
+ */
 export async function uploadProductImage(file: File, code: string): Promise<string> {
-  const [storage, { ref, uploadBytes, getDownloadURL }] = await Promise.all([
+  const [storage, { ref, uploadBytes, getDownloadURL }, { compressImage }] = await Promise.all([
     getFirebaseStorage(),
     import('firebase/storage'),
+    import('./imageCompress'),
   ]);
+  const upload = await compressImage(file);
   const safeCode = (code || 'producto').replace(/[^a-zA-Z0-9_-]/g, '');
-  const path = `products/${safeCode}-${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+  const path = `products/${safeCode}-${Date.now()}-${upload.name.replace(/\s+/g, '_')}`;
   const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, file);
+  await uploadBytes(storageRef, upload, { contentType: upload.type });
   return getDownloadURL(storageRef);
 }
 

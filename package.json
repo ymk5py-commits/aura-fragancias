@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "test:images": "node --test scripts/test-images.mjs",
+    "test:compress": "node --test scripts/test-compress.mjs",
     "test:rules": "firebase emulators:exec --only firestore --project demo-aura-rules \"node scripts/test-rules.mjs\"",
     "rules:deploy": "firebase deploy --only firestore:rules --project aura-fragancias"
   },

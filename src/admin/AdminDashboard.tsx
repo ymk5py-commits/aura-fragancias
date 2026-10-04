@@ -151,7 +151,7 @@ const AdminDashboard: React.FC = () => {
           {([
             { key: 'products', label: 'Productos' },
             { key: 'orders', label: 'Pedidos' },
-            { key: 'sales', label: 'Ventas' },
+            { key: 'sales', label: 'Caja / ERP' },
             { key: 'labels', label: 'Etiquetas' },
             { key: 'reviews', label: 'Reseñas' },
             { key: 'alertas', label: 'Alertas' },

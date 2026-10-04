@@ -2,6 +2,78 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Caja privada: cuenta administrativa actual del negocio.
+    function isCashAdmin() {
+      return request.auth != null && request.auth.token.email == 'ymk5py@gmail.com';
+    }
+
+    function cashAmount(value) {
+      return value is int && value >= 0 && value <= 1000000000000;
+    }
+
+    function validSale(d) {
+      return d.keys().hasAll(['date', 'customer', 'phone', 'channel', 'paymentMethod', 'status', 'items', 'discount', 'deliveryCharged', 'deliveryActual', 'otherCosts', 'collected', 'notes', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['date', 'customer', 'phone', 'channel', 'paymentMethod', 'status', 'items', 'discount', 'deliveryCharged', 'deliveryActual', 'otherCosts', 'collected', 'notes', 'createdAt', 'updatedAt', 'sourceOrderId', 'sourceOrderCode'])
+        && d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.customer is string && d.customer.size() <= 120
+        && d.phone is string && d.phone.size() <= 40
+        && d.notes is string && d.notes.size() <= 2000
+        && d.channel in ['Mostrador', 'WhatsApp', 'Instagram', 'Web', 'Mayorista', 'Otro']
+        && d.paymentMethod in ['Efectivo', 'Transferencia', 'QR', 'Tarjeta', 'Otro']
+        && d.status in ['pagada', 'pendiente', 'anulada']
+        && d.items is list && d.items.size() > 0 && d.items.size() <= 50
+        && cashAmount(d.discount) && cashAmount(d.deliveryCharged) && cashAmount(d.deliveryActual)
+        && cashAmount(d.otherCosts) && cashAmount(d.collected)
+        && d.createdAt is timestamp && d.updatedAt == request.time
+        && (!('sourceOrderId' in d) || (d.sourceOrderId is string && d.sourceOrderId.size() <= 128))
+        && (!('sourceOrderCode' in d) || (d.sourceOrderCode is string && d.sourceOrderCode.size() <= 80));
+    }
+
+    function validExpense(d) {
+      return d.keys().hasAll(['date', 'type', 'category', 'description', 'payee', 'amount', 'paymentMethod', 'status', 'notes', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['date', 'type', 'category', 'description', 'payee', 'amount', 'paymentMethod', 'status', 'notes', 'createdAt', 'updatedAt'])
+        && d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.type in ['Operativo', 'Mercadería', 'Inversión', 'Retiro']
+        && d.category is string && d.category.size() > 0 && d.category.size() <= 100
+        && d.description is string && d.description.size() > 0 && d.description.size() <= 300
+        && d.payee is string && d.payee.size() <= 120
+        && d.notes is string && d.notes.size() <= 2000
+        && cashAmount(d.amount) && d.amount > 0
+        && d.paymentMethod in ['Efectivo', 'Transferencia', 'QR', 'Tarjeta', 'Otro']
+        && d.status in ['pagado', 'pendiente', 'anulado']
+        && d.createdAt is timestamp && d.updatedAt == request.time;
+    }
+
+    match /sales/{id} {
+      allow read: if isCashAdmin();
+      allow create: if isCashAdmin() && validSale(request.resource.data) && request.resource.data.createdAt == request.time;
+      allow update: if isCashAdmin() && validSale(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.get('sourceOrderId', '') == resource.data.get('sourceOrderId', '')
+        && request.resource.data.get('sourceOrderCode', '') == resource.data.get('sourceOrderCode', '');
+      // Se anulan los movimientos para conservar su historial.
+      allow delete: if false;
+    }
+
+    match /expenses/{id} {
+      allow read: if isCashAdmin();
+      allow create: if isCashAdmin() && validExpense(request.resource.data) && request.resource.data.createdAt == request.time;
+      allow update: if isCashAdmin() && validExpense(request.resource.data) && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if false;
+    }
+
+    match /salesConfig/{id} {
+      allow read: if isCashAdmin();
+      allow create, update: if isCashAdmin() && id == 'costs'
+        && request.resource.data.keys().hasOnly(['costs', 'recipe', 'updatedAt'])
+        && request.resource.data.costs is map
+        && request.resource.data.costs.keys().hasOnly(['10 ML', '30 ML', '50 ML'])
+        && cashAmount(request.resource.data.costs['10 ML'])
+        && cashAmount(request.resource.data.costs['30 ML'])
+        && cashAmount(request.resource.data.costs['50 ML'])
+        && request.resource.data.updatedAt == request.time;
+    }
+
     // Catálogo: lectura pública, escritura solo admin autenticado.
     match /products/{id} {
       allow read: if true;

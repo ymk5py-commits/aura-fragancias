@@ -5,8 +5,9 @@ import {
   Loader2, FileText, ExternalLink, CheckCircle2, XCircle, PackageOpen, Search, Phone, MapPin, RefreshCw, CreditCard,
 } from 'lucide-react';
 import { Order, OrderStatus } from '../types';
-import { subscribeOrders, setOrderStatus, updateOrderFields } from '../lib/ordersService';
+import { subscribeOrders, setOrderStatus } from '../lib/ordersService';
 import { fetchPaymentStatus, isCardPayment } from '../lib/payments';
+import { confirmOrderAndRecordSale, cancelOrderAndSale } from '../lib/salesService';
 
 const STATUS_STYLE: Record<OrderStatus, string> = {
   pendiente: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -47,7 +48,7 @@ const AdminOrders: React.FC = () => {
     try {
       const st = await fetchPaymentStatus(o.pagoparHash);
       if (st.pagado) {
-        await updateOrderFields(o.id, {
+        await confirmOrderAndRecordSale(o.id, {
           status: 'confirmado',
           pagoparStatus: 'pagado',
           paidAt: Date.now(),
@@ -103,7 +104,7 @@ const AdminOrders: React.FC = () => {
     if (!confirm(`¿Confirmar la venta ${o.orderId} por ${fmt(o.total)}?\n\nSe marcará como pagada y se enviará la conversión a Meta.`)) return;
     setBusy(o.id);
     try {
-      await setOrderStatus(o.id, 'confirmado');
+      await confirmOrderAndRecordSale(o.id, { paidAt: Date.now() });
       const res = await fetch('/api/meta-capi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -124,7 +125,7 @@ const AdminOrders: React.FC = () => {
       else if (json.ok) notify(`✓ Venta ${o.orderId} confirmada y Purchase enviado a Meta.`);
       else notify(`Pedido confirmado, pero Meta rechazó el evento: ${JSON.stringify(json.meta?.error || json).slice(0, 120)}`);
     } catch {
-      notify('Se marcó el pedido, pero falló el envío a Meta.');
+      notify('No se pudo completar la confirmación. Revisá el estado del pedido antes de reintentar.');
     } finally {
       setBusy(null);
     }
@@ -134,7 +135,7 @@ const AdminOrders: React.FC = () => {
     if (!o.id) return;
     if (!confirm(`¿Cancelar el pedido ${o.orderId}?`)) return;
     setBusy(o.id);
-    try { await setOrderStatus(o.id, 'cancelado'); notify('Pedido cancelado.'); }
+    try { await cancelOrderAndSale(o.id); notify('Pedido cancelado.'); }
     catch { notify('No se pudo cancelar.'); }
     finally { setBusy(null); }
   };
@@ -292,9 +293,15 @@ const AdminOrders: React.FC = () => {
                     </div>
                   )}
                   {o.status === 'confirmado' && (
-                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-green-700">
+                    <div className="flex flex-col items-end gap-2"><span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-green-700">
                       <CheckCircle2 size={13} /> Venta confirmada
-                    </span>
+                    </span><button disabled={busy === o.id} className="text-[10px] text-zinc-500 underline disabled:opacity-50" onClick={async () => {
+                      if (!o.id) return;
+                      setBusy(o.id);
+                      try { const created = await confirmOrderAndRecordSale(o.id, {}, true); notify(created ? 'Pedido registrado en Caja / ERP. Revisá delivery y comisiones.' : 'Este pedido ya tiene su registro de caja.'); }
+                      catch (e) { notify(e instanceof Error ? e.message : 'No se pudo registrar en caja.'); }
+                      finally { setBusy(null); }
+                    }}>Registrar en caja (pedidos anteriores)</button></div>
                   )}
                   {o.status === 'cancelado' && (
                     <button onClick={() => o.id && setOrderStatus(o.id, 'pendiente')}

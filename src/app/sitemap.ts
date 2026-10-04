@@ -2,6 +2,10 @@ import type { MetadataRoute } from 'next';
 import { getProducts } from '../lib/serverData';
 import { SITE } from '../lib/site';
 
+// La ruta de metadata debe regenerarse junto con el catálogo de Firestore.
+// Así las altas, bajas y cambios de visibilidad llegan también al sitemap.
+export const revalidate = 120;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { products } = await getProducts();
   const now = new Date();

@@ -29,12 +29,21 @@ function parseFields(fields: Record<string, any>): Record<string, any> {
 export async function getProducts(): Promise<{ products: Perfume[]; source: 'firebase' | 'local' }> {
   if (!PROJECT || !KEY) return { products: PERFUMES, source: 'local' };
   try {
-    const res = await fetch(`${BASE}/products?key=${KEY}&pageSize=300`, {
-      next: { revalidate: 120 }, // ISR: refresca cada 2 min
-    });
-    if (!res.ok) return { products: PERFUMES, source: 'local' };
-    const data = await res.json();
-    const docs = data.documents || [];
+    // Firestore puede devolver varias páginas incluso con pageSize definido.
+    // Leerlas todas evita omitir perfumes cuando crece el catálogo.
+    const docs: any[] = [];
+    let pageToken: string | undefined;
+    do {
+      const params = new URLSearchParams({ key: KEY, pageSize: '300' });
+      if (pageToken) params.set('pageToken', pageToken);
+      const res = await fetch(`${BASE}/products?${params}`, {
+        next: { revalidate: 120 }, // ISR: refresca cada 2 min
+      });
+      if (!res.ok) return { products: PERFUMES, source: 'local' };
+      const data = await res.json();
+      docs.push(...(data.documents || []));
+      pageToken = data.nextPageToken;
+    } while (pageToken);
     if (!docs.length) return { products: PERFUMES, source: 'local' };
     const products: Perfume[] = docs.map((d: any) => {
       const f = parseFields(d.fields || {});

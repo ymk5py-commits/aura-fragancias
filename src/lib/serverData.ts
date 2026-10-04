@@ -48,7 +48,8 @@ export async function getProducts(): Promise<{ products: Perfume[]; source: 'fir
     const products: Perfume[] = docs.map((d: any) => {
       const f = parseFields(d.fields || {});
       const id = d.name.split('/').pop();
-      return { id, ...f } as Perfume;
+      // Conservar la fotografía corregida en la publicación original.
+      return { id, ...f, ...(id === 'DD161' ? { imageUrl: '/products/DD161.png' } : {}) } as Perfume;
     });
     return { products, source: 'firebase' };
   } catch {

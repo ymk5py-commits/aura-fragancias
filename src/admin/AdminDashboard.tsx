@@ -13,10 +13,16 @@ import { cldn } from '../lib/img';
 import SettingsForm from './SettingsForm';
 import AdminSales from './AdminSales';
 import AdminOrders from './AdminOrders';
+import AdminLabels from './AdminLabels';
 import AdminReviews from './AdminReviews';
 import AdminAlertas from './AdminAlertas';
 import { subscribeIncidents, INCIDENT_LABELS } from '../lib/incidentsService';
 import type { Incident } from '../types';
+
+type AdminTab = 'products' | 'orders' | 'settings' | 'sales' | 'reviews' | 'alertas' | 'labels';
+const tabHashes: Record<AdminTab, string> = {
+  products: '', orders: 'pedidos', sales: 'ventas', labels: 'etiquetas', reviews: 'resenas', alertas: 'alertas', settings: 'configuracion',
+};
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -27,7 +33,24 @@ const AdminDashboard: React.FC = () => {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [seeding, setSeeding] = useState(false);
   const [toast, setToast] = useState('');
-  const [tab, setTab] = useState<'products' | 'orders' | 'settings' | 'sales' | 'reviews' | 'alertas'>('products');
+  const [tab, setTab] = useState<AdminTab>('products');
+
+  useEffect(() => {
+    const readHash = () => {
+      const match = (Object.entries(tabHashes) as [AdminTab, string][])
+        .find(([, hash]) => hash && `#${hash}` === window.location.hash);
+      setTab(match?.[0] ?? 'products');
+    };
+    readHash();
+    window.addEventListener('hashchange', readHash);
+    return () => window.removeEventListener('hashchange', readHash);
+  }, []);
+
+  const goToTab = (next: AdminTab) => {
+    setTab(next);
+    const hash = tabHashes[next] ? `#${tabHashes[next]}` : '';
+    window.history.replaceState(window.history.state, '', `${window.location.pathname}${window.location.search}${hash}`);
+  };
 
   // Alertas en tiempo real: el contador rojo de la pestaña y el aviso de arriba
   // salen de esta misma suscripción.
@@ -124,19 +147,20 @@ const AdminDashboard: React.FC = () => {
 
       {/* Tabs */}
       <div className="bg-white border-b border-zinc-100 sticky top-[57px] z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex gap-1">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex gap-1 overflow-x-auto">
           {([
             { key: 'products', label: 'Productos' },
             { key: 'orders', label: 'Pedidos' },
             { key: 'sales', label: 'Ventas' },
+            { key: 'labels', label: 'Etiquetas' },
             { key: 'reviews', label: 'Reseñas' },
             { key: 'alertas', label: 'Alertas' },
             { key: 'settings', label: 'Configuración' },
           ] as const).map((t) => (
             <button
               key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`inline-flex items-center gap-2 px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] border-b-2 transition-colors ${
+              onClick={() => goToTab(t.key)}
+              className={`inline-flex shrink-0 items-center gap-2 px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] border-b-2 transition-colors ${
                 tab === t.key ? 'border-aura-ink text-aura-ink' : 'border-transparent text-zinc-400 hover:text-zinc-600'
               }`}
             >
@@ -166,7 +190,7 @@ const AdminDashboard: React.FC = () => {
                 </p>
               </div>
             </div>
-            <button onClick={() => setTab('alertas')} className="shrink-0 inline-flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-red-700 transition-colors">
+            <button onClick={() => goToTab('alertas')} className="shrink-0 inline-flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-red-700 transition-colors">
               Ver alertas
             </button>
           </div>
@@ -175,6 +199,7 @@ const AdminDashboard: React.FC = () => {
         {tab === 'alertas' && <AdminAlertas incidents={incidents} loading={incidentsLoading} />}
         {tab === 'settings' && <SettingsForm />}
         {tab === 'sales' && <AdminSales />}
+        {tab === 'labels' && <AdminLabels />}
         {tab === 'reviews' && <AdminReviews />}
 
         {tab === 'products' && (

@@ -9,8 +9,7 @@ import smartImageLoader from '../lib/imageLoader';
 import { trackEvent } from '../lib/pixel';
 import { newEventId } from '../lib/tracking';
 import { toItem, gaViewItem, gaRemarketing } from '../lib/gtag';
-import { ShoppingBag, Truck, Minus, Plus, ChevronRight, CreditCard, QrCode, Wallet, Landmark, Lock } from 'lucide-react';
-import { isCardPaymentEnabled } from '../lib/payments';
+import { ShoppingBag, Truck, Minus, Plus, ChevronRight } from 'lucide-react';
 import { Perfume, Review } from '../types';
 import { ProductReviews, Stars } from './Reviews';
 import StickyBuyBar from './StickyBuyBar';
@@ -26,10 +25,10 @@ const IntensityBar = ({ level }: { level: number }) => (
 
 interface ProductViewProps {
   perfume: Perfume;
+  reviews?: Review[];
   description?: string;
   related?: Perfume[];
   breadcrumb?: { genderLabel: string; genderPath: string };
-  reviews?: Review[];
 }
 
 const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related = [], breadcrumb, reviews = [] }) => {
@@ -60,9 +59,9 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
   }, [perfume.code]);
 
   return (
-    <main className="flex-grow pt-28 pb-16 min-h-screen bg-aura-ivory">
-      <div className="container mx-auto px-4 sm:px-6">
-        <nav aria-label="Ruta de navegación" className="flex items-center flex-wrap gap-1.5 mb-8 text-[10px] font-bold tracking-[0.15em] uppercase text-zinc-400">
+    <main className="min-h-screen flex-grow bg-aura-ivory pb-20 pt-32 sm:pt-36">
+      <div className="section-shell">
+        <nav aria-label="Ruta de navegación" className="mb-9 flex flex-wrap items-center gap-1.5 border-b border-aura-ink/12 pb-5 text-[10px] font-bold uppercase tracking-[0.15em] text-aura-ink/50">
           <Link href="/" className="hover:text-zinc-900 transition-colors">Inicio</Link>
           <ChevronRight size={12} className="shrink-0" />
           {breadcrumb && (
@@ -71,12 +70,12 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
               <ChevronRight size={12} className="shrink-0" />
             </>
           )}
-          <span className="text-zinc-700 normal-case tracking-normal font-semibold">{perfume.name}</span>
+          <span className="font-semibold normal-case tracking-normal text-aura-cognac">{perfume.name}</span>
         </nav>
 
-        <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
-          <div className="w-full lg:w-1/2">
-            <div className="relative aspect-[4/5] w-full max-w-[500px] mx-auto bg-white border border-zinc-100 shadow-2xl flex flex-col overflow-hidden rounded-sm">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 xl:gap-24">
+          <div className="w-full">
+            <div className="relative mx-auto aspect-[4/5] w-full max-w-[610px] overflow-hidden bg-aura-sand">
               {perfume.imageUrl ? (
                 <Image
                   src={perfume.imageUrl}
@@ -90,29 +89,29 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
               ) : (
                 <div className="w-full h-full flex flex-col p-10 sm:p-16 justify-center items-center text-center">
                   <h3 className="text-7xl sm:text-9xl font-luxury font-light text-zinc-900">{perfume.code}</h3>
-                  <p className="text-3xl sm:text-5xl font-luxury font-bold text-zinc-900 mt-4">{perfume.name}</p>
+                  <h4 className="text-3xl sm:text-5xl font-luxury font-bold text-zinc-900 mt-4">{perfume.name}</h4>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="w-full lg:w-1/2 flex flex-col">
+          <div className="flex w-full flex-col">
             <div className="mb-10">
-              <span className="text-aura-gold-deep font-bold tracking-[0.4em] text-[10px] uppercase mb-3 block">Inspiración {perfume.inspiration}</span>
-              <h1 className="text-5xl sm:text-6xl font-luxury text-zinc-900 leading-none mb-3">{perfume.name}</h1>
+              <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.22em] text-aura-cognac">Äura / {perfume.code} / Inspiración {perfume.inspiration}</span>
+              <h1 className="mb-5 max-w-[13ch] font-luxury text-[clamp(3.2rem,6vw,6rem)] font-semibold leading-[0.9] tracking-[-0.06em] text-aura-ink">{perfume.name}</h1>
               {rating.count > 0 && (
                 <a href="#resenas" className="mt-3 inline-flex items-center gap-2 text-[12px] text-zinc-600 hover:text-zinc-900">
                   <Stars value={rating.average} /> {rating.average.toFixed(1)} · {rating.count} {rating.count === 1 ? 'reseña' : 'reseñas'}
                 </a>
               )}
-              <p className="text-xs text-zinc-500 font-medium tracking-[0.25em] uppercase mb-6">{perfume.family}</p>
+              <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-aura-ink/50">{perfume.family}</p>
 
               <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 bg-zinc-50 px-4 py-2 rounded-sm border border-zinc-100">
+                <div className="flex items-center gap-2 border border-aura-ink/12 px-4 py-2">
                   <Truck size={14} className="text-aura-gold-deep" />
                   <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Delivery gratis desde Gs. 300.000</span>
                 </div>
-                <div className="flex items-center gap-2 bg-aura-ink px-4 py-2 rounded-sm">
+                <div className="flex items-center gap-2 bg-aura-wine px-4 py-2">
                   <span className="text-[9px] font-bold text-white uppercase tracking-widest">ID: {perfume.code}</span>
                 </div>
                 <button
@@ -121,7 +120,7 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   }}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-sm border transition-all ${copied ? 'bg-green-50 border-green-200' : 'bg-white border-zinc-200 hover:border-zinc-900'}`}
+                  className={`flex items-center gap-2 border px-4 py-2 transition-all ${copied ? 'bg-green-50 border-green-200' : 'bg-transparent border-aura-ink/20 hover:border-aura-cognac'}`}
                 >
                   <span className={`text-[9px] font-bold uppercase tracking-widest ${copied ? 'text-green-600' : 'text-zinc-600'}`}>{copied ? 'Copiado ✓' : 'Compartir'}</span>
                 </button>
@@ -130,12 +129,12 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
 
             <div className="space-y-12">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-6">Presentación</p>
-                <div className="grid grid-cols-3 gap-4">
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-6">Presentación</h4>
+                <div className="grid grid-cols-3 gap-2 sm:gap-4">
                   {PRICES.map((p) => (
-                    <button key={p.size} onClick={() => setSelectedSize(p.size)} className={`relative py-6 px-2 border transition-all duration-300 rounded-sm ${selectedSize === p.size ? 'border-zinc-900 bg-zinc-900 text-white shadow-xl' : 'border-zinc-100 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'}`}>
+                    <button key={p.size} onClick={() => setSelectedSize(p.size)} className={`relative min-h-24 border px-1.5 py-4 transition-all duration-300 sm:px-2 ${selectedSize === p.size ? 'border-aura-wine bg-aura-wine text-white' : 'border-aura-ink/15 text-aura-ink/65 hover:border-aura-wine hover:bg-aura-sand'}`}>
                       <span className="text-[10px] font-bold tracking-widest uppercase mb-1 block">{p.size}</span>
-                      <span className={`text-lg font-luxury tabular ${selectedSize === p.size ? 'text-aura-gold' : 'text-zinc-700'}`}>Gs. {p.price.toLocaleString('es-PY')}</span>
+                      <span className={`font-luxury text-base tabular sm:text-lg ${selectedSize === p.size ? 'text-aura-gold-soft' : 'text-aura-ink'}`}>Gs. {p.price.toLocaleString('es-PY')}</span>
                     </button>
                   ))}
                 </div>
@@ -143,18 +142,18 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
 
               <div className="grid grid-cols-2 gap-12 py-10 border-y border-zinc-100">
                 <div className="flex flex-col gap-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Intensidad</p>
+                  <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Intensidad</h4>
                   <IntensityBar level={perfume.intensity} />
                 </div>
                 <div className="flex flex-col gap-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Longevidad</p>
+                  <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Longevidad</h4>
                   <span className="text-xl text-zinc-900 font-bold tracking-[0.2em] uppercase">{perfume.duration}</span>
                 </div>
               </div>
 
               {perfume.notes?.length > 0 && (
                 <div>
-                  <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-4">Notas Olfativas</h2>
+                  <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-4">Notas Olfativas</h4>
                   <div className="flex flex-wrap gap-2">
                     {perfume.notes.map((n) => (
                       <span key={n} className="text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600 bg-aura-ivory border border-zinc-100 px-3 py-1.5">{n}</span>
@@ -165,32 +164,23 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
 
               {description && (
                 <div>
-                  <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-4">Sobre esta fragancia</h2>
+                  <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-4">Sobre esta fragancia</h4>
                   <p className="text-[15px] leading-relaxed text-zinc-600 font-light max-w-prose">{description}</p>
                 </div>
               )}
 
               <div className="flex flex-col gap-6">
                 <div className="flex items-center gap-6">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Cantidad</p>
+                  <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Cantidad</h4>
                   <div className="flex items-center border border-zinc-100 rounded-sm">
-                    <button type="button" aria-label="Restar una unidad" onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="p-4 hover:bg-zinc-50 text-zinc-600"><Minus size={16} /></button>
+                    <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="p-4 hover:bg-zinc-50 text-zinc-600"><Minus size={16} /></button>
                     <span className="w-14 text-center text-lg font-bold text-zinc-900 tabular">{quantity}</span>
-                    <button type="button" aria-label="Sumar una unidad" onClick={() => setQuantity((q) => q + 1)} className="p-4 hover:bg-zinc-50 text-zinc-600"><Plus size={16} /></button>
+                    <button onClick={() => setQuantity((q) => q + 1)} className="p-4 hover:bg-zinc-50 text-zinc-600"><Plus size={16} /></button>
                   </div>
                 </div>
-                <button ref={buyRef} onClick={() => addToCart(perfume, selectedSize, quantity)} className="w-full bg-aura-ink text-white py-6 rounded-sm text-[12px] font-bold tracking-[0.4em] uppercase flex items-center justify-center gap-4 hover:bg-aura-gold transition-all active:scale-[0.98] shadow-2xl">
+                <button ref={buyRef} onClick={() => addToCart(perfume, selectedSize, quantity)} className="flex min-h-16 w-full items-center justify-center gap-4 bg-aura-wine px-4 py-4 text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-aura-ink active:scale-[0.98]">
                   <ShoppingBag size={20} /> Agregar al Carrito
                 </button>
-                {isCardPaymentEnabled && (
-                  <ul className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-500">
-                    <li className="flex items-center gap-1.5"><CreditCard size={13} strokeWidth={1.6} /> Tarjeta</li>
-                    <li className="flex items-center gap-1.5"><QrCode size={13} strokeWidth={1.6} /> QR</li>
-                    <li className="flex items-center gap-1.5"><Wallet size={13} strokeWidth={1.6} /> Billeteras</li>
-                    <li className="flex items-center gap-1.5"><Landmark size={13} strokeWidth={1.6} /> Transferencia</li>
-                    <li className="flex items-center gap-1.5 text-zinc-400"><Lock size={12} strokeWidth={1.6} /> Pago seguro · Pagopar</li>
-                  </ul>
-                )}
               </div>
             </div>
           </div>
@@ -206,9 +196,9 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
         />
 
         {related.length > 0 && (
-          <section aria-labelledby="relacionados" className="mt-20 sm:mt-28 border-t border-zinc-100 pt-14">
-            <h2 id="relacionados" className="text-2xl sm:text-3xl font-luxury text-zinc-900 mb-8 text-center">
-              También te puede gustar
+          <section aria-labelledby="relacionados" className="mt-20 border-t border-aura-ink/15 pt-9 sm:mt-28">
+            <h2 id="relacionados" className="mb-8 font-luxury text-3xl font-semibold tracking-[-0.04em] text-aura-ink sm:text-5xl">
+              Seguí explorando.
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
               {related.map((p) => (

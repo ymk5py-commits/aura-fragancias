@@ -53,7 +53,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
   const getBadgeStyles = (badge: string) => {
     switch (badge) {
       case 'Bestseller': return 'bg-aura-ink text-white border-aura-ink';
-      case 'Recommended': return 'bg-aura-gold text-aura-ink border-aura-gold';
+      case 'Recommended': return 'bg-aura-gold text-white border-aura-gold';
       case 'New': return 'bg-white text-aura-ink border-aura-ink/20';
       default: return 'bg-white text-zinc-400 border-zinc-200';
     }
@@ -128,7 +128,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
               <Link href={productHref} onClick={openModal} className="hover:text-aura-gold transition-colors">{perfume.name}</Link>
             </h3>
             <p className="text-white/50 text-[11px] font-medium tracking-[0.25em] uppercase mb-7">{perfume.family}</p>
-            <div className="flex items-center gap-6 mb-8">
+            <div className="mb-8 flex flex-wrap items-center gap-x-6 gap-y-4">
               <div>
                 <span className="block text-[9px] tracking-[0.2em] uppercase text-white/40 mb-1.5">Intensidad</span>
                 <div className="flex gap-1.5">
@@ -139,7 +139,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
               </div>
               <div>
                 <span className="block text-[9px] tracking-[0.2em] uppercase text-white/40 mb-1">Desde</span>
-                <span className="font-luxury text-2xl text-champagne tabular">Gs. {fromPrice.toLocaleString('es-PY')}</span>
+                <span className="whitespace-nowrap font-luxury text-2xl text-champagne tabular">Gs. {fromPrice.toLocaleString('es-PY')}</span>
               </div>
             </div>
             <Link
@@ -159,30 +159,17 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
   return (
     <>
       <div
-        className="group flex flex-col h-full cursor-pointer"
+        className="group flex h-full cursor-pointer flex-col"
         onClick={() => setShowDetails(true)}
       >
-        {/* Image frame */}
-        <div className="relative aspect-[4/5] bg-aura-ivory overflow-hidden border border-zinc-100 group-hover:border-aura-gold/40 transition-all duration-500 group-hover:shadow-[var(--shadow-card)]">
-          {/* Hover overlay */}
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2.5 opacity-0 group-hover:opacity-100 transition-all duration-500 bg-aura-ink/30 backdrop-blur-[2px]">
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowDetails(true); }}
-              aria-label={`Vista rápida de ${perfume.name}`}
-              className="bg-white text-aura-ink w-11 h-11 sm:w-auto sm:px-7 sm:py-3 text-[9px] font-bold tracking-[0.25em] uppercase shadow-xl transform translate-y-3 group-hover:translate-y-0 transition-transform duration-500 flex items-center justify-center gap-2 hover:bg-aura-gold hover:text-white active-scale"
-            >
-              <Eye size={13} strokeWidth={2.2} />
-              <span className="hidden sm:inline">Vista Rápida</span>
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowDetails(true); }}
-              aria-label={`Agregar ${perfume.name} al carrito`}
-              className="bg-aura-gold text-aura-ink w-11 h-11 sm:w-auto sm:px-7 sm:py-3 text-[9px] font-bold tracking-[0.25em] uppercase shadow-xl transform translate-y-5 group-hover:translate-y-0 transition-transform duration-700 flex items-center justify-center gap-2 hover:bg-aura-ink active-scale"
-            >
-              <ShoppingBag size={13} />
-              <span className="hidden sm:inline">Agregar</span>
-            </button>
-          </div>
+        <div className="relative aspect-[4/5] overflow-hidden bg-aura-sand transition-shadow duration-500 group-hover:shadow-[var(--shadow-card)]">
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowDetails(true); }}
+            aria-label={`Vista rápida de ${perfume.name}`}
+            className="absolute bottom-3 right-3 z-30 hidden h-12 w-12 translate-y-3 items-center justify-center bg-aura-ivory text-aura-ink opacity-0 shadow-xl transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-aura-ink hover:text-aura-ivory sm:flex"
+          >
+            <Eye size={16} strokeWidth={1.8} />
+          </button>
 
           {perfume.imageUrl ? (
             <Image
@@ -191,51 +178,53 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               loader={smartImageLoader}
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.035]"
             />
           ) : (
             <div className="w-full h-full flex flex-col p-5 sm:p-8 bg-white">
               <span className="text-[10px] font-bold tracking-[0.5em] text-aura-ink uppercase text-center opacity-70">ÄURA</span>
               <div className="flex-grow flex flex-col justify-center items-center text-center">
                 <h3 className="text-3xl sm:text-5xl font-luxury font-light text-aura-ink tracking-tight">{perfume.code}</h3>
-                <h3 className="text-xs sm:text-base font-luxury font-semibold text-aura-ink mt-2 line-clamp-2">{perfume.name}</h3>
+                <h4 className="text-xs sm:text-base font-luxury font-semibold text-aura-ink mt-2 line-clamp-2">{perfume.name}</h4>
               </div>
             </div>
           )}
 
           {rank === 1 ? (
-            <div className="absolute top-3 left-3 flex items-center gap-1 bg-aura-gold text-aura-ink px-2.5 py-1 text-[7px] sm:text-[8px] font-bold tracking-[0.15em] border border-aura-gold z-20 shadow-md">
-              <span className="text-[9px] leading-none">★</span> Nº1 EN VENTAS
+            <div className="absolute left-3 top-3 z-20 flex items-center gap-1 bg-aura-ink px-2.5 py-1.5 text-[9px] font-bold tracking-[0.08em] text-aura-ivory">
+              Nº1 EN VENTAS
             </div>
           ) : perfume.badge ? (
-            <div className={`absolute top-3 left-3 px-2.5 py-1 text-[7px] sm:text-[8px] font-bold tracking-[0.15em] border z-20 ${getBadgeStyles(perfume.badge)}`}>
+            <div className={`absolute left-3 top-3 z-20 border px-2.5 py-1.5 text-[9px] font-bold tracking-[0.08em] ${getBadgeStyles(perfume.badge)}`}>
               {getBadgeLabel(perfume.badge)}
             </div>
           ) : null}
+          <span className="absolute right-3 top-3 z-20 bg-aura-ivory/88 px-2 py-1 text-[9px] font-bold tracking-[0.1em] text-aura-ink/70 backdrop-blur-sm">
+            {perfume.code}
+          </span>
         </div>
 
-        {/* Info */}
-        <div className="pt-4 pb-2 px-1 text-center flex flex-col items-center">
-          <span className="text-[8px] font-bold text-aura-gold-deep uppercase tracking-[0.2em] mb-1.5">
+        <div className="flex flex-col items-start px-0.5 pb-2 pt-4 text-left">
+          <span className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-aura-cognac">
             Inspiración {perfume.inspiration}
           </span>
-          <h3 className="text-[11px] sm:text-sm font-semibold text-aura-ink uppercase tracking-[0.12em] line-clamp-2 leading-tight mb-2 min-h-[2.2em] group-hover:text-aura-gold-deep transition-colors">
+          <h3 className="mb-2 min-h-[2.35em] line-clamp-2 font-luxury text-base font-semibold leading-[1.12] tracking-[-0.025em] text-aura-ink transition-colors group-hover:text-aura-cognac sm:text-xl">
             <Link href={productHref} onClick={openModal}>{perfume.name}</Link>
           </h3>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-[9px] font-medium text-zinc-400 tabular">Desde</span>
-            <span className="text-sm font-luxury font-semibold text-aura-ink tabular">Gs. {fromPrice.toLocaleString('es-PY')}</span>
+          <div className="mb-3 flex w-full items-center justify-between gap-2 border-t border-aura-ink/10 pt-2.5">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-aura-ink/55">Desde</span>
+            <span className="font-luxury text-sm font-semibold tracking-[-0.02em] text-aura-ink tabular sm:text-base">Gs. {fromPrice.toLocaleString('es-PY')}</span>
           </div>
 
-          {/* Mobile quick add */}
-          <div className="flex sm:hidden flex-col gap-2 w-full px-1">
-            <div className="flex justify-center gap-1">
+          <div className="flex w-full flex-col gap-2 sm:hidden">
+            <div className="grid grid-cols-3 border border-aura-ink/12">
               {PRICES.map((p) => (
                 <button
                   key={p.size}
                   onClick={(e) => { e.stopPropagation(); setSelectedSize(p.size); }}
-                  className={`text-[9px] font-bold px-2 py-1 border transition-all ${
-                    selectedSize === p.size ? 'bg-aura-ink text-white border-aura-ink' : 'bg-white text-zinc-500 border-zinc-200'
+                  aria-pressed={selectedSize === p.size}
+                  className={`min-h-11 border-r border-aura-ink/10 px-1 text-[10px] font-bold transition-all last:border-r-0 ${
+                    selectedSize === p.size ? 'bg-aura-ink text-aura-ivory' : 'bg-transparent text-aura-ink/52'
                   }`}
                 >
                   {p.size}
@@ -244,7 +233,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
             </div>
             <button
               onClick={(e) => { e.stopPropagation(); addToCart(perfume, selectedSize, 1); }}
-              className="bg-aura-ink text-white text-[9px] font-bold tracking-[0.15em] py-2.5 uppercase flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
+              className="flex min-h-11 items-center justify-center gap-1.5 bg-aura-ink py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-aura-ivory transition-colors active:bg-aura-cognac"
             >
               <ShoppingBag size={11} /> Agregar
             </button>
@@ -288,7 +277,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
                 ) : (
                   <div className="w-full h-full flex flex-col justify-center items-center p-8 text-center">
                     <h3 className="text-6xl font-luxury font-light text-aura-ink">{perfume.code}</h3>
-                    <h3 className="text-2xl font-luxury font-semibold text-aura-ink mt-4">{perfume.name}</h3>
+                    <h4 className="text-2xl font-luxury font-semibold text-aura-ink mt-4">{perfume.name}</h4>
                   </div>
                 )}
               </div>
@@ -335,7 +324,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
 
               <div className="space-y-8 flex-grow">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 mb-4">Presentación</p>
+                  <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 mb-4">Presentación</h4>
                   <div className="grid grid-cols-3 gap-2.5">
                     {PRICES.map((p) => (
                       <button
@@ -356,18 +345,18 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
 
                 <div className="grid grid-cols-2 gap-8 py-7 border-y border-zinc-100">
                   <div className="flex flex-col gap-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Intensidad</p>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Intensidad</h4>
                     <IntensityBar level={perfume.intensity} />
                   </div>
                   <div className="flex flex-col gap-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Longevidad</p>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Longevidad</h4>
                     <span className="text-sm text-aura-ink font-bold tracking-[0.15em] uppercase">{perfume.duration}</span>
                   </div>
                 </div>
 
                 {perfume.notes?.length > 0 && (
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 mb-4">Notas Olfativas</p>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 mb-4">Notas Olfativas</h4>
                     <div className="flex flex-wrap gap-2">
                       {perfume.notes.map((n) => (
                         <span key={n} className="text-[9px] font-semibold uppercase tracking-[0.12em] text-zinc-600 bg-aura-ivory border border-zinc-100 px-3 py-1.5">
@@ -381,7 +370,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
 
               <div className="mt-10 flex flex-col gap-4">
                 <div className="flex items-center gap-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Cantidad</p>
+                  <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Cantidad</h4>
                   <div className="flex items-center border border-zinc-200">
                     <button onClick={(e) => { e.stopPropagation(); setQuantity((q) => Math.max(1, q - 1)); }} className="p-3 hover:bg-zinc-50 text-zinc-600">
                       <Minus size={14} />

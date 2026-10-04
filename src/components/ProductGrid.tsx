@@ -63,51 +63,56 @@ const ProductGrid: React.FC<Props> = ({ gender, id }) => {
   if (!hasAnyForGender) return null;
 
   const sectionTitle = {
-    'Man': 'Caballeros',
-    'Woman': 'Damas',
+    'Man': 'Hombres',
+    'Woman': 'Mujeres',
     'Unisex': 'Nicho & Unisex'
   }[gender];
 
   return (
-    <section id={id} className="py-12 sm:py-32 bg-white overflow-hidden scroll-mt-20">
-      <div className="container mx-auto px-2 sm:px-8">
-        
-        <div className="flex flex-col items-center text-center mb-8 sm:mb-20">
-          <span className="text-aura-gold font-bold tracking-[0.4em] text-[11px] uppercase mb-2 block">Selección de Autor</span>
-          <h2 className="text-2xl sm:text-4xl font-luxury leading-none tracking-tight mb-6 sm:mb-8">{sectionTitle}</h2>
-          
-          <div className="flex flex-col gap-6 items-center w-full max-w-5xl justify-center mt-2">
+    <section id={id} className="scroll-mt-20 overflow-hidden bg-aura-ivory py-16 sm:py-28">
+      <div className="section-shell">
+        <div className="mb-10 grid gap-9 border-b border-aura-ink/12 pb-9 sm:mb-16 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
+          <div>
+            <span className="eyebrow mb-4">Selección de autor</span>
+            <h2 className="font-luxury text-[clamp(3rem,7vw,6.5rem)] font-semibold leading-[0.9] tracking-[-0.055em] text-aura-ink">{sectionTitle}</h2>
+            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-aura-ink/42 tabular">{filtered.length} fragancias</p>
+          </div>
+
+          <div className="flex w-full flex-col items-start justify-center gap-5 lg:items-end">
             
             {/* Search and Category Row */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center w-full justify-center">
-              <div className="relative w-full max-w-[240px] group">
+            <div className="flex w-full flex-col items-start gap-4 sm:flex-row sm:items-center lg:justify-end">
+              <div className="group relative w-full sm:max-w-[260px]">
                 <input
                   type="text"
+                  aria-label="Buscar fragancias"
                   placeholder="Buscar..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white border-b border-zinc-300 py-2 pl-7 pr-4 text-xs font-bold uppercase tracking-[0.2em] focus:outline-none focus:border-zinc-900 transition-all placeholder:text-zinc-500"
+                  className="min-h-11 w-full border-b border-aura-ink/25 bg-transparent py-2.5 pl-7 pr-11 text-sm font-medium text-aura-ink placeholder:text-aura-ink/50 focus:border-aura-cognac focus:outline-none"
                 />
                 <Search className="absolute left-0 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-zinc-900 transition-colors" size={12} />
                 {searchQuery && (
                   <button 
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 text-zinc-300 hover:text-zinc-900"
+                    aria-label="Limpiar búsqueda"
+                    className="absolute right-0 top-1/2 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-aura-ink/55 hover:text-aura-ink"
                   >
-                    <XCircle size={12} />
+                    <XCircle size={16} />
                   </button>
                 )}
               </div>
 
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 px-2">
+              <div className="no-scrollbar flex max-w-full items-center overflow-x-auto border border-aura-ink/14">
                 {categories.map(cat => (
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
-                    className={`whitespace-nowrap px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-bold tracking-[0.2em] uppercase transition-all border shrink-0 ${
-                      activeCategory === cat 
-                        ? 'bg-zinc-900 text-white border-zinc-900 shadow-md' 
-                        : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-400'
+                    aria-pressed={activeCategory === cat}
+                    className={`min-h-11 shrink-0 whitespace-nowrap border-r border-aura-ink/12 px-4 text-[10px] font-bold uppercase tracking-[0.11em] transition-all last:border-r-0 sm:px-5 ${
+                      activeCategory === cat
+                        ? 'bg-aura-ink text-aura-ivory'
+                        : 'bg-transparent text-aura-ink/56 hover:bg-aura-sand hover:text-aura-ink'
                     }`}
                   >
                     {categoryLabels[cat]}
@@ -117,19 +122,20 @@ const ProductGrid: React.FC<Props> = ({ gender, id }) => {
             </div>
 
             {/* Intensity Filter Row */}
-            <div className="flex items-center gap-4 py-2 border-t border-zinc-50 w-full justify-center">
-              <span className="text-[9px] sm:text-xs font-bold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-1.5">
-                <Zap size={10} className="text-aura-gold" /> Intensidad:
+            <div className="flex w-full flex-col items-start gap-2 sm:flex-row sm:items-center lg:justify-end">
+              <span className="flex shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-aura-ink/55">
+                <Zap size={11} className="text-aura-cognac" /> Intensidad
               </span>
-              <div className="flex gap-1.5">
+              <div className="grid w-full grid-cols-4 border-b border-aura-ink/14 sm:flex sm:w-auto">
                 {intensities.map((int) => (
                   <button
                     key={int.value}
                     onClick={() => setActiveIntensity(int.value)}
-                    className={`px-3 sm:px-4 py-1.5 rounded-sm text-[9px] sm:text-xs font-bold tracking-widest uppercase transition-all border ${
+                    aria-pressed={activeIntensity === int.value}
+                    className={`min-h-11 px-1 text-[10px] font-bold uppercase tracking-[0.08em] transition-all sm:px-4 sm:tracking-[0.12em] ${
                       activeIntensity === int.value
-                        ? 'bg-aura-gold/10 border-aura-gold text-aura-gold'
-                        : 'bg-white border-zinc-200 text-zinc-600 hover:border-zinc-400'
+                        ? 'border-b-2 border-aura-cognac text-aura-cognac'
+                        : 'text-aura-ink/45 hover:text-aura-ink'
                     }`}
                   >
                     {int.label}
@@ -142,18 +148,18 @@ const ProductGrid: React.FC<Props> = ({ gender, id }) => {
         </div>
 
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-10 animate-fade-in">
+          <div className="grid grid-cols-1 gap-x-3 gap-y-10 min-[360px]:grid-cols-2 sm:gap-x-7 sm:gap-y-14 lg:grid-cols-4 animate-fade-in">
             {filtered.map(perfume => (
               <ProductCard key={perfume.code} perfume={perfume} />
             ))}
           </div>
         ) : (
-          <div className="py-16 text-center border-y border-zinc-50 max-w-xl mx-auto">
-            <h3 className="text-xl font-luxury text-zinc-300 mb-3">Aroma no encontrado</h3>
-            <p className="text-zinc-400 text-[8px] uppercase tracking-[0.2em]">Intenta con otra combinación de filtros.</p>
+          <div className="mx-auto max-w-xl border-y border-aura-ink/15 py-16 text-center">
+            <h3 className="mb-3 font-luxury text-2xl font-semibold text-aura-ink">Aroma no encontrado</h3>
+            <p className="text-sm text-aura-ink/60">Probá con otra búsqueda o combinación de filtros.</p>
             <button 
               onClick={() => {setSearchQuery(''); setActiveCategory('All'); setActiveIntensity('All');}}
-              className="mt-6 text-aura-gold text-[8px] font-bold uppercase tracking-[0.2em] border-b border-aura-gold/20 pb-1 hover:border-aura-gold transition-all"
+              className="mt-6 min-h-11 border-b border-aura-cognac pb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-aura-cognac transition-colors hover:text-aura-ink"
             >
               Limpiar filtros
             </button>

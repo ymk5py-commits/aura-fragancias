@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useSettings } from '../context/SettingsContext';
 
 const MESSAGE = encodeURIComponent(
@@ -18,13 +19,27 @@ const WhatsAppGlyph: React.FC<{ size?: number }> = ({ size = 26 }) => (
 // pelearse con la paleta noir/dorado). El label aparece únicamente al hover.
 const WhatsAppButton: React.FC = () => {
   const { settings } = useSettings();
+  const pathname = usePathname();
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const hasHero = ['/', '/hombres', '/mujeres', '/unisex'].includes(pathname);
+    const update = () => {
+      const footerVisible = (document.querySelector('footer')?.getBoundingClientRect().top ?? Infinity) < window.innerHeight;
+      setShow((!hasHero || window.scrollY > Math.max(280, window.innerHeight * 0.4)) && !footerVisible);
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    return () => window.removeEventListener('scroll', update);
+  }, [pathname]);
+
   return (
     <a
       href={`https://wa.me/${settings.whatsappNumber}?text=${MESSAGE}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Escribinos por WhatsApp"
-      className="group fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[120] flex items-center gap-0"
+      className={`group fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[120] flex items-center gap-0 transition-[opacity,transform] duration-300 ${show ? 'opacity-100' : 'pointer-events-none translate-y-4 opacity-0'}`}
     >
       <span className="pointer-events-none mr-3 hidden sm:block max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-300 group-hover:max-w-[180px] group-hover:opacity-100">
         <span className="block bg-aura-ink text-white text-[10px] font-semibold tracking-[0.2em] uppercase px-4 py-2.5 rounded-full border border-white/10 shadow-xl">

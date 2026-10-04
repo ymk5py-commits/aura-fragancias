@@ -35,8 +35,8 @@ const AdminLogin: React.FC = () => {
     <div className="min-h-dvh flex items-center justify-center bg-aura-ink px-5">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
-          <img src="/logo.svg" alt="Äura" className="w-16 h-16 rounded-full mb-4" width={64} height={64} />
-          <h1 className="text-2xl font-luxury font-semibold tracking-[0.2em] text-white">ÄURA</h1>
+          <img src="/brand/aura-wordmark-white.png" alt="Äura Fragancias" className="mb-4 h-auto w-44" width={1600} height={534} />
+          <h1 className="sr-only">Äura Fragancias</h1>
           <p className="text-[10px] tracking-[0.3em] uppercase text-aura-gold mt-1">Panel de Administración</p>
         </div>
 

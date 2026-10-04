@@ -1,80 +1,71 @@
 'use client';
 
-
 import React from 'react';
+import { ArrowUpRight, Check } from 'lucide-react';
 import { SCALES } from '../constants';
 import { useSettings } from '../context/SettingsContext';
-import { TrendingUp, CheckCircle } from 'lucide-react';
+import Reveal from './Reveal';
 
 const Wholesale: React.FC = () => {
   const { settings } = useSettings();
-  const wholesaleMessage = encodeURIComponent("Hola Äura, me gustaría recibir información para ser mayorista.");
+  const message = encodeURIComponent('Hola Äura, me gustaría recibir información para ser mayorista.');
 
   return (
-    <section id="mayoristas" className="py-24 bg-zinc-900 text-white relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-aura-gold/5 -skew-x-12 transform translate-x-20"></div>
-      
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div>
-            <h2 className="text-3xl sm:text-4xl font-luxury mb-8">Ventas Mayoristas</h2>
-            <p className="text-zinc-400 text-lg mb-10 font-light leading-relaxed">
-              Emprendé con Äura. Ofrecemos las mejores escalas de precio para que puedas revender perfumes de altísima calidad con el margen más alto del mercado.
-            </p>
-
-            <div className="space-y-6 mb-12">
-              <div className="flex gap-4">
-                <CheckCircle className="text-aura-gold shrink-0" />
-                <div>
-                  <h3 className="font-bold text-white uppercase text-xs tracking-widest mb-1">Baja Inversión</h3>
-                  <p className="text-zinc-500 text-sm">Escalas flexibles para comenzar tu negocio hoy mismo.</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <CheckCircle className="text-aura-gold shrink-0" />
-                <div>
-                  <h3 className="font-bold text-white uppercase text-xs tracking-widest mb-1">Calidad Garantizada</h3>
-                  <p className="text-zinc-500 text-sm">Tu cliente vuelve siempre por la fijación del 30%.</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <CheckCircle className="text-aura-gold shrink-0" />
-                <div>
-                  <h3 className="font-bold text-white uppercase text-xs tracking-widest mb-1">Asesoramiento</h3>
-                  <p className="text-zinc-500 text-sm">Te ayudamos a elegir los perfumes más vendidos de la temporada.</p>
-                </div>
-              </div>
-            </div>
-
-            <a 
-              href={`https://wa.me/${settings.whatsappNumber}?text=${wholesaleMessage}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-white text-zinc-900 px-10 py-4 rounded-full text-sm font-bold tracking-widest hover:bg-aura-gold transition-colors"
-            >
-              SOLICITAR LISTA MAYORISTA
-            </a>
-          </div>
-
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-2xl">
-            <h3 className="text-2xl font-luxury mb-8 text-center">Escalas de Inversión</h3>
-            <div className="space-y-4">
-              {SCALES.map((scale, i) => (
-                <div key={i} className="flex justify-between items-center p-5 rounded-xl bg-white/5 border border-white/5 hover:border-aura-gold/50 transition-colors">
-                  <span className="text-lg font-light">{scale.units}</span>
-                  <span className="text-aura-gold font-bold text-sm tracking-widest uppercase">{scale.discount}</span>
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-10 p-6 bg-aura-gold/10 rounded-xl border border-aura-gold/20 text-center">
-              <TrendingUp className="mx-auto text-aura-gold mb-3" />
-              <p className="text-sm text-aura-gold font-medium tracking-wide">Margen de ganancia superior al 100% sugerido.</p>
-            </div>
-          </div>
-        </div>
+    <section id="mayoristas" className="relative overflow-hidden bg-aura-cognac py-20 text-aura-ivory sm:py-32">
+      <div className="absolute inset-0 aura-noise" aria-hidden />
+      <div className="absolute -right-[8vw] top-1/2 hidden -translate-y-1/2 select-none font-luxury text-[28vw] font-extrabold leading-none text-white/[0.035] lg:block" aria-hidden>
+        Ä
       </div>
 
+      <div className="section-shell relative grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-24">
+        <Reveal>
+          <span className="eyebrow !text-aura-gold-soft mb-6">Comunidad mayorista</span>
+          <h2 className="max-w-3xl font-luxury text-[clamp(3.2rem,7vw,7rem)] font-semibold leading-[0.87] tracking-[-0.065em]">
+            Tu negocio puede empezar con un <span className="text-aura-gold-soft">gran aroma.</span>
+          </h2>
+          <p className="mt-7 max-w-[52ch] text-sm sm:text-base font-light leading-relaxed text-white/68">
+            Armamos una selección inicial con los perfumes de mayor salida, escalas flexibles y acompañamiento para que puedas vender con seguridad desde el primer pedido.
+          </p>
+
+          <div className="mt-8 grid gap-3 text-sm text-white/78 sm:grid-cols-2">
+            {['Inversión inicial flexible', 'Selección de top ventas', 'Material para vender', 'Asesoría por WhatsApp'].map((benefit) => (
+              <div key={benefit} className="flex items-center gap-3 border-t border-white/15 pt-3">
+                <Check size={15} className="text-aura-gold-soft" />
+                <span>{benefit}</span>
+              </div>
+            ))}
+          </div>
+
+          <a
+            href={`https://wa.me/${settings.whatsappNumber}?text=${message}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group mt-10 inline-flex min-h-12 items-center justify-center gap-3 bg-aura-ivory px-7 py-3 text-[10px] font-bold uppercase tracking-[0.19em] text-aura-cognac transition-all hover:bg-aura-gold-soft active:scale-[0.98]"
+          >
+            Solicitar lista mayorista
+            <ArrowUpRight size={16} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </a>
+        </Reveal>
+
+        <Reveal delay={120} className="self-end border-t border-white/24">
+          <div className="flex items-end justify-between py-5 text-white/55">
+            <span className="text-[9px] font-bold uppercase tracking-[0.2em]">Escala de compra</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.2em]">Beneficio</span>
+          </div>
+          {SCALES.map((scale, index) => (
+            <div key={scale.units} className="group flex items-center justify-between border-t border-white/16 py-6 sm:py-7">
+              <div className="flex items-baseline gap-4">
+                <span className="font-luxury text-xl font-semibold text-white/28 tabular">0{index + 1}</span>
+                <span className="font-luxury text-2xl sm:text-3xl font-semibold tracking-[-0.035em] text-white">{scale.units}</span>
+              </div>
+              <span className="text-right text-[10px] sm:text-xs font-bold uppercase tracking-[0.17em] text-aura-gold-soft">{scale.discount}</span>
+            </div>
+          ))}
+          <p className="border-t border-white/24 pt-5 text-xs leading-relaxed text-white/52">
+            Te recomendamos la escala según tu presupuesto, ciudad y tipo de público.
+          </p>
+        </Reveal>
+      </div>
     </section>
   );
 };

@@ -2,30 +2,35 @@
 
 /* ============================================================
    ÄURA — Design Tokens (Tailwind v4 @theme)
-   Quiet-luxury noir: warm ivory, deep ink, refined gold.
+   Identidad oficial: borgoña profundo, marfil mineral y champagne tenue.
    ============================================================ */
 @theme {
+  --color-aura-gold: #c4a275;
+  --color-aura-gold-deep: #896342;
+  --color-aura-gold-soft: #ead4b7;
+  --color-aura-ivory: #f8f5f0;
+  --color-aura-sand: #eee7df;
+  --color-aura-ink: #211719;
+  --color-aura-charcoal: #302123;
+  --color-aura-cognac: #843046;
   --color-aura-wine: #580c17;
-  --color-aura-gold: #c5a059;
-  --color-aura-gold-deep: #85692f; /* antes #9a7b3f: 3.98:1 sobre blanco, ahora 5.2:1 */
-  --color-aura-gold-soft: #e3d2ad;
-  --color-aura-ivory: #faf9f7;
-  --color-aura-ink: #0c0a09;
-  --color-aura-charcoal: #1c1917;
 
-  --font-luxury: var(--font-display), "Bodoni Moda", Didot, "Bodoni MT", ui-serif, Georgia, serif;
+  --font-luxury: var(--font-display), "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-body), "Jost", "Futura", ui-sans-serif, system-ui, sans-serif;
 
-  --shadow-luxe: 0 24px 60px -30px rgba(12, 10, 9, 0.45);
-  --shadow-card: 0 12px 40px -22px rgba(12, 10, 9, 0.28);
+  --shadow-luxe: 0 30px 80px -38px rgba(33, 23, 25, 0.52);
+  --shadow-card: 0 22px 50px -32px rgba(33, 23, 25, 0.38);
 }
 
 /* ============================================================
    Base
    ============================================================ */
 :root {
-  --aura-gold: #c5a059;
-  --aura-ivory: #faf9f7;
+  --aura-gold: #c4a275;
+  --aura-ivory: #f8f5f0;
+  --aura-ink: #211719;
+  --aura-cognac: #843046;
+  --ease-aura: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * {
@@ -50,26 +55,24 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   width: 100%;
-  background-color: #ffffff;
+  background-color: var(--aura-ivory);
   color: var(--color-aura-ink);
   text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, h4, .font-luxury {
   font-family: var(--font-luxury);
+  text-wrap: balance;
 }
 
-/* Legacy helper classes kept for compatibility */
-.bg-aura-ivory { background-color: var(--aura-ivory); }
-.text-aura-gold { color: var(--aura-gold); }
-.border-aura-gold { border-color: var(--aura-gold); }
+p { text-wrap: pretty; }
 
 /* ============================================================
    Decorative utilities
    ============================================================ */
 
 /* Solid champagne gold for premium headings (no gradient text) */
-.text-champagne { color: #d9bd7e; }
+.text-champagne { color: #ead4b7; }
 
 /* Hairline gold rule with fade */
 .rule-gold {
@@ -86,16 +89,56 @@ h1, h2, h3, h4, .font-luxury {
   background: radial-gradient(120% 80% at 50% 35%, transparent 40%, rgba(12, 10, 9, 0.35) 100%);
 }
 
-/* Frosted glass surface */
+/* Superficies translúcidas reservadas para navegación superpuesta */
 .glass {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: saturate(180%) blur(14px);
-  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  background: rgba(248, 245, 240, 0.94);
+  backdrop-filter: saturate(120%) blur(12px);
+  -webkit-backdrop-filter: saturate(120%) blur(12px);
 }
 .glass-dark {
-  background: rgba(12, 10, 9, 0.55);
-  backdrop-filter: saturate(160%) blur(12px);
-  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  background: rgba(33, 23, 25, 0.94);
+  backdrop-filter: saturate(120%) blur(12px);
+  -webkit-backdrop-filter: saturate(120%) blur(12px);
+}
+
+.aura-grid {
+  background-image:
+    linear-gradient(to right, rgba(88, 12, 23, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(88, 12, 23, 0.045) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
+
+.aura-noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.055;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.52'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+}
+
+.section-shell {
+  width: min(100% - 2rem, 88rem);
+  margin-inline: auto;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--color-aura-gold-deep);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 1.75rem;
+  height: 1px;
+  background: currentColor;
 }
 
 /* Tabular numerals for prices */
@@ -114,6 +157,7 @@ h1, h2, h3, h4, .font-luxury {
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @keyframes kenburns { 0% { transform: scale(1.05); } 100% { transform: scale(1.18); } }
+@keyframes lineGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
 .animate-fade-in { animation: fadeIn 0.9s ease-out forwards; }
 .animate-slide-up { animation: slideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -125,16 +169,13 @@ h1, h2, h3, h4, .font-luxury {
 .animate-kenburns { animation: kenburns 18s ease-out forwards; }
 .animate-marquee { animation: marquee 45s linear infinite; }
 .animate-marquee:hover { animation-play-state: paused; }
+.animate-line-grow { animation: lineGrow 1.2s var(--ease-aura) both; transform-origin: left; }
 
 /* Difumina los bordes de una cinta horizontal */
 .marquee-mask {
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
 }
-
-/* Scroll-reveal: elements start hidden, .is-visible triggers the reveal */
-.reveal { opacity: 0; transform: translateY(36px); transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1); }
-.reveal.is-visible { opacity: 1; transform: translateY(0); }
 
 /* Press feedback */
 .active-scale:active { transform: scale(0.96); transition: transform 0.1s; }
@@ -168,14 +209,14 @@ h1, h2, h3, h4, .font-luxury {
    Scrollbar
    ============================================================ */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #fff; }
-::-webkit-scrollbar-thumb { background: #e7e2d8; border-radius: 10px; }
+::-webkit-scrollbar-track { background: var(--aura-ivory); }
+::-webkit-scrollbar-thumb { background: #c9b6ad; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-aura-gold); }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-::selection { background: var(--color-aura-gold); color: #fff; }
+::selection { background: var(--color-aura-gold); color: var(--color-aura-ink); }
 
 @media (max-width: 640px) {
   .container { padding-left: 1rem; padding-right: 1rem; }
@@ -189,5 +230,4 @@ h1, h2, h3, h4, .font-luxury {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  .reveal { opacity: 1; transform: none; }
 }

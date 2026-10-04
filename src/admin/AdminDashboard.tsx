@@ -14,14 +14,15 @@ import SettingsForm from './SettingsForm';
 import AdminSales from './AdminSales';
 import AdminOrders from './AdminOrders';
 import AdminLabels from './AdminLabels';
+import AdminBrand from './AdminBrand';
 import AdminReviews from './AdminReviews';
 import AdminAlertas from './AdminAlertas';
 import { subscribeIncidents, INCIDENT_LABELS } from '../lib/incidentsService';
 import type { Incident } from '../types';
 
-type AdminTab = 'products' | 'orders' | 'settings' | 'sales' | 'reviews' | 'alertas' | 'labels';
+type AdminTab = 'products' | 'orders' | 'settings' | 'sales' | 'reviews' | 'alertas' | 'labels' | 'brand';
 const tabHashes: Record<AdminTab, string> = {
-  products: '', orders: 'pedidos', sales: 'ventas', labels: 'etiquetas', reviews: 'resenas', alertas: 'alertas', settings: 'configuracion',
+  products: '', orders: 'pedidos', sales: 'ventas', labels: 'etiquetas', brand: 'marca', reviews: 'resenas', alertas: 'alertas', settings: 'configuracion',
 };
 
 const AdminDashboard: React.FC = () => {
@@ -127,9 +128,9 @@ const AdminDashboard: React.FC = () => {
       <header className="bg-aura-ink text-white sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.svg" alt="Äura" className="w-9 h-9 rounded-full" width={36} height={36} />
+            <img src="/brand/aura-wordmark-white.png" alt="Äura" className="h-auto w-24 sm:w-28" width={1600} height={534} />
             <div>
-              <h1 className="text-lg font-luxury font-semibold tracking-[0.18em] leading-none">ÄURA</h1>
+              <h1 className="sr-only">ÄURA</h1>
               <span className="text-[9px] tracking-[0.25em] uppercase text-aura-gold">Panel Admin</span>
             </div>
           </div>
@@ -153,6 +154,7 @@ const AdminDashboard: React.FC = () => {
             { key: 'orders', label: 'Pedidos' },
             { key: 'sales', label: 'Caja / ERP' },
             { key: 'labels', label: 'Etiquetas' },
+            { key: 'brand', label: 'Marca' },
             { key: 'reviews', label: 'Reseñas' },
             { key: 'alertas', label: 'Alertas' },
             { key: 'settings', label: 'Configuración' },
@@ -200,6 +202,7 @@ const AdminDashboard: React.FC = () => {
         {tab === 'settings' && <SettingsForm />}
         {tab === 'sales' && <AdminSales />}
         {tab === 'labels' && <AdminLabels />}
+        {tab === 'brand' && <AdminBrand onGoToLabels={() => goToTab('labels')} />}
         {tab === 'reviews' && <AdminReviews />}
 
         {tab === 'products' && (

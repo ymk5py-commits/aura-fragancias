@@ -9,7 +9,7 @@ export const CATALOG_URL = "https://drive.google.com/file/d/1W9KvpiZubUwsYwUvXCc
 export const BRAND_NAME = "ÄURA";
 // Banners servidos desde el propio dominio (public/banners) — nunca hotlinkear
 // a dominios de terceros: dependencia frágil y LCP externo.
-export const BANNER_IMAGE = "/banners/hero.jpg";
+export const BANNER_IMAGE = "/editorial/hero-cc180.webp";
 export const BANNER_MEN = "/banners/men.jpg";
 export const BANNER_WOMEN = "/banners/women.jpg";
 export const BANNER_UNISEX = "/banners/unisex.jpg";
@@ -152,7 +152,7 @@ export const PERFUMES: Perfume[] = [
   { code: "DD081", name: "J' ADORE WOMAN CHRISTIAN DIOR", inspiration: "Dior", family: "FLORALES, AFRUTADOS, FLORAL BLANCO", notes: ["JAZMIN", "PERA", "LIMON"], intensity: 4, duration: "10h", gender: "Woman", category: "Casual", imageUrl: "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219364/DD081_krki7i.png" },
   { code: "DD101", name: "MY WAY GIORGIO ARMANI", inspiration: "Giorgio Armani", family: "FLORAL BLANCO, CITRICO", notes: ["FLOR DE AZAHAR", "BERGAMOTA", "NARDO"], intensity: 4, duration: "10h", gender: "Woman", category: "Casual", imageUrl: "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219380/DD101_v7dzxn.png" },
   { code: "DD159", name: "CLOUD BY ARIANA GRANDE", inspiration: "Ariana Grande", family: "FLORAL FRUTAL", notes: ["CREMA BATIDA", "PRALINE", "COCO"], intensity: 4, duration: "10h", gender: "Woman", category: "Casual", imageUrl: "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219375/DD159_pcymra.png" },
-  { code: "DD161", name: "GOOD GIRL BLUSH CH", inspiration: "Carolina Herrera", family: "CHIPRE FLORAL", notes: ["VAINILLA", "PEONÍA", "BERGAMOTA"], intensity: 4, duration: "10h", gender: "Woman", category: "Night", imageUrl: "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219566/DD193_kzc359.png" },
+  { code: "DD161", name: "GOOD GIRL BLUSH CH", inspiration: "Carolina Herrera", family: "CHIPRE FLORAL", notes: ["VAINILLA", "PEONÍA", "BERGAMOTA"], intensity: 4, duration: "10h", gender: "Woman", category: "Night", imageUrl: "/products/DD161.png" },
   { code: "DD094", name: "LA VIDA ES BELLA LANCÔME", inspiration: "Lancôme", family: "DULCE, AVAINILLADO, AFRUTADO", notes: ["VAINILLA", "PACHULI", "GROSELLAS NEGRAS"], intensity: 4, duration: "10h", gender: "Woman", category: "Casual", badge: "Bestseller", imageUrl: "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219368/DD094_vjzgtf.png" },
   { code: "DD199", name: "BRIGHT CRYSTAL DE VERSACE", inspiration: "Versace", family: "FLORAL FRUTAL", notes: ["YUZU", "FRUTAS ROJAS", "GRANADA", "CARAMELO"], intensity: 4, duration: "10h", gender: "Woman", category: "Casual", imageUrl: "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219382/DD199_jqomni.png" },
   { code: "DD147", name: "DELINA EXCLUSIF", inspiration: "Parfums de Marly", family: "ORIENTAL", notes: ["LICHI", "PERA", "BERGAMOTA", "TORONJA", "PIMIENTA ROSA"], intensity: 5, duration: "12h+", gender: "Woman", category: "Night", imageUrl: "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219373/DD147_ejt8md.png" },

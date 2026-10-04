@@ -21,9 +21,19 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // El header vive SIEMPRE en el mundo noir: transparente sobre el hero de la
-  // home, vidrio oscuro al scrollear y en el resto de las páginas (nunca claro).
-  const transparent = !isScrolled && pathname === '/';
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsMenuOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isMenuOpen]);
 
   const navLinks = [
     { name: 'Hombres', href: '/hombres' },
@@ -57,22 +67,19 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      <div className={`transition-all duration-500 ${transparent ? 'bg-transparent' : 'glass-dark shadow-[0_1px_0_rgba(255,255,255,0.07)]'}`}>
-        <div className={`container mx-auto px-5 sm:px-6 flex justify-between items-center transition-all duration-500 ${isScrolled || pathname !== '/' ? 'py-3' : 'py-4 sm:py-5'}`}>
-          <Link href="/" onClick={() => handleNavClick('/')} className="flex items-center gap-2.5 sm:gap-3 group">
-            <img src="/logo.svg" alt="Äura Fragancias" className="w-9 h-9 sm:w-10 sm:h-10 rounded-full group-hover:scale-105 transition-transform duration-300" width={40} height={40} />
-            <span className="text-2xl sm:text-3xl font-luxury font-semibold tracking-[0.2em] text-white">
-              ÄURA
-            </span>
+      <div className={`bg-aura-ivory/96 backdrop-blur-md border-b border-aura-ink/10 transition-shadow duration-300 ${isScrolled ? 'shadow-[0_8px_30px_-22px_rgba(20,15,12,0.5)]' : ''}`}>
+        <div className="section-shell flex min-h-16 items-center justify-between gap-5 py-2">
+          <Link href="/" onClick={() => handleNavClick('/')} className="group flex shrink-0 items-center" aria-label="Äura Fragancias, inicio">
+            <img src="/brand/aura-wordmark-burgundy.png" alt="Äura Fragancias" className="h-auto w-[132px] transition-transform duration-300 group-hover:scale-[1.03] sm:w-[150px] xl:w-[164px]" width={1600} height={534} />
           </Link>
 
-          <nav className="hidden md:flex space-x-7 lg:space-x-9 items-center">
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
                 onClick={() => handleNavClick(link.href)}
-                className="relative text-[11px] font-semibold tracking-[0.2em] uppercase transition-colors duration-300 after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-aura-gold after:transition-all after:duration-300 hover:after:w-full text-white/80 hover:text-white"
+                className={`relative text-[10px] font-bold tracking-[0.18em] uppercase transition-colors duration-300 after:absolute after:-bottom-1.5 after:left-0 after:h-px after:bg-aura-cognac after:transition-all after:duration-300 hover:after:w-full text-aura-ink/70 hover:text-aura-ink ${pathname === link.href ? 'after:w-full text-aura-ink' : 'after:w-0'}`}
               >
                 {link.name}
               </Link>
@@ -80,26 +87,26 @@ const Header: React.FC = () => {
 
             <button
               onClick={openCart}
-              className="flex items-center gap-2.5 px-5 py-2.5 text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 active:scale-95 ml-2 bg-white text-aura-ink hover:bg-aura-gold hover:text-white"
+              className="flex min-h-11 items-center gap-2.5 px-5 py-2.5 text-[10px] font-bold tracking-[0.18em] uppercase transition-all duration-300 active:scale-95 ml-2 bg-aura-ink text-aura-ivory hover:bg-aura-cognac"
             >
               <div className="relative">
                 <ShoppingBag size={16} strokeWidth={1.75} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-aura-gold text-aura-ink text-[7px] font-bold w-3.5 h-3.5 flex items-center justify-center rounded-full">{cartCount}</span>
+                  <span className="absolute -top-2 -right-2 bg-aura-gold text-white text-[7px] font-bold w-3.5 h-3.5 flex items-center justify-center rounded-full">{cartCount}</span>
                 )}
               </div>
               Mi Carrito
             </button>
           </nav>
 
-          <div className="md:hidden flex items-center gap-1">
-            <button onClick={openCart} aria-label="Abrir carrito" className="relative p-2 text-white">
+          <div className="lg:hidden flex items-center gap-1">
+            <button onClick={openCart} aria-label="Abrir carrito" className="relative flex min-h-11 min-w-11 items-center justify-center text-aura-ink">
               <ShoppingBag size={22} strokeWidth={1.75} />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-aura-gold text-aura-ink text-[8px] font-bold w-4 h-4 flex items-center justify-center rounded-full">{cartCount}</span>
+                <span className="absolute top-0 right-0 bg-aura-gold text-white text-[8px] font-bold w-4 h-4 flex items-center justify-center rounded-full">{cartCount}</span>
               )}
             </button>
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Abrir menú" className="p-2 text-white">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'} aria-expanded={isMenuOpen} className="flex min-h-11 min-w-11 items-center justify-center text-aura-ink">
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
@@ -107,14 +114,11 @@ const Header: React.FC = () => {
       </div>
 
       {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-[100] animate-fade-in">
+        <div className="lg:hidden fixed inset-0 z-[100] animate-fade-in">
           <div className="absolute inset-0 bg-aura-ink/50 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)} />
           <div className="absolute top-0 right-0 w-[82%] max-w-sm h-full bg-white flex flex-col p-8 shadow-2xl animate-slide-left">
             <div className="flex justify-between items-center mb-10">
-              <div className="flex items-center gap-2.5">
-                <img src="/logo.svg" alt="Äura" className="w-9 h-9 rounded-full" width={36} height={36} />
-                <span className="text-2xl font-luxury font-semibold tracking-[0.2em] text-aura-ink">ÄURA</span>
-              </div>
+              <img src="/brand/aura-wordmark-burgundy.png" alt="Äura Fragancias" className="h-auto w-36" width={1600} height={534} />
               <button onClick={() => setIsMenuOpen(false)} aria-label="Cerrar menú" className="p-2 text-aura-ink"><X size={24} /></button>
             </div>
             <nav className="flex flex-col">
@@ -124,8 +128,8 @@ const Header: React.FC = () => {
                 </Link>
               ))}
             </nav>
-            <Link href="/hombres" onClick={() => setIsMenuOpen(false)} className="mt-auto w-full bg-aura-ink text-white py-4 text-[10px] font-bold tracking-[0.25em] text-center block uppercase hover:bg-aura-gold transition-colors">
-              Ver Catálogo
+            <Link href="/#top-ventas" onClick={() => setIsMenuOpen(false)} className="mt-auto flex min-h-12 w-full items-center justify-center bg-aura-ink px-4 py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-white transition-colors hover:bg-aura-cognac">
+              Descubrir top ventas
             </Link>
           </div>
         </div>

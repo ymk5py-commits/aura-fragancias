@@ -1,56 +1,50 @@
-
 import React from 'react';
-import { Microscope, Zap, Thermometer } from 'lucide-react';
+import { Droplets, Hourglass, SprayCan } from 'lucide-react';
+import Reveal from './Reveal';
 
-const TechnicalSection: React.FC = () => {
-  return (
-    <section id="tecnica" className="py-16 sm:py-24 bg-white">
-      <div className="container mx-auto px-5 sm:px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16">
-            <span className="text-aura-gold font-bold tracking-[0.2em] text-[11px] uppercase mb-2 block">Alta Perfumería</span>
-            <h2 className="text-2xl sm:text-3xl font-luxury mb-4 leading-tight">Ciencia & Perfumería</h2>
-            <p className="text-zinc-700 text-sm sm:text-lg max-w-xl mx-auto px-4">Descubrí por qué nuestras fragancias superan el estándar tradicional.</p>
-          </div>
+const stages = [
+  { number: '01', icon: Droplets, title: 'Concentración', text: 'Trabajamos con 30% de esencia, por encima del rango habitual de un Eau de Parfum.' },
+  { number: '02', icon: Hourglass, title: 'Maceración', text: 'El reposo controlado integra salida, corazón y fondo para una evolución más armoniosa.' },
+  { number: '03', icon: SprayCan, title: 'Desempeño', text: 'La proyección aparece desde el primer spray y la base permanece cerca de la piel.' },
+];
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 mb-12 sm:mb-16">
-            <div className="bg-zinc-50 p-8 sm:p-10 rounded-sm border border-zinc-100 flex flex-col">
-              <div className="flex items-center gap-4 mb-6">
-                <Microscope className="text-aura-gold shrink-0" size={28} />
-                <h3 className="text-xl sm:text-2xl font-luxury font-bold">Concentración 30%</h3>
-              </div>
-              <p className="text-zinc-600 text-sm sm:text-base leading-relaxed mb-6">
-                Superamos el estándar de <span className="text-zinc-900 font-semibold">Eau de Parfum</span> (15-20%) formulando con un <span className="text-aura-gold font-bold">30% de esencia pura</span> importada. 
-              </p>
-              <ul className="space-y-4 mt-auto">
-                <li className="flex items-start gap-3 text-xs sm:text-base text-zinc-600">
-                  <Zap size={14} className="text-aura-gold shrink-0 mt-0.5" /> 
-                  <span>Intensidad inmediata desde el primer spray.</span>
-                </li>
-                <li className="flex items-start gap-3 text-xs sm:text-base text-zinc-600">
-                  <Zap size={14} className="text-aura-gold shrink-0 mt-0.5" /> 
-                  <span>Proyección envolvente de larga distancia.</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="flex flex-col justify-center p-4">
-              <h3 className="text-xl sm:text-2xl font-luxury font-bold mb-4 sm:mb-6">Fijación Superior</h3>
-              <p className="text-zinc-700 text-sm sm:text-lg mb-8 leading-relaxed">
-                Nuestras fragancias son sometidas a un proceso de maceración controlada por 21 días, permitiendo que las notas de base se asienten y la longevidad en piel se maximice de forma natural.
-              </p>
-              <div className="p-5 bg-zinc-50 border border-zinc-100 rounded-sm flex gap-4">
-                <Thermometer className="text-zinc-300 shrink-0" size={20} />
-                <p className="text-[11px] sm:text-xs text-zinc-500 leading-snug">
-                  *La duración real puede variar según el pH de la piel y las condiciones climáticas del entorno.
-                </p>
-              </div>
-            </div>
-          </div>
+const TechnicalSection: React.FC = () => (
+  <section id="tecnica" className="bg-aura-sand py-20 sm:py-32">
+    <div className="section-shell">
+      <Reveal className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:gap-24">
+        <div>
+          <span className="eyebrow mb-5">Del laboratorio a tu piel</span>
+          <h2 className="font-luxury text-[clamp(2.8rem,6vw,5.4rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-aura-ink">
+            La ciencia detrás de una estela memorable.
+          </h2>
         </div>
+        <div className="flex items-end">
+          <p className="max-w-[58ch] text-base sm:text-lg font-light leading-relaxed text-aura-ink/66">
+            Una fragancia no se mide solamente por cómo huele al abrirla. Importan la concentración, el tiempo de reposo y cómo sus notas evolucionan durante horas.
+          </p>
+        </div>
+      </Reveal>
+
+      <div className="mt-14 grid border-t border-aura-ink/15 md:grid-cols-3 md:divide-x md:divide-aura-ink/15">
+        {stages.map((stage, index) => (
+          <Reveal key={stage.number} delay={index * 90}>
+            <article className="group border-b border-aura-ink/15 py-8 md:min-h-[20rem] md:border-b-0 md:px-8 md:first:pl-0 md:last:pr-0">
+              <div className="flex items-center justify-between">
+                <span className="font-luxury text-5xl font-semibold tracking-[-0.06em] text-aura-ink/14 transition-colors group-hover:text-aura-cognac">{stage.number}</span>
+                <stage.icon size={24} strokeWidth={1.25} className="text-aura-cognac" />
+              </div>
+              <h3 className="mt-14 font-luxury text-2xl sm:text-3xl font-semibold tracking-[-0.035em] text-aura-ink">{stage.title}</h3>
+              <p className="mt-4 max-w-[38ch] text-sm leading-relaxed text-aura-ink/58">{stage.text}</p>
+            </article>
+          </Reveal>
+        ))}
       </div>
-    </section>
-  );
-};
+
+      <p className="mt-6 max-w-2xl text-[11px] leading-relaxed text-aura-ink/46">
+        La duración puede variar según el pH de la piel, la aplicación y las condiciones climáticas.
+      </p>
+    </div>
+  </section>
+);
 
 export default TechnicalSection;

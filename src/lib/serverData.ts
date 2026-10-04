@@ -65,7 +65,8 @@ export async function getVisibleProducts(): Promise<Perfume[]> {
 // URLs de banners hotlinkeados a dominios de terceros que quedaron guardadas
 // en Firestore: se reescriben a los assets locales de /public/banners.
 const LEGACY_BANNERS: Record<string, string> = {
-  'https://www.druni.es/blog/wp-content/uploads/2026/03/03_Perfumes_unisex_PORTADA.jpg': '/banners/hero.jpg',
+  'https://www.druni.es/blog/wp-content/uploads/2026/03/03_Perfumes_unisex_PORTADA.jpg': '/editorial/hero-cc180.webp',
+  '/banners/hero.jpg': '/editorial/hero-cc180.webp',
   'https://www.radioformula.com.mx/__export/1768509508491/sites/formula/img/2026/01/15/perfume_de_hombre_exitosox_portada.png_2053803405.png': '/banners/men.jpg',
   'https://fragarabic.com/cdn/shop/articles/Botellas_de_perfumes_arabes.jpg?v=1724446535&width=2048': '/banners/unisex.jpg',
 };
@@ -79,7 +80,7 @@ function localizeBanners(s: SiteSettings): SiteSettings {
   };
   return {
     ...s,
-    heroImage: fix(s.heroImage, '/banners/hero.jpg'),
+    heroImage: fix(s.heroImage, '/editorial/hero-cc180.webp'),
     bannerMen: fix(s.bannerMen, '/banners/men.jpg'),
     bannerWomen: fix(s.bannerWomen, '/banners/women.jpg'),
     bannerUnisex: fix(s.bannerUnisex, '/banners/unisex.jpg'),

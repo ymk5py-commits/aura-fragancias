@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Bodoni_Moda, Jost } from 'next/font/google';
+import { Bricolage_Grotesque, Jost } from 'next/font/google';
 import Script from 'next/script';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import './globals.css';
@@ -14,11 +14,11 @@ const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID;
 const ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
 const GTAG_ID = GA4_ID || ADS_ID;
 
-// Bodoni Moda: didone de alto contraste, mismo ADN que el wordmark Ä del logo.
-// Jost: geométrica tipo Futura (código tipográfico clásico del lujo). Sin italics.
-const bodoni = Bodoni_Moda({
+// Bricolage Grotesque aporta una voz contemporánea y propia sin recurrir al
+// serif editorial genérico. Jost mantiene el cuerpo claro y geométrico.
+const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-display',
   display: 'swap',
 });
@@ -31,16 +31,16 @@ const jost = Jost({
 });
 
 export const viewport: Viewport = {
-  themeColor: '#0c0a09',
+  themeColor: '#580c17',
   width: 'device-width',
   initialScale: 1,
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
-  title: 'Äura Fragancias | Perfumes Extrait de Parfum 30% en Paraguay',
+  title: 'Äura Fragancias | Perfumes de Lujo Accesible en Paraguay · Extrait de Parfum 30%',
   description:
-    'Alta perfumería en Paraguay: inspiraciones olfativas premium con 30% de concentración (Extrait de Parfum), fijación 12 h+ y envío gratis desde Gs. 300.000.',
+    'Alta perfumería en Paraguay con 30% de concentración (Extrait de Parfum). Inspiraciones olfativas premium de las fragancias más icónicas, con fijación y estela excepcionales. Envío gratis desde Gs. 300.000.',
   keywords: [
     'perfumes Paraguay', 'fragancias de lujo', 'Äura', 'perfumes premium Asunción',
     'inspiraciones olfativas', 'extrait de parfum', 'perfumes importados', 'perfumes mayoristas Paraguay',
@@ -54,16 +54,16 @@ export const metadata: Metadata = {
     url: SITE,
     title: 'Äura Fragancias | Perfumes de Lujo Accesible · Extrait de Parfum 30%',
     description: 'Alta perfumería en Paraguay con 30% de concentración. Inspiraciones olfativas premium con fijación y estela excepcionales.',
-    images: [{ url: '/logo-512.png', width: 512, height: 512 }],
+    images: [{ url: '/brand/aura-social-1200x630.png', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Äura Fragancias | Perfumes de Lujo Accesible · Extrait de Parfum 30%',
     description: 'Alta perfumería en Paraguay con 30% de concentración. Inspiraciones olfativas premium.',
-    images: ['/logo-512.png'],
+    images: ['/brand/aura-social-1200x630.png'],
   },
   icons: {
-    icon: [{ url: '/logo.svg', type: 'image/svg+xml' }, { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' }],
+    icon: [{ url: '/brand/aura-icon.svg', type: 'image/svg+xml' }, { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' }],
     apple: '/apple-touch-icon.png',
   },
 };
@@ -73,8 +73,8 @@ const storeJsonLd = {
   '@type': 'Store',
   name: 'Äura Fragancias',
   description: 'Alta perfumería en Paraguay con 30% de concentración (Extrait de Parfum). Inspiraciones olfativas premium de lujo accesible.',
-  image: `${SITE}/logo-512.png`,
-  logo: `${SITE}/logo-512.png`,
+  image: `${SITE}/brand/aura-social-1200x630.png`,
+  logo: `${SITE}/brand/aura-wordmark-burgundy.png`,
   '@id': SITE,
   url: SITE,
   telephone: '+595994414986',
@@ -102,7 +102,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [settings, productsData] = await Promise.all([getSettings(), getProducts()]);
 
   return (
-    <html lang="es-PY" className={`${bodoni.variable} ${jost.variable}`}>
+    <html lang="es" className={`${bricolage.variable} ${jost.variable}`}>
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
         {/* Consent Mode v2 — default DENIED antes de cargar gtag (Ley 7593/2025 PY + EU/UK) */}
@@ -115,7 +115,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([storeJsonLd, webSiteJsonLd]) }} />
       </head>
-      <body className="bg-white text-zinc-900">
+      <body className="bg-aura-ivory text-aura-ink">
         <Providers settings={settings} products={productsData.products} source={productsData.source}>
           {children}
         </Providers>

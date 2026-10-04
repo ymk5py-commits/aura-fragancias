@@ -2,102 +2,93 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Instagram, Facebook, MessageCircle, Music2 as Tiktok, CreditCard, QrCode, Wallet, Landmark } from 'lucide-react';
-import { BRAND_NAME, INSTAGRAM_URL, FACEBOOK_URL, TIKTOK_URL, CATALOG_URL } from '../constants';
+import { ArrowRight, ArrowUpRight, Instagram, Facebook, MessageCircle, Music2 as Tiktok } from 'lucide-react';
+import { INSTAGRAM_URL, FACEBOOK_URL, TIKTOK_URL, CATALOG_URL } from '../constants';
 import { useSettings } from '../context/SettingsContext';
+
+const collections = [
+  { label: 'Hombres', href: '/hombres' },
+  { label: 'Mujeres', href: '/mujeres' },
+  { label: 'Nicho & Unisex', href: '/unisex' },
+];
 
 const Footer: React.FC = () => {
   const { settings } = useSettings();
+
   return (
-    <footer className="bg-aura-ink text-white/80 pt-20 sm:pt-28 pb-10">
-      <div className="container mx-auto px-6">
-        {/* Closing statement */}
-        <div className="flex flex-col items-center text-center mb-16 sm:mb-20">
-          <span className="text-aura-gold font-semibold tracking-[0.4em] text-[10px] uppercase mb-5 block">
-            Tu firma olfativa
-          </span>
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-luxury text-white leading-tight max-w-3xl mb-10">
-            Elegí tu aroma. Elegí tu presencia.
-            <span className="block text-champagne">Elegí Äura.</span>
-          </h2>
-          <a
-            href={CATALOG_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-shine bg-white text-aura-ink px-12 py-4 text-[11px] font-bold tracking-[0.25em] uppercase hover:bg-aura-gold hover:text-white transition-all duration-300 active-scale"
-          >
-            Ver Catálogo Completo
-          </a>
+    <footer className="bg-aura-ink text-aura-ivory">
+      <div className="section-shell">
+        <div className="grid gap-12 border-b border-white/16 py-20 lg:grid-cols-[1.2fr_0.8fr] lg:gap-20 lg:py-28">
+          <div>
+            <span className="eyebrow !text-aura-gold mb-6">Tu firma olfativa</span>
+            <h2 className="max-w-4xl font-luxury text-[clamp(3rem,6vw,6rem)] font-semibold leading-[0.92] tracking-[-0.055em] text-white">
+              Hay aromas que se vuelven <span className="text-champagne">parte de vos.</span>
+            </h2>
+          </div>
+          <div className="flex flex-col justify-end">
+            <p className="mb-8 max-w-[42ch] text-sm leading-relaxed text-white/60 sm:text-base">
+              Explorá las colecciones y encontrá la inspiración que encaja con tu estilo.
+            </p>
+            <div className="border-t border-white/22">
+              {collections.map(({ label, href }) => (
+                <Link key={href} href={href} className="group flex min-h-14 items-center justify-between border-b border-white/22 font-luxury text-xl font-medium text-white transition-colors hover:text-aura-gold-soft">
+                  {label}
+                  <ArrowRight size={18} strokeWidth={1.5} className="transition-transform group-hover:translate-x-1" />
+                </Link>
+              ))}
+            </div>
+            <a href={CATALOG_URL} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex min-h-11 items-center gap-2 self-start border-b border-aura-gold/55 text-[10px] font-bold uppercase tracking-[0.17em] text-aura-gold-soft transition-colors hover:text-white">
+              Ver catálogo completo
+              <ArrowUpRight size={14} />
+            </a>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 sm:gap-12 py-12 border-y border-white/10">
-          <div className="md:col-span-1">
-            <div className="flex items-center gap-3 mb-5">
-              <img src="/logo.svg" alt="Äura Fragancias" className="w-11 h-11 rounded-full" width={44} height={44} />
-              <h3 className="text-2xl font-luxury font-semibold tracking-[0.2em] text-white">{BRAND_NAME}</h3>
-            </div>
-            <p className="text-white/55 text-sm font-light leading-relaxed max-w-xs">
-              Las fragancias más icónicas del mundo, reinterpretadas con la máxima concentración y fijación.
-              Lujo real para personas reales.
+        <div className="grid gap-10 border-b border-white/12 py-12 md:grid-cols-[1.5fr_0.7fr_0.9fr_1fr] md:gap-8">
+          <div>
+            <img src="/brand/aura-wordmark-white.png" alt="Äura Fragancias" className="mb-5 h-auto w-44" width={1600} height={534} />
+            <p className="max-w-xs text-sm leading-relaxed text-white/55">
+              Inspiraciones olfativas con 30% de concentración, hechas para acompañarte mucho después del primer encuentro.
             </p>
           </div>
 
           <div>
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.25em] mb-5 text-aura-gold">Navegación</h3>
-            <ul className="space-y-3.5 text-sm text-white/65 font-medium">
-              <li><Link href="/hombres" className="hover:text-white transition-colors">Hombres</Link></li>
-              <li><Link href="/mujeres" className="hover:text-white transition-colors">Mujeres</Link></li>
-              <li><Link href="/unisex" className="hover:text-white transition-colors">Nicho & Unisex</Link></li>
-              <li><Link href="/mayoristas" className="hover:text-white transition-colors">Mayoristas</Link></li>
+            <h4 className="mb-5 text-[10px] font-bold uppercase tracking-[0.2em] text-aura-gold">Tienda</h4>
+            <ul className="space-y-3 text-sm text-white/65">
+              {collections.map(({ label, href }) => <li key={href}><Link href={href} className="transition-colors hover:text-white">{label}</Link></li>)}
+              <li><Link href="/mayoristas" className="transition-colors hover:text-white">Mayoristas</Link></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.25em] mb-5 text-aura-gold">Legal</h3>
-            <ul className="space-y-3.5 text-sm text-white/65 font-medium">
-              <li><Link href="/sobre-inspiraciones" className="hover:text-white transition-colors">Inspiraciones</Link></li>
-              <li><Link href="/terminos-y-condiciones" className="hover:text-white transition-colors">Términos y Condiciones</Link></li>
-              <li><Link href="/envios-y-devoluciones" className="hover:text-white transition-colors">Envíos y Devoluciones</Link></li>
+            <h4 className="mb-5 text-[10px] font-bold uppercase tracking-[0.2em] text-aura-gold">Información</h4>
+            <ul className="space-y-3 text-sm text-white/65">
+              <li><Link href="/sobre-inspiraciones" className="transition-colors hover:text-white">Sobre las inspiraciones</Link></li>
+              <li><Link href="/terminos-y-condiciones" className="transition-colors hover:text-white">Términos y condiciones</Link></li>
+              <li><Link href="/envios-y-devoluciones" className="transition-colors hover:text-white">Envíos y devoluciones</Link></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.25em] mb-5 text-aura-gold">Seguinos</h3>
-            <div className="flex gap-3">
+            <h4 className="mb-5 text-[10px] font-bold uppercase tracking-[0.2em] text-aura-gold">Conectemos</h4>
+            <div className="flex flex-wrap gap-2">
               {[
                 { href: INSTAGRAM_URL, icon: Instagram, label: 'Instagram' },
                 { href: FACEBOOK_URL, icon: Facebook, label: 'Facebook' },
                 { href: TIKTOK_URL, icon: Tiktok, label: 'TikTok' },
                 { href: `https://wa.me/${settings.whatsappNumber}`, icon: MessageCircle, label: 'WhatsApp' },
               ].map(({ href, icon: Icon, label }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center text-white/70 hover:bg-aura-gold hover:text-aura-ink hover:border-aura-gold transition-all duration-300"
-                >
-                  <Icon size={18} />
+                <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="flex min-h-11 min-w-11 items-center justify-center border border-white/18 text-white/70 transition-colors hover:border-aura-gold hover:text-aura-gold">
+                  <Icon size={18} strokeWidth={1.7} />
                 </a>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-white/10 pt-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">
-          <span className="text-aura-gold">Medios de pago</span>
-          <span className="flex items-center gap-1.5"><CreditCard size={13} strokeWidth={1.6} /> Tarjeta</span>
-          <span className="flex items-center gap-1.5"><QrCode size={13} strokeWidth={1.6} /> QR</span>
-          <span className="flex items-center gap-1.5"><Wallet size={13} strokeWidth={1.6} /> Billeteras</span>
-          <span className="flex items-center gap-1.5"><Landmark size={13} strokeWidth={1.6} /> Transferencia</span>
-          <span className="text-white/35">Pago seguro · Pagopar</span>
-        </div>
-
-        <div className="mt-8 text-center text-white/40 text-[10px] uppercase tracking-[0.2em] font-medium leading-relaxed">
-          &copy; {new Date().getFullYear()} Äura Perfumes · Todos los derechos reservados.
-          <br />
-          Los productos aquí mencionados son perfumes de inspiración olfativa.
+        <div className="flex flex-col gap-2 py-7 text-[10px] font-medium uppercase tracking-[0.14em] text-white/38 sm:flex-row sm:justify-between">
+          <span>&copy; {new Date().getFullYear()} Äura Fragancias. Todos los derechos reservados.</span>
+          <span>Perfumes de inspiración olfativa.</span>
         </div>
       </div>
     </footer>

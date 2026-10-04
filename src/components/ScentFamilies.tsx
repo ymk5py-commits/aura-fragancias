@@ -24,7 +24,7 @@ const ScentFamilies: React.FC = () => {
   const [active, setActive] = useState(0);
 
   return (
-    <section className="relative py-16 sm:py-28 bg-aura-ink overflow-hidden">
+    <section className="relative overflow-hidden bg-aura-ink py-20 sm:py-32">
       {/* tint de fondo según familia activa */}
       <div
         className="pointer-events-none absolute inset-0 transition-opacity duration-700"
@@ -32,11 +32,13 @@ const ScentFamilies: React.FC = () => {
         aria-hidden
       />
 
-      <div className="relative container mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12 sm:mb-16">
-          <span className="text-aura-gold font-semibold tracking-[0.4em] text-[10px] sm:text-[11px] uppercase mb-3 block">El Universo Äura</span>
-          <h2 className="text-3xl sm:text-5xl font-luxury text-white">Familias Olfativas</h2>
-          <div className="rule-gold w-20 mx-auto mt-5" />
+      <div className="relative section-shell">
+        <div className="mb-12 grid gap-6 sm:mb-16 md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <span className="eyebrow !text-aura-gold mb-5">El universo Äura</span>
+            <h2 className="font-luxury text-[clamp(2.8rem,7vw,6rem)] font-semibold leading-[0.9] tracking-[-0.055em] text-white">Encontrá tu familia olfativa.</h2>
+          </div>
+          <p className="max-w-sm text-sm leading-relaxed text-white/50">Cada familia cuenta una intención distinta. Explorá sus notas y reconocé cuál se parece más a vos.</p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
@@ -54,11 +56,11 @@ const ScentFamilies: React.FC = () => {
                     aria-expanded={isActive}
                     className="w-full text-left group flex items-center gap-4 sm:gap-5 py-4 sm:py-5 border-b border-white/10 transition-colors"
                   >
-                    <span className={`shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border transition-all duration-500 ${isActive ? 'border-aura-gold text-aura-gold bg-aura-gold/10' : 'border-white/15 text-white/40'}`}>
+                    <span className={`flex h-10 w-10 shrink-0 items-center justify-center border transition-all duration-500 sm:h-12 sm:w-12 ${isActive ? 'border-aura-gold bg-aura-gold/10 text-aura-gold' : 'border-white/15 text-white/40'}`}>
                       <Icon size={20} strokeWidth={1.5} />
                     </span>
                     <span className="flex-1 min-w-0">
-                      <span className={`block font-luxury leading-none transition-colors duration-300 ${isActive ? 'text-white' : 'text-white/45 group-hover:text-white/70'} text-2xl sm:text-4xl`}>
+                      <span className={`block font-luxury font-semibold leading-none tracking-[-0.035em] transition-colors duration-300 ${isActive ? 'text-white' : 'text-white/42 group-hover:text-white/70'} text-2xl sm:text-4xl`}>
                         {f.name}
                       </span>
                       {/* Detalle inline (solo móvil) */}

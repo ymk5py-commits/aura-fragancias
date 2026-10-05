@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import LegalArticle from '../../../components/LegalArticle';
-import { LEGAL_TEXTS, SHIPPING_ZONES } from '../../../constants';
+import { LEGAL_TEXTS } from '../../../constants';
 
 export const metadata: Metadata = {
   title: 'Envíos y Devoluciones en Paraguay | Äura Fragancias',
@@ -13,19 +13,9 @@ export default function EnviosPage() {
   return (
     <LegalArticle title={LEGAL_TEXTS.shipping.title} content={LEGAL_TEXTS.shipping.content}>
       <div className="mt-12">
-        <h2 className="text-2xl font-luxury text-zinc-900 mb-6">Tarifas de envío por zona</h2>
-        <ul className="divide-y divide-zinc-100 border border-zinc-100">
-          {SHIPPING_ZONES.map((z) => (
-            <li key={z.name} className="flex items-center justify-between px-5 py-4">
-              <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-zinc-600">{z.name}</span>
-              <span className="text-sm font-semibold text-zinc-900 tabular">Gs. {z.price.toLocaleString('es-PY')}</span>
-            </li>
-          ))}
-          <li className="flex items-center justify-between px-5 py-4 bg-aura-ivory">
-            <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-zinc-600">Compras desde Gs. 300.000</span>
-            <span className="text-sm font-semibold text-aura-gold-deep">Envío gratis</span>
-          </li>
-        </ul>
+        <h2 className="text-2xl font-luxury text-zinc-900 mb-6">Cómo se cotiza tu envío</h2>
+        <p className="text-base leading-relaxed text-zinc-600">El delivery se cotiza individualmente según tu dirección. Coordinamos el importe antes de confirmar el pedido, tanto para Asunción y Gran Asunción como para el interior del país.</p>
+        <p className="mt-5 border border-zinc-100 bg-aura-ivory px-5 py-4 text-sm font-semibold text-aura-gold-deep">En compras desde Gs. 300.000, el envío es gratis.</p>
       </div>
     </LegalArticle>
   );

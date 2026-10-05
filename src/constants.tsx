@@ -25,12 +25,6 @@ export const PRICES = [
   { size: "50 ML", price: 120000, label: "120.000 Gs.", desc: "Mejor valor.", bestValue: true },
 ];
 
-export const SHIPPING_ZONES = [
-  { name: "ASUNCIÓN", price: 20000 },
-  { name: "GRAN ASUNCIÓN", price: 25000 },
-  { name: "INTERIOR DEL PAÍS (ENCOMIENDA)", price: 35000 },
-];
-
 // ============================================================
 //  CONFIGURACIÓN DEL SITIO (editable desde /admin → Configuración)
 //  Estos son los valores por defecto; si hay datos en Firebase, mandan esos.

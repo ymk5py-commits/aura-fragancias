@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
 import ts from 'typescript';
+import { resolveSitemap } from 'next/dist/build/webpack/loaders/metadata/resolve-route-data.js';
 
 function load(file, imports, globals = {}) {
   const source = readFileSync(new URL(file, import.meta.url), 'utf8');
@@ -93,7 +94,7 @@ test('sitemap keeps real modification dates stable and omits unknown dates', asy
   let settings = {};
   const products = [
     { code: 'CC001', updatedAt: '2026-09-20T12:00:00Z', imageUrl: '/products/CC001.png' },
-    { code: 'DD001' },
+    { code: 'DD001', imageUrl: 'https://firebasestorage.googleapis.com/example?alt=media&token=public-image' },
   ];
   const sitemap = load('../src/app/sitemap.ts', {
     '../lib/serverData': { getProducts: async () => ({ products }), getSettings: async () => settings },
@@ -107,6 +108,10 @@ test('sitemap keeps real modification dates stable and omits unknown dates', asy
   assert.equal(first.find((p) => p.url.endsWith('/CC001')).lastModified, products[0].updatedAt);
   assert.equal(first.find((p) => p.url.endsWith('/DD001')).lastModified, undefined);
   assert.equal(first.find((p) => p.url.endsWith('/CC001')).images[0], 'https://www.aurafragancias.store/products/CC001.png');
+  const xml = resolveSitemap(first);
+  assert.ok(xml.includes('<image:loc>https://firebasestorage.googleapis.com/example?alt=media&amp;token=public-image</image:loc>'));
+  assert.equal(xml.includes('alt=media&token='), false);
+  assert.equal(xml.includes('&amp;amp;'), false);
   assert.equal(first.find((p) => p.url.endsWith('/terminos-y-condiciones')).lastModified, undefined);
   settings = { updatedAt: '2026-10-03T12:00:00Z' };
   const changed = await sitemap.default();

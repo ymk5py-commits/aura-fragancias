@@ -22,7 +22,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((p) => p.visible !== false)
     .map((p) => {
       const updated = latestUpdate(p.updatedAt, settings.updatedAt);
-      return { url: `${SITE}/producto/${p.code}`, ...(updated ? { lastModified: updated } : {}), ...(p.imageUrl ? { images: [new URL(cldn(p.imageUrl, 1000), SITE).href] } : {}), changeFrequency: 'monthly' as const, priority: 0.7 };
+      // Next concatena image:loc sin escapar XML; las URLs de Firebase llevan &token.
+      const image = p.imageUrl ? new URL(cldn(p.imageUrl, 1000), SITE).href.replace(/&/g, '&amp;') : undefined;
+      return { url: `${SITE}/producto/${p.code}`, ...(updated ? { lastModified: updated } : {}), ...(image ? { images: [image] } : {}), changeFrequency: 'monthly' as const, priority: 0.7 };
     });
   return [
     { url: SITE, ...(catalogUpdated ? { lastModified: catalogUpdated } : {}), changeFrequency: 'weekly', priority: 1.0 },

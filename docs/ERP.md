@@ -30,6 +30,6 @@ El resultado puede diferir del RESUMEN de Sheets cuando sus fórmulas difieren d
 
 ## Persistencia y verificación
 
-Firestore: `sales`, `expenses`, `salesConfig/costs`, `erpImports/aura-caja`. Datos de caja privados para la cuenta administrativa actual. Los movimientos no se borran: se anulan. Ediciones con versiones anteriores se rechazan para evitar sobrescrituras entre ventanas. Las reglas de las colecciones existentes se conservan.
+Firestore: `sales`, `expenses`, `salesConfig/costs`, `erpImports/aura-caja`. Datos de caja privados para las cuentas autenticadas que acceden al administrador. Todas esas cuentas pueden gestionar ventas, gastos, costos e historial con los mismos permisos del panel. Los movimientos no se borran: se anulan. Ediciones con versiones anteriores se rechazan para evitar sobrescrituras entre ventanas. Las reglas de las colecciones existentes se conservan.
 
 Verificación: `npm run test:import` (incluye los cálculos ERP), pruebas con emulador en `scripts/test-rules.mjs`, `npm run lint`, `npm run build` y prueba de formularios en navegador con movimientos locales temporales. No se cargan ventas ficticias en producción.

@@ -2,9 +2,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Caja privada: cuenta administrativa actual del negocio.
+    // Caja privada: mismo acceso autenticado que el panel administrativo.
     function isCashAdmin() {
-      return request.auth != null && request.auth.token.email == 'ymk5py@gmail.com';
+      return request.auth != null;
     }
 
     function cashAmount(value) {

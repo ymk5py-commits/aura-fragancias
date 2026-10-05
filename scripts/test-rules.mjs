@@ -129,7 +129,7 @@ await caso('el admin la borra', () => assertSucceeds(deleteDoc(doc(admin(), 'inc
 
 console.log('\nCaja / ERP — acceso privado y transacciones\n');
 const cashAdmin = () => env.authenticatedContext('cash-admin', { email: 'ymk5py@gmail.com' }).firestore();
-const outsider = () => env.authenticatedContext('other', { email: 'otro@example.com' }).firestore();
+const secondAdmin = () => env.authenticatedContext('second-admin', { email: 'otro@example.com' }).firestore();
 function loadModule(path, imports) {
   const source = readFileSync(new URL(path, import.meta.url), 'utf8');
   const output = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -161,10 +161,25 @@ await caso('anon no lee ventas ni costos privados', async () => {
   await assertFails(getDoc(doc(anon(), 'sales', 's1')));
   await assertFails(getDoc(doc(anon(), 'salesConfig', 'costs')));
 });
-await caso('otra cuenta autenticada no lee ni modifica la caja', async () => {
-  await assertFails(getDoc(doc(outsider(), 'sales', 's1')));
-  await assertFails(updateDoc(doc(outsider(), 'sales', 's1'), { notes: 'alterado', updatedAt: serverTimestamp() }));
-  await assertFails(setDoc(doc(outsider(), 'expenses', 'x'), { ...gasto, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
+await caso('otra cuenta del admin también lee, registra y actualiza la caja', async () => {
+  const secondLedger = loadModule('../src/lib/salesService.ts', {
+    './firebase': { getFirebaseDb: async () => secondAdmin() }, './sales': salesModel, './erp': erpModel, 'firebase/firestore': firestoreSdk,
+  });
+  await assertSucceeds(getDoc(doc(secondAdmin(), 'sales', 's1')));
+  await secondLedger.saveSale({ ...venta, id: 'second-admin-sale' });
+  const saved = { ...venta, id: 'second-admin-sale', ...(await getDoc(doc(secondAdmin(), 'sales', 'second-admin-sale'))).data() };
+  await secondLedger.saveSale({ ...saved, customer: 'Actualizado por otro administrador' });
+  assert.equal((await getDoc(doc(cashAdmin(), 'sales', 'second-admin-sale'))).data().customer, 'Actualizado por otro administrador');
+  await secondLedger.saveExpense({ ...gasto, id: 'second-admin-expense' });
+  await secondLedger.saveCostRecipe(erpModel.INITIAL_RECIPE);
+  await assertFails(updateDoc(doc(secondAdmin(), 'sales', 's1'), { collected: -1, updatedAt: serverTimestamp() }));
+  await assertFails(deleteDoc(doc(secondAdmin(), 'sales', 's1')));
+});
+await caso('sin login tampoco se registran ni actualizan ventas, gastos o costos', async () => {
+  await assertFails(updateDoc(doc(anon(), 'sales', 's1'), { notes: 'alterado', updatedAt: serverTimestamp() }));
+  await assertFails(setDoc(doc(anon(), 'sales', 'anonymous-sale'), { ...venta, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
+  await assertFails(setDoc(doc(anon(), 'expenses', 'anonymous-expense'), { ...gasto, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
+  await assertFails(updateDoc(doc(anon(), 'salesConfig', 'costs'), { updatedAt: serverTimestamp() }));
 });
 await caso('lista completa por rango de fechas sin índice compuesto', () => assertSucceeds(getDocs(query(collection(cashAdmin(), 'sales'), firestoreSdk.where('date', '>=', '2026-10-01'), firestoreSdk.where('date', '<=', '2026-10-31'), orderBy('date', 'desc')))));
 await caso('no se puede borrar una venta ni alterar su fecha de creación', async () => {
@@ -249,8 +264,9 @@ await caso('la copia de preparación del historial también es privada', async (
   await assertSucceeds(setDoc(doc(cashAdmin(), 'erpImports', 'aura-caja'), { contents: '{}', updatedAt: serverTimestamp() }));
   await assertSucceeds(getDoc(doc(cashAdmin(), 'erpImports', 'aura-caja')));
   await assertFails(getDoc(doc(anon(), 'erpImports', 'aura-caja')));
-  await assertFails(getDoc(doc(outsider(), 'erpImports', 'aura-caja')));
-  await assertFails(setDoc(doc(outsider(), 'erpImports', 'aura-caja'), { contents: '{}', updatedAt: serverTimestamp() }));
+  await assertSucceeds(getDoc(doc(secondAdmin(), 'erpImports', 'aura-caja')));
+  await assertSucceeds(setDoc(doc(secondAdmin(), 'erpImports', 'aura-caja'), { contents: '{}', updatedAt: serverTimestamp() }));
+  await assertFails(setDoc(doc(anon(), 'erpImports', 'aura-caja'), { contents: '{}', updatedAt: serverTimestamp() }));
 });
 await caso('reanuda una importación interrumpida después de un bloque sin duplicarlo', async () => {
   const rows = Array.from({ length: 25 }, (_, i) => ({ key: `sheet_aura_resume_1_${i + 1}_sale`, kind: 'sale', record: { ...venta, id: `sheet_aura_resume_1_${i + 1}_sale` }, errors: [] }));

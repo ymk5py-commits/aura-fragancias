@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Menu, X, ShoppingBag } from 'lucide-react';
+import { Menu, X, ShoppingBag, Search } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSettings } from '../context/SettingsContext';
@@ -17,7 +17,7 @@ const Header: React.FC = () => {
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 40);
     handleScroll();
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -85,6 +85,12 @@ const Header: React.FC = () => {
               </Link>
             ))}
 
+            <form action="/buscar" method="get" role="search" className="hidden xl:flex min-h-11 w-40 items-center gap-2 border-b border-aura-ink/25">
+              <label className="sr-only" htmlFor="header-search">Buscar fragancias</label>
+              <input id="header-search" type="search" name="q" maxLength={100} placeholder="Buscar fragancias" className="min-w-0 w-full bg-transparent text-xs outline-none" />
+              <button aria-label="Buscar" className="flex min-h-11 min-w-8 items-center justify-center"><Search size={17} /></button>
+            </form>
+            <Link href="/buscar" aria-label="Buscar fragancias" className="xl:hidden flex min-h-11 min-w-11 items-center justify-center"><Search size={20} /></Link>
             <button
               onClick={openCart}
               className="flex min-h-11 items-center gap-2.5 px-5 py-2.5 text-[10px] font-bold tracking-[0.18em] uppercase transition-all duration-300 active:scale-95 ml-2 bg-aura-ink text-aura-ivory hover:bg-aura-cognac"
@@ -100,6 +106,7 @@ const Header: React.FC = () => {
           </nav>
 
           <div className="lg:hidden flex items-center gap-1">
+            <Link href="/buscar" aria-label="Buscar fragancias" onClick={() => handleNavClick('/buscar')} className="flex min-h-11 min-w-11 items-center justify-center text-aura-ink"><Search size={22} /></Link>
             <button onClick={openCart} aria-label="Abrir carrito" className="relative flex min-h-11 min-w-11 items-center justify-center text-aura-ink">
               <ShoppingBag size={22} strokeWidth={1.75} />
               {cartCount > 0 && (

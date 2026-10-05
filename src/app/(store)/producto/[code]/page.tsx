@@ -6,6 +6,7 @@ import { cldn } from '../../../../lib/img';
 import { SITE } from '../../../../lib/site';
 import { buildProductDescription } from '../../../../lib/productCopy';
 import { Perfume } from '../../../../types';
+import { productGroup, sizeKey } from '../../../../lib/catalogSeo';
 import { getApprovedReviews, ratingJsonLd } from '../../../../lib/server/reviews';
 
 async function findProduct(code: string) {
@@ -39,8 +40,8 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
   const perfume = await findProduct(code);
   if (!perfume) return { title: 'Producto no encontrado | Äura Fragancias' };
   const title = `${perfume.name} — Inspiración ${perfume.inspiration} | Äura`;
-  const description = `${perfume.name}: inspiración olfativa de ${perfume.inspiration}, familia ${perfume.family}. Extrait de Parfum 30%, fijación ${perfume.duration}. Envío a todo Paraguay.`;
-  const image = cldn(perfume.imageUrl, 800) || `${SITE}/logo-512.png`;
+  const description = `${perfume.name}, inspiración olfativa de ${perfume.inspiration}. ${perfume.family}. Extrait de Parfum 30% en 10, 30 y 50 ml. Envíos a Paraguay.`;
+  const image = new URL(cldn(perfume.imageUrl, 1000) || '/brand/aura-social-1200x630.png', SITE).href;
   return {
     title,
     description,
@@ -50,8 +51,9 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
   };
 }
 
-export default async function ProductoPage({ params }: { params: Promise<{ code: string }> }) {
-  const { code } = await params;
+export default async function ProductoPage({ params, searchParams }: { params: Promise<{ code: string }>; searchParams: Promise<{ size?: string | string[] }> }) {
+  const [{ code }, query] = await Promise.all([params, searchParams]);
+  const initialSize = `${sizeKey(query.size)} ML`;
   const [perfume, settings, { products }] = await Promise.all([findProduct(code), getSettings(), getProducts()]);
   if (!perfume) notFound();
   const reviews = await getApprovedReviews(perfume.code);
@@ -61,50 +63,11 @@ export default async function ProductoPage({ params }: { params: Promise<{ code:
   const productUrl = `${SITE}/producto/${perfume.code}`;
   const description = buildProductDescription(perfume, settings);
   const related = pickRelated(products, perfume);
-  const priceValidUntil = `${new Date().getFullYear()}-12-31`;
-
-  const shippingDetails = {
-    '@type': 'OfferShippingDetails',
-    shippingRate: { '@type': 'MonetaryAmount', value: '0', currency: 'PYG' },
-    shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'PY' },
-    deliveryTime: {
-      '@type': 'ShippingDeliveryTime',
-      handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
-      transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 5, unitCode: 'DAY' },
-    },
-  };
-
-  const offers = [
-    { size: '10 ML', price: settings.price10 },
-    { size: '30 ML', price: settings.price30 },
-    { size: '50 ML', price: settings.price50 },
-  ].map(({ size, price }) => ({
-    '@type': 'Offer',
-    name: `${perfume.name} — ${size}`,
-    priceCurrency: 'PYG',
-    price,
-    priceValidUntil,
-    availability: 'https://schema.org/InStock',
-    itemCondition: 'https://schema.org/NewCondition',
-    url: productUrl,
-    seller: { '@type': 'Organization', name: 'Äura Fragancias' },
-    shippingDetails,
-  }));
-
   const jsonLd = [
     {
-      '@context': 'https://schema.org',
-      '@type': 'Product',
-      name: perfume.name,
-      image: cldn(perfume.imageUrl, 800) || `${SITE}/logo-512.png`,
-      description,
-      sku: perfume.code,
-      mpn: perfume.code,
-      category: 'Health & Beauty > Personal Care > Cosmetics > Fragrance',
-      brand: { '@type': 'Brand', name: 'Äura Fragancias' },
+      ...productGroup(perfume, settings, description),
       // aggregateRating + review solo con reseñas visibles en la página.
       ...ratingJsonLd(reviews),
-      offers,
     },
     {
       '@context': 'https://schema.org',
@@ -119,8 +82,10 @@ export default async function ProductoPage({ params }: { params: Promise<{ code:
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
       <ProductView
+        key={`${perfume.code}-${initialSize}`}
+        initialSize={initialSize}
         perfume={perfume}
         description={description}
         related={related}

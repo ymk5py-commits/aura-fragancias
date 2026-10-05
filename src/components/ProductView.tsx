@@ -25,16 +25,17 @@ const IntensityBar = ({ level }: { level: number }) => (
 
 interface ProductViewProps {
   perfume: Perfume;
+  initialSize?: string;
   reviews?: Review[];
   description?: string;
   related?: Perfume[];
   breadcrumb?: { genderLabel: string; genderPath: string };
 }
 
-const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related = [], breadcrumb, reviews = [] }) => {
+const ProductView: React.FC<ProductViewProps> = ({ perfume, initialSize = '30 ML', description, related = [], breadcrumb, reviews = [] }) => {
   const { prices: PRICES } = useSettings();
   const { addToCart } = useCart();
-  const [selectedSize, setSelectedSize] = useState<string>(PRICES[1].size);
+  const [selectedSize, setSelectedSize] = useState<string>(initialSize);
   const [quantity, setQuantity] = useState(1);
   const [copied, setCopied] = useState(false);
   const buyRef = useRef<HTMLButtonElement | null>(null);
@@ -43,7 +44,7 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
 
   // ViewContent (Meta, pool de retargeting DPA) + view_item (GA4) + remarketing.
   useEffect(() => {
-    const refPrice = PRICES[1]?.price || PRICES[0]?.price || 0;
+    const refPrice = selectedPrice;
     const category = perfume.gender === 'Man' ? 'Hombre' : perfume.gender === 'Woman' ? 'Mujer' : 'Unisex';
     trackEvent('ViewContent', {
       content_name: perfume.name,
@@ -53,10 +54,10 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
       value: refPrice,
       currency: 'PYG',
     }, newEventId());
-    gaViewItem(toItem(perfume, refPrice, PRICES[1]?.size));
+    gaViewItem(toItem(perfume, refPrice, selectedSize));
     gaRemarketing('product', [perfume.code], refPrice);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [perfume.code]);
+  }, [perfume.code, selectedSize, selectedPrice]);
 
   return (
     <main className="min-h-screen flex-grow bg-aura-ivory pb-20 pt-32 sm:pt-36">
@@ -96,7 +97,7 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
           </div>
 
           <div className="flex w-full flex-col">
-            <div className="mb-10">
+            <div className="mb-7">
               <span className="mb-4 block text-[10px] font-bold uppercase tracking-[0.22em] text-aura-cognac">Äura / {perfume.code} / Inspiración {perfume.inspiration}</span>
               <h1 className="mb-5 max-w-[13ch] font-luxury text-[clamp(3.2rem,6vw,6rem)] font-semibold leading-[0.9] tracking-[-0.06em] text-aura-ink">{perfume.name}</h1>
               {rating.count > 0 && (
@@ -127,12 +128,12 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
               </div>
             </div>
 
-            <div className="space-y-12">
+            <div className="space-y-7">
               <div>
                 <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-6">Presentación</h4>
                 <div className="grid grid-cols-3 gap-2 sm:gap-4">
                   {PRICES.map((p) => (
-                    <button key={p.size} onClick={() => setSelectedSize(p.size)} className={`relative min-h-24 border px-1.5 py-4 transition-all duration-300 sm:px-2 ${selectedSize === p.size ? 'border-aura-wine bg-aura-wine text-white' : 'border-aura-ink/15 text-aura-ink/65 hover:border-aura-wine hover:bg-aura-sand'}`}>
+                    <button key={p.size} aria-pressed={selectedSize === p.size} onClick={() => { setSelectedSize(p.size); const url = new URL(window.location.href); url.searchParams.set('size', p.size.split(' ')[0]); window.history.replaceState(null, '', url); }} className={`relative min-h-24 border px-1.5 py-4 transition-all duration-300 sm:px-2 ${selectedSize === p.size ? 'border-aura-wine bg-aura-wine text-white' : 'border-aura-ink/15 text-aura-ink/65 hover:border-aura-wine hover:bg-aura-sand'}`}>
                       <span className="text-[10px] font-bold tracking-widest uppercase mb-1 block">{p.size}</span>
                       <span className={`font-luxury text-base tabular sm:text-lg ${selectedSize === p.size ? 'text-aura-gold-soft' : 'text-aura-ink'}`}>Gs. {p.price.toLocaleString('es-PY')}</span>
                     </button>
@@ -140,10 +141,34 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-12 py-10 border-y border-zinc-100">
+              <div className="flex flex-col gap-4">
+                <p className="flex items-baseline justify-between gap-4 text-sm text-aura-ink/65"><span>{selectedSize} · {quantity} {quantity === 1 ? 'unidad' : 'unidades'}</span><strong className="text-2xl font-semibold text-aura-ink">Gs. {(selectedPrice * quantity).toLocaleString('es-PY')}</strong></p>
+                <div className="flex items-center gap-6">
+                  <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Cantidad</h4>
+                  <div className="flex items-center border border-zinc-100 rounded-sm">
+                    <button aria-label="Reducir cantidad" onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="p-4 hover:bg-zinc-50 text-zinc-600"><Minus size={16} /></button>
+                    <span className="w-14 text-center text-lg font-bold text-zinc-900 tabular">{quantity}</span>
+                    <button aria-label="Aumentar cantidad" onClick={() => setQuantity((q) => q + 1)} className="p-4 hover:bg-zinc-50 text-zinc-600"><Plus size={16} /></button>
+                  </div>
+                </div>
+                <button ref={buyRef} onClick={() => addToCart(perfume, selectedSize, quantity)} className="flex min-h-16 w-full items-center justify-center gap-4 bg-aura-wine px-4 py-4 text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-aura-ink active:scale-[0.98]">
+                  <ShoppingBag size={20} /> Agregar al Carrito
+                </button>
+              </div>
+              <div className="grid gap-2 border-b border-aura-ink/15 pb-6 text-xs leading-relaxed text-aura-ink/70">
+                <p><strong>Envíos a todo Paraguay.</strong> Gratis desde Gs. 300.000; para otros importes, el costo depende del destino. <Link href="/envios-y-devoluciones" className="text-aura-cognac underline">Ver entregas</Link></p>
+                <p><strong>Pagá con tarjeta o transferencia.</strong> También podés coordinar tu compra por WhatsApp.</p>
+              </div>
+              <dl className="grid grid-cols-2 gap-4 bg-aura-sand p-4 text-sm">
+                <div><dt className="mb-2 text-[10px] font-bold uppercase tracking-wider text-aura-cognac">Perfil del aroma</dt><dd>{perfume.family}</dd></div>
+                <div><dt className="mb-2 text-[10px] font-bold uppercase tracking-wider text-aura-cognac">Para acompañarte</dt><dd>{({ Daily: 'Oficina y uso diario', Casual: 'Salidas y encuentros', Night: 'Noche y ocasiones especiales' })[perfume.category]}</dd></div>
+              </dl>
+
+              <div className="grid grid-cols-2 gap-6 py-6 border-y border-zinc-100">
                 <div className="flex flex-col gap-4">
                   <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Intensidad</h4>
                   <IntensityBar level={perfume.intensity} />
+                  <span className="text-xs text-aura-ink/60">{perfume.intensity} de 5</span>
                 </div>
                 <div className="flex flex-col gap-4">
                   <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Longevidad</h4>
@@ -164,28 +189,16 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, description, related
 
               {description && (
                 <div>
-                  <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600 mb-4">Sobre esta fragancia</h4>
-                  <p className="text-[15px] leading-relaxed text-zinc-600 font-light max-w-prose">{description}</p>
+                  <details><summary className="min-h-11 cursor-pointer text-sm font-semibold text-aura-ink">Conocé esta fragancia</summary><p className="mt-4 text-[15px] leading-relaxed text-zinc-600 max-w-prose">{description}</p></details>
                 </div>
               )}
 
-              <div className="flex flex-col gap-6">
-                <div className="flex items-center gap-6">
-                  <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-600">Cantidad</h4>
-                  <div className="flex items-center border border-zinc-100 rounded-sm">
-                    <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="p-4 hover:bg-zinc-50 text-zinc-600"><Minus size={16} /></button>
-                    <span className="w-14 text-center text-lg font-bold text-zinc-900 tabular">{quantity}</span>
-                    <button onClick={() => setQuantity((q) => q + 1)} className="p-4 hover:bg-zinc-50 text-zinc-600"><Plus size={16} /></button>
-                  </div>
-                </div>
-                <button ref={buyRef} onClick={() => addToCart(perfume, selectedSize, quantity)} className="flex min-h-16 w-full items-center justify-center gap-4 bg-aura-wine px-4 py-4 text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-aura-ink active:scale-[0.98]">
-                  <ShoppingBag size={20} /> Agregar al Carrito
-                </button>
-              </div>
+
             </div>
           </div>
         </div>
 
+        <p className="mt-9 text-sm text-aura-ink/65">¿Todavía estás eligiendo? <Link href="/guias/elegir-presentacion" className="text-aura-cognac underline">Compará los formatos de 10, 30 y 50 ml</Link></p>
         <ProductReviews productId={perfume.code} productName={perfume.name} reviews={reviews} />
 
         <StickyBuyBar

@@ -11,7 +11,7 @@ function load(file, imports, globals = {}) {
   });
   const exports = {};
   vm.runInNewContext(outputText, {
-    exports, URLSearchParams,
+    exports, URL, URLSearchParams,
     require: (name) => {
       assert.ok(name in imports, `Unexpected import: ${name}`);
       return imports[name];
@@ -21,8 +21,10 @@ function load(file, imports, globals = {}) {
   return exports;
 }
 
+const seo = load('../src/lib/catalogSeo.ts', { './site': { SITE: 'https://www.aurafragancias.store' }, './img': { cldn: (url) => url } });
 function serverData(fetch) {
   return load('../src/lib/serverData.ts', {
+    './catalogSeo': seo,
     '../constants': { PERFUMES: [{ code: 'FALLBACK' }], DEFAULT_SETTINGS: {} },
   }, {
     process: { env: { NEXT_PUBLIC_FIREBASE_PROJECT_ID: 'test', NEXT_PUBLIC_FIREBASE_API_KEY: 'test' } },
@@ -73,7 +75,10 @@ test('sitemap refreshes all genders and removes hidden or deleted products', asy
     { code: 'HIDDEN', visible: false },
   ];
   const sitemap = load('../src/app/sitemap.ts', {
-    '../lib/serverData': { getProducts: async () => ({ products }) },
+    '../lib/serverData': { getProducts: async () => ({ products }), getSettings: async () => ({}) },
+    '../lib/catalogSeo': seo,
+    '../lib/guides': { GUIDES: [] },
+    '../lib/img': { cldn: (url) => url },
     '../lib/site': { SITE: 'https://www.aurafragancias.store' },
   });
   assert.equal(sitemap.revalidate, 120);
@@ -82,4 +87,29 @@ test('sitemap refreshes all genders and removes hidden or deleted products', asy
   assert.deepEqual(await codes(), ['CC001', 'DD001', 'UU001']);
   products = [products[0], { ...products[1], visible: false }, { code: 'DD002', gender: 'Woman' }];
   assert.deepEqual(await codes(), ['CC001', 'DD002']);
+});
+
+test('sitemap keeps real modification dates stable and omits unknown dates', async () => {
+  let settings = {};
+  const products = [
+    { code: 'CC001', updatedAt: '2026-09-20T12:00:00Z', imageUrl: '/products/CC001.png' },
+    { code: 'DD001' },
+  ];
+  const sitemap = load('../src/app/sitemap.ts', {
+    '../lib/serverData': { getProducts: async () => ({ products }), getSettings: async () => settings },
+    '../lib/catalogSeo': seo,
+    '../lib/guides': { GUIDES: [{ slug: 'guia', date: '2026-10-04' }] },
+    '../lib/img': { cldn: (url) => url },
+    '../lib/site': { SITE: 'https://www.aurafragancias.store' },
+  });
+  const first = await sitemap.default();
+  assert.deepEqual(await sitemap.default(), first);
+  assert.equal(first.find((p) => p.url.endsWith('/CC001')).lastModified, products[0].updatedAt);
+  assert.equal(first.find((p) => p.url.endsWith('/DD001')).lastModified, undefined);
+  assert.equal(first.find((p) => p.url.endsWith('/CC001')).images[0], 'https://www.aurafragancias.store/products/CC001.png');
+  assert.equal(first.find((p) => p.url.endsWith('/terminos-y-condiciones')).lastModified, undefined);
+  settings = { updatedAt: '2026-10-03T12:00:00Z' };
+  const changed = await sitemap.default();
+  assert.equal(changed.find((p) => p.url.endsWith('/CC001')).lastModified, settings.updatedAt);
+  assert.equal(changed.find((p) => p.url.endsWith('/DD001')).lastModified, settings.updatedAt);
 });

@@ -1,27 +1,35 @@
 import type { MetadataRoute } from 'next';
-import { getProducts } from '../lib/serverData';
+import { getProducts, getSettings } from '../lib/serverData';
 import { SITE } from '../lib/site';
+import { latestUpdate } from '../lib/catalogSeo';
+import { GUIDES } from '../lib/guides';
+import { cldn } from '../lib/img';
 
 // La ruta de metadata debe regenerarse junto con el catálogo de Firestore.
 // Así las altas, bajas y cambios de visibilidad llegan también al sitemap.
 export const revalidate = 120;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { products } = await getProducts();
-  const now = new Date();
+  const [{ products }, settings] = await Promise.all([getProducts(), getSettings()]);
+  const catalogUpdated = latestUpdate(settings.updatedAt, ...products.map((p) => p.updatedAt));
   const sections = ['/hombres', '/mujeres', '/unisex', '/mayoristas'].map((p) => ({
-    url: `${SITE}${p}`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.9,
+    url: `${SITE}${p}`, ...(catalogUpdated ? { lastModified: catalogUpdated } : {}), changeFrequency: 'weekly' as const, priority: 0.9,
   }));
   const legal = ['/sobre-inspiraciones', '/terminos-y-condiciones', '/envios-y-devoluciones'].map((p) => ({
-    url: `${SITE}${p}`, lastModified: now, changeFrequency: 'yearly' as const, priority: 0.3,
+    url: `${SITE}${p}`, changeFrequency: 'yearly' as const, priority: 0.3,
   }));
   const productUrls = products
     .filter((p) => p.visible !== false)
-    .map((p) => ({ url: `${SITE}/producto/${p.code}`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.7 }));
+    .map((p) => {
+      const updated = latestUpdate(p.updatedAt, settings.updatedAt);
+      return { url: `${SITE}/producto/${p.code}`, ...(updated ? { lastModified: updated } : {}), ...(p.imageUrl ? { images: [new URL(cldn(p.imageUrl, 1000), SITE).href] } : {}), changeFrequency: 'monthly' as const, priority: 0.7 };
+    });
   return [
-    { url: SITE, lastModified: now, changeFrequency: 'weekly', priority: 1.0 },
+    { url: SITE, ...(catalogUpdated ? { lastModified: catalogUpdated } : {}), changeFrequency: 'weekly', priority: 1.0 },
     ...sections,
     ...legal,
     ...productUrls,
+    { url: `${SITE}/guias`, lastModified: '2026-10-04', changeFrequency: 'monthly', priority: 0.6 },
+    ...GUIDES.map((g) => ({ url: `${SITE}/guias/${g.slug}`, lastModified: g.date, changeFrequency: 'monthly' as const, priority: 0.6 })),
   ];
 }

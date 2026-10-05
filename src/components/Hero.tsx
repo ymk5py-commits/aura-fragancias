@@ -65,17 +65,17 @@ export default function Hero({
   return (
     <section className="overflow-hidden bg-aura-wine pt-[104px] text-aura-ivory lg:pt-[98px]">
       <div className="grid lg:min-h-[710px] lg:grid-cols-[48%_52%]">
-        <div className="order-2 flex flex-col justify-between px-5 pb-8 pt-7 sm:px-8 sm:pt-12 lg:order-1 lg:px-[clamp(2.5rem,5.5vw,7rem)] lg:pb-9 lg:pt-16">
+        <div className="order-2 flex flex-col justify-between px-5 pb-6 pt-5 sm:px-8 sm:pt-12 lg:order-1 lg:px-[clamp(2.5rem,5.5vw,7rem)] lg:pb-9 lg:pt-16">
           <motion.div initial={reveal} animate={{ opacity: 1, y: 0 }} transition={transition} className="max-w-[38rem]">
-            <p className="mb-7 flex items-center gap-3 text-[9px] font-bold uppercase tracking-[0.24em] text-aura-gold-soft sm:text-[10px]">
+            <p className="mb-4 flex items-center gap-3 text-[9px] font-bold uppercase tracking-[0.24em] text-aura-gold-soft sm:text-[10px]">
               <span className="h-px w-8 bg-current" aria-hidden="true" />
               Alta perfumería · Paraguay
             </p>
             <h1>
               <span className="sr-only">Äura Fragancias: alta perfumería en Paraguay</span>
-              <img src="/brand/aura-wordmark-white.png" alt="" aria-hidden="true" className="h-auto w-[min(82vw,460px)] lg:w-full" width={1600} height={534} />
+              <img src="/brand/aura-wordmark-white.png" alt="" aria-hidden="true" className="h-auto w-[min(64vw,460px)] sm:w-[min(82vw,460px)] lg:w-full" width={1600} height={534} />
             </h1>
-            <h2 className="mt-5 max-w-[16ch] font-luxury text-[clamp(2.9rem,4.45vw,4.75rem)] font-medium leading-[0.96] tracking-[-0.055em] text-white lg:mt-8">
+            <h2 className="mt-5 max-w-[16ch] font-luxury text-[clamp(2.35rem,4.45vw,4.75rem)] font-medium leading-[0.96] tracking-[-0.055em] text-white lg:mt-8">
               Una presencia que permanece.
             </h2>
             <p className="mt-5 max-w-[43ch] text-sm leading-relaxed text-white/72 sm:text-base lg:mt-6">
@@ -91,7 +91,7 @@ export default function Hero({
             </div>
           </motion.div>
 
-          <div className="mt-12 grid grid-cols-3 divide-x divide-white/20 border-t border-white/20 pt-6 lg:mt-10">
+          <div className="mt-7 grid grid-cols-3 divide-x divide-white/20 border-t border-white/20 pt-6 lg:mt-10">
             {[
               ['30%', 'esencia'],
               ['21 días', 'maceración'],
@@ -105,7 +105,7 @@ export default function Hero({
           </div>
         </div>
 
-        <div className="relative order-1 h-[240px] overflow-hidden sm:h-[390px] lg:order-2 lg:h-auto lg:min-h-[710px]">
+        <div className="relative order-1 h-[170px] overflow-hidden sm:h-[390px] lg:order-2 lg:h-auto lg:min-h-[710px]">
           <motion.div
             className="absolute inset-0"
             initial={reducedMotion ? false : { scale: 1.1, opacity: 0.6 }}

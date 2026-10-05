@@ -2,6 +2,7 @@
 // dinámicamente para no entrar en el bundle de la tienda.
 import { getFirebaseDb } from './firebase';
 import { SiteSettings } from '../types';
+import { notifySearch } from './searchNotify';
 
 const SETTINGS_DOC = { collection: 'settings', id: 'site' };
 
@@ -15,4 +16,5 @@ export async function saveSettings(settings: SiteSettings): Promise<void> {
     { ...settings, updatedAt: serverTimestamp() },
     { merge: true }
   );
+  void notifySearch();
 }

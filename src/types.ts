@@ -4,6 +4,7 @@ export type Gender = 'Man' | 'Woman' | 'Unisex';
 export type Badge = 'Bestseller' | 'Recommended' | 'New';
 
 export interface Perfume {
+  updatedAt?: string;   // Fecha real de modificación, serializada por el servidor.
   id?: string;          // Firestore document id (optional for bundled catalog)
   code: string;
   name: string;
@@ -35,6 +36,7 @@ export interface WholesaleScale {
 }
 
 export interface SiteSettings {
+  updatedAt?: string;
   // Hero principal (home)
   heroTitle: string;
   heroSubtitle: string;

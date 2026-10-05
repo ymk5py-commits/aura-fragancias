@@ -56,6 +56,7 @@ const Footer: React.FC = () => {
             <h4 className="mb-5 text-[10px] font-bold uppercase tracking-[0.2em] text-aura-gold">Tienda</h4>
             <ul className="space-y-3 text-sm text-white/65">
               {collections.map(({ label, href }) => <li key={href}><Link href={href} className="transition-colors hover:text-white">{label}</Link></li>)}
+              <li><Link href="/buscar" className="transition-colors hover:text-white">Buscar fragancias</Link></li>
               <li><Link href="/mayoristas" className="transition-colors hover:text-white">Mayoristas</Link></li>
             </ul>
           </div>
@@ -63,6 +64,7 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="mb-5 text-[10px] font-bold uppercase tracking-[0.2em] text-aura-gold">Información</h4>
             <ul className="space-y-3 text-sm text-white/65">
+              <li><Link href="/guias" className="transition-colors hover:text-white">Guías para elegir</Link></li>
               <li><Link href="/sobre-inspiraciones" className="transition-colors hover:text-white">Sobre las inspiraciones</Link></li>
               <li><Link href="/terminos-y-condiciones" className="transition-colors hover:text-white">Términos y condiciones</Link></li>
               <li><Link href="/envios-y-devoluciones" className="transition-colors hover:text-white">Envíos y devoluciones</Link></li>

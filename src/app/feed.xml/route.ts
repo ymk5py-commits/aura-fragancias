@@ -36,7 +36,7 @@ export async function GET() {
   const items = products
     .flatMap((p) => {
       const desc = esc(buildProductDescription(p, settings));
-      const img = esc(feedImage(p.imageUrl));
+      const img = esc(new URL(feedImage(p.imageUrl || '/brand/aura-social-1200x630.png'), SITE).href);
       const cat = esc(genderCat(p.gender));
       return sizes.map(
         (s) => `
@@ -52,7 +52,6 @@ export async function GET() {
       <g:brand>Äura Fragancias</g:brand>
       <g:condition>new</g:condition>
       <g:identifier_exists>no</g:identifier_exists>
-      <g:mpn>${esc(p.code)}-${s.key}</g:mpn>
       <g:google_product_category>2915</g:google_product_category>
       <g:product_type>Perfumes &gt; ${cat} &gt; Inspiración ${esc(p.inspiration)}</g:product_type>
       <g:size>${s.label}</g:size>

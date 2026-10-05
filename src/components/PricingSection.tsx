@@ -44,7 +44,7 @@ const PricingSection: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between gap-6 sm:justify-end">
                     <span className="font-luxury text-2xl sm:text-3xl font-semibold tracking-[-0.035em] text-aura-ink tabular">{item.label}</span>
-                    <Link href="/hombres" aria-label={`Ver fragancias de ${item.size}`} className="flex h-12 w-12 shrink-0 items-center justify-center border border-aura-ink/18 text-aura-ink transition-all duration-300 group-hover:border-aura-ink group-hover:bg-aura-ink group-hover:text-aura-ivory">
+                    <Link href={`/buscar?size=${item.size.split(' ')[0]}`} aria-label={`Ver fragancias de ${item.size}`} className="flex h-12 w-12 shrink-0 items-center justify-center border border-aura-ink/18 text-aura-ink transition-all duration-300 group-hover:border-aura-ink group-hover:bg-aura-ink group-hover:text-aura-ivory">
                       <ArrowUpRight size={18} />
                     </Link>
                   </div>

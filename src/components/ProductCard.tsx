@@ -9,6 +9,7 @@ import { Perfume } from '../types';
 import { useSettings } from '../context/SettingsContext';
 import { useCart } from '../context/CartContext';
 import smartImageLoader from '../lib/imageLoader';
+import { productLink, sizeKey } from '../lib/catalogSeo';
 import { ShoppingBag, X, Eye, Plus, Minus, Truck, ArrowRight } from 'lucide-react';
 
 interface Props {
@@ -87,7 +88,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
 
   // Los títulos llevan <Link href> real (crawleable, cmd+click abre la ficha);
   // el click simple conserva la UX de modal.
-  const productHref = `/producto/${perfume.code}`;
+  const productHref = productLink(perfume.code, sizeKey(selectedSize.split(' ')[0]));
   const openModal = (e: React.MouseEvent) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey) return; // respeta abrir en pestaña nueva
     e.preventDefault();
@@ -301,7 +302,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
                   </div>
                   <button
                     onClick={() => {
-                      const url = `${window.location.origin}/producto/${perfume.code}`;
+                      const url = `${window.location.origin}${productHref}`;
                       navigator.clipboard.writeText(url);
                       setCopied(true);
                       setTimeout(() => setCopied(false), 2000);

@@ -13,7 +13,8 @@
     "test:compress": "node --test scripts/test-compress.mjs",
     "test:rules": "firebase emulators:exec --only firestore --project demo-aura-rules \"node scripts/test-rules.mjs\"",
     "rules:deploy": "firebase deploy --only firestore:rules --project aura-fragancias",
-    "test:import": "node --test scripts/test-import.mjs"
+    "test:import": "node --test scripts/test-import.mjs",
+    "test:seo": "node --test scripts/test-seo.mjs scripts/test-sitemap.mjs"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.10",

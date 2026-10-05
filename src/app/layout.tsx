@@ -38,6 +38,10 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
+  verification: {
+    google: 'wH10kV5eETSoJqom4VlMCDfUsT0g_8-5zPiQZ9h3NWc',
+    other: { 'msvalidate.01': '7C48645DA64DE74C9B7AC4411773FEB6' },
+  },
   title: 'Äura Fragancias | Perfumes de Lujo Accesible en Paraguay · Extrait de Parfum 30%',
   description:
     'Alta perfumería en Paraguay con 30% de concentración (Extrait de Parfum). Inspiraciones olfativas premium de las fragancias más icónicas, con fijación y estela excepcionales. Envío gratis desde Gs. 300.000.',
@@ -70,7 +74,7 @@ export const metadata: Metadata = {
 
 const storeJsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'Store',
+  '@type': 'OnlineStore',
   name: 'Äura Fragancias',
   description: 'Alta perfumería en Paraguay con 30% de concentración (Extrait de Parfum). Inspiraciones olfativas premium de lujo accesible.',
   image: `${SITE}/brand/aura-social-1200x630.png`,
@@ -80,8 +84,7 @@ const storeJsonLd = {
   telephone: '+595994414986',
   priceRange: 'Gs. 30.000 - Gs. 120.000',
   currenciesAccepted: 'PYG',
-  address: { '@type': 'PostalAddress', addressLocality: 'Asunción', addressRegion: 'Asunción', addressCountry: 'PY' },
-  geo: { '@type': 'GeoCoordinates', latitude: -25.2637, longitude: -57.5759 },
+  areaServed: { '@type': 'Country', name: 'Paraguay' },
   sameAs: [
     'https://www.facebook.com/aurafraganciaspy',
     'https://www.instagram.com/aura_fraganciaspy/',

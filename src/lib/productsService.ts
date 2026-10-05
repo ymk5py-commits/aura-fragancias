@@ -3,6 +3,7 @@
 import { getFirebaseDb, getFirebaseStorage } from './firebase';
 import { PERFUMES, SALES_BY_CODE } from '../constants';
 import { Perfume } from '../types';
+import { notifySearch } from './searchNotify';
 
 const COLLECTION = 'products';
 
@@ -31,6 +32,7 @@ export async function saveProduct(p: Perfume): Promise<void> {
   };
   if (p.badge) data.badge = p.badge;
   await setDoc(doc(db, COLLECTION, id), data, { merge: true });
+  void notifySearch(p.code);
 }
 
 export async function updateProductFields(id: string, fields: Partial<Perfume>): Promise<void> {
@@ -39,11 +41,13 @@ export async function updateProductFields(id: string, fields: Partial<Perfume>):
     import('firebase/firestore'),
   ]);
   await updateDoc(doc(db, COLLECTION, id), { ...fields, updatedAt: serverTimestamp() });
+  void notifySearch(fields.code || id);
 }
 
 export async function deleteProduct(id: string): Promise<void> {
   const [db, { doc, deleteDoc }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
   await deleteDoc(doc(db, COLLECTION, id));
+  void notifySearch(id);
 }
 
 export async function toggleVisible(id: string, visible: boolean): Promise<void> {

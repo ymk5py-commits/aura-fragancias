@@ -25,7 +25,7 @@ interface SettingsContextValue {
 const buildPrices = (s: SiteSettings): PriceTier[] => [
   { size: '10 ML', price: s.price10, label: `${s.price10.toLocaleString('es-PY')} Gs.`, desc: 'Ideal para probar o llevar de viaje.' },
   { size: '30 ML', price: s.price30, label: `${s.price30.toLocaleString('es-PY')} Gs.`, desc: 'Tamaño estándar.', favorite: true },
-  { size: '50 ML', price: s.price50, label: `${s.price50.toLocaleString('es-PY')} Gs.`, desc: 'Mejor valor.', bestValue: true },
+  { size: '50 ML', price: s.price50, label: `${s.price50.toLocaleString('es-PY')} Gs.`, desc: 'Más cantidad de tu fragancia favorita.', bestValue: true },
 ];
 
 const SettingsContext = createContext<SettingsContextValue>({

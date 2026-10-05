@@ -1,5 +1,6 @@
 import { PERFUMES, DEFAULT_SETTINGS } from '../constants';
 import { Perfume, SiteSettings } from '../types';
+import { cleanCatalogProduct } from './catalogSeo';
 
 const PROJECT = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 const KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
@@ -27,7 +28,7 @@ function parseFields(fields: Record<string, any>): Record<string, any> {
 
 /** Lee todos los productos desde Firestore (REST). Fallback: catálogo incluido. */
 export async function getProducts(): Promise<{ products: Perfume[]; source: 'firebase' | 'local' }> {
-  if (!PROJECT || !KEY) return { products: PERFUMES, source: 'local' };
+  if (!PROJECT || !KEY) return { products: PERFUMES.map(cleanCatalogProduct), source: 'local' };
   try {
     // Firestore puede devolver varias páginas incluso con pageSize definido.
     // Leerlas todas evita omitir perfumes cuando crece el catálogo.
@@ -37,23 +38,23 @@ export async function getProducts(): Promise<{ products: Perfume[]; source: 'fir
       const params = new URLSearchParams({ key: KEY, pageSize: '300' });
       if (pageToken) params.set('pageToken', pageToken);
       const res = await fetch(`${BASE}/products?${params}`, {
-        next: { revalidate: 120 }, // ISR: refresca cada 2 min
+        next: { revalidate: 120, tags: ['catalog'] }, // ISR: refresca cada 2 min
       });
-      if (!res.ok) return { products: PERFUMES, source: 'local' };
+      if (!res.ok) return { products: PERFUMES.map(cleanCatalogProduct), source: 'local' };
       const data = await res.json();
       docs.push(...(data.documents || []));
       pageToken = data.nextPageToken;
     } while (pageToken);
-    if (!docs.length) return { products: PERFUMES, source: 'local' };
+    if (!docs.length) return { products: PERFUMES.map(cleanCatalogProduct), source: 'local' };
     const products: Perfume[] = docs.map((d: any) => {
       const f = parseFields(d.fields || {});
       const id = d.name.split('/').pop();
       // Conservar la fotografía corregida en la publicación original.
-      return { id, ...f, ...(id === 'DD161' ? { imageUrl: '/products/DD161.png' } : {}) } as Perfume;
+      return cleanCatalogProduct({ id, ...f, ...(id === 'DD161' ? { imageUrl: '/products/DD161.png' } : {}) } as Perfume);
     });
     return { products, source: 'firebase' };
   } catch {
-    return { products: PERFUMES, source: 'local' };
+    return { products: PERFUMES.map(cleanCatalogProduct), source: 'local' };
   }
 }
 
@@ -93,7 +94,7 @@ export async function getSettings(): Promise<SiteSettings> {
   if (!PROJECT || !KEY) return localizeBanners(DEFAULT_SETTINGS);
   try {
     const res = await fetch(`${BASE}/settings/site?key=${KEY}`, {
-      next: { revalidate: 120 },
+      next: { revalidate: 120, tags: ['settings'] },
     });
     if (!res.ok) return localizeBanners(DEFAULT_SETTINGS);
     const data = await res.json();

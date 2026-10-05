@@ -10,13 +10,17 @@ import ScentFamilies from '../../components/ScentFamilies';
 import InspirationsMarquee from '../../components/InspirationsMarquee';
 import AsciiEditorial from '../../components/AsciiEditorial';
 import Link from 'next/link';
+import GuideLinks from '../../components/GuideLinks';
+import { ReviewCard } from '../../components/Reviews';
+import { getApprovedReviews } from '../../lib/server/reviews';
 import { ArrowRight } from 'lucide-react';
 import { getVisibleProducts, getSettings } from '../../lib/serverData';
 import { SALES_BY_CODE, TOP_SELLERS_COUNT } from '../../constants';
 
 export default async function HomePage() {
-  const [products, settings] = await Promise.all([getVisibleProducts(), getSettings()]);
+  const [products, settings, reviews] = await Promise.all([getVisibleProducts(), getSettings(), getApprovedReviews()]);
 
+  const publicReviews = reviews.filter((r) => products.some((p) => p.code === r.productId)).slice(0, 3);
   const bestSellers = [...products]
     .map((p) => ({ p, score: (p.salesScore || 0) || SALES_BY_CODE[p.code] || (p.badge === 'Bestseller' ? 1 : 0) }))
     .filter((x) => x.score > 0)
@@ -28,15 +32,12 @@ export default async function HomePage() {
     <main>
       <Hero title={settings.heroTitle} subtitle={settings.heroSubtitle} image={settings.heroImage} />
 
-      <InspirationsMarquee />
-      <AsciiEditorial />
-
-      <section id="top-ventas" className="relative py-20 sm:py-32 bg-aura-ivory scroll-mt-24 aura-grid overflow-hidden">
+      <section id="top-ventas" className="relative py-10 sm:py-24 bg-aura-ivory scroll-mt-24 aura-grid overflow-hidden">
         <div className="section-shell relative">
-          <Reveal className="mb-12 sm:mb-16 grid gap-7 md:grid-cols-[1fr_auto] md:items-end">
+          <Reveal className="mb-7 sm:mb-12 grid gap-7 md:grid-cols-[1fr_auto] md:items-end">
             <div>
               <span className="eyebrow mb-4">Elegidos por nuestros clientes</span>
-              <h2 className="max-w-3xl text-[clamp(2.8rem,7vw,6.4rem)] font-luxury font-semibold leading-[0.92] tracking-[-0.055em] text-aura-ink">
+              <h2 className="max-w-3xl text-[clamp(2.35rem,7vw,6.4rem)] font-luxury font-semibold leading-[0.92] tracking-[-0.055em] text-aura-ink">
                 Los aromas que dejan <span className="text-aura-cognac">huella.</span>
               </h2>
             </div>
@@ -70,11 +71,15 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {publicReviews.length > 0 && <section className="bg-aura-sand py-12 sm:py-20" aria-labelledby="home-reviews"><div className="section-shell"><span className="eyebrow mb-4">Experiencias de nuestros clientes</span><h2 id="home-reviews" className="mb-8 font-luxury text-3xl font-semibold sm:text-5xl">Así se vive Äura.</h2><div className="grid gap-4 md:grid-cols-3">{publicReviews.map((r) => <div key={r.id}><ReviewCard review={r} /><Link href={`/producto/${r.productId}#resenas`} className="mt-3 inline-flex min-h-11 items-center text-sm text-aura-cognac underline">Conocer la fragancia</Link></div>)}</div></div></section>}
+      <InspirationsMarquee />
+      <AsciiEditorial />
       <FeatureSection />
       <ScentFamilies />
       <PricingSection />
       <Wholesale />
       <TechnicalSection />
+      <GuideLinks />
       <HomeFaq />
     </main>
   );

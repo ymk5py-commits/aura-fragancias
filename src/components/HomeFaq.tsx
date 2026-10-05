@@ -15,7 +15,7 @@ const FAQS = [
   },
   {
     q: '¿Cuánto cuesta el envío y cuándo es gratis?',
-    a: 'El envío es gratis en compras desde Gs. 300.000. Para compras menores: Asunción Gs. 20.000, Gran Asunción Gs. 25.000 e interior del país por encomienda Gs. 35.000. Entregas en 24-48 horas hábiles en Asunción y Gran Asunción.',
+    a: 'El envío es gratis en compras desde Gs. 300.000. Para compras menores, el delivery se cotiza individualmente según tu dirección y coordinamos el importe antes de confirmar el pedido. Entregas habituales en 24-48 horas hábiles en Asunción y Gran Asunción, y de 2 a 5 días hábiles al interior según la transportadora.',
   },
   {
     q: '¿Cómo compro y cuáles son los medios de pago?',

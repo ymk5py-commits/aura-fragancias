@@ -10,12 +10,40 @@ export const PAYMENT_METHODS = ['Efectivo', 'Transferencia', 'QR', 'Tarjeta', 'O
 export const INITIAL_COSTS: Record<SaleSize, number> = { '10 ML': 8766, '30 ML': 17398, '50 ML': 23987 };
 
 export interface SaleItem {
+  lineId?: string;
   code: string;
   name: string;
   size: SaleSize;
   quantity: number;
   unitPrice: number;
   unitCost: number | null;
+}
+
+/** Identidad estable de cada renglón, incluso al quitar otra fragancia de la venta. */
+export function saleLineId(item: SaleItem, index: number) { return item.lineId || `legacy_${index}`; }
+
+export function changeSaleSize(item: SaleItem, size: SaleSize, costs: Record<SaleSize, number>, prices: Record<SaleSize, number>, original?: SaleItem): SaleItem {
+  if (size === item.size) return item;
+  if (original?.size === size) return { ...item, size, unitPrice: original.unitPrice, unitCost: original.unitCost };
+  return { ...item, size, unitPrice: prices[size], unitCost: costs[size] };
+}
+
+/** Comprueba el costo en el guardado, además del bloqueo visible del formulario. */
+export function enforceSaleCosts(sale: Sale, previous: Sale | null, costs: Record<SaleSize, number>): Sale {
+  const originals = new Map(previous?.items.map((item, i) => [saleLineId(item, i), item]) || []);
+  const used = new Set<string>();
+  const items = sale.items.map((item, i) => {
+    const lineId = saleLineId(item, i);
+    if (used.has(lineId) || lineId.length > 100) throw new Error('Revisá las fragancias repetidas del formulario.');
+    used.add(lineId);
+    const original = originals.get(lineId);
+    const expected = original && original.size === item.size ? original.unitCost : costs[item.size];
+    if (item.unitCost !== expected) throw new Error(original && original.size === item.size
+      ? 'El costo histórico de esta fragancia está protegido. Volvé a abrir la venta; para cambiar costos futuros usá Costos.'
+      : 'El costo parametrizado cambió. Volvé a abrir la venta para revisar el costo y el margen actualizados.');
+    return { ...item, lineId, unitCost: expected };
+  });
+  return { ...sale, items };
 }
 
 export interface Sale {
@@ -72,6 +100,7 @@ export function validateSale(sale: Sale): string | null {
   if (!sale.items.length || sale.items.length > 50) return 'Agregá entre 1 y 50 fragancias.';
   const money = (n: number) => Number.isSafeInteger(n) && n >= 0 && n <= 1e12;
   for (const item of sale.items) {
+    if (item.lineId !== undefined && (typeof item.lineId !== 'string' || !item.lineId.trim() || item.lineId.length > 100)) return 'Revisá el identificador de la fragancia.';
     if (!item.code.trim() || !item.name.trim() || item.code.length > 60 || item.name.length > 200) return 'Cada fragancia necesita código y nombre.';
     if (!SALE_SIZES.includes(item.size)) return 'Elegí una presentación válida.';
     if (!Number.isSafeInteger(item.quantity) || item.quantity < 1 || item.quantity > 10000) return 'La cantidad debe ser un entero entre 1 y 10.000.';

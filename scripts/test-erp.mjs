@@ -22,6 +22,33 @@ export const sale = {
 };
 export const expense = { id: 'GASTO-test', date: '2026-10-04', type: 'Operativo', category: 'Internet', description: 'Servicio mensual', payee: '', amount: 10000, paymentMethod: 'Transferencia', status: 'pagado', notes: '' };
 
+test('size round-trip restores historical cost and price, while new sizes use parameters', () => {
+  const original = { ...sale.items[0], size: '10 ML', unitPrice: 30000, unitCost: 7932 };
+  const changed = sales.changeSaleSize(original, '30 ML', sales.INITIAL_COSTS, { '10 ML': 30000, '30 ML': 70000, '50 ML': 120000 }, original);
+  assert.equal(changed.unitCost, 17398);
+  const restored = sales.changeSaleSize(changed, '10 ML', sales.INITIAL_COSTS, { '10 ML': 30000, '30 ML': 70000, '50 ML': 120000 }, original);
+  assert.equal(restored.unitCost, 7932); assert.equal(restored.unitPrice, 30000);
+});
+test('historical costs survive price, quantity, customer and parameter changes', () => {
+  const previous = { ...sale, items: [{ ...sale.items[0], lineId: 'a', unitCost: 7932 }] };
+  const revised = { ...previous, customer: 'Otro cliente', items: [{ ...previous.items[0], quantity: 3, unitPrice: 60000 }] };
+  const checked = sales.enforceSaleCosts(revised, previous, { ...sales.INITIAL_COSTS, '30 ML': 99999 });
+  assert.equal(checked.items[0].unitCost, 7932);
+  assert.throws(() => sales.enforceSaleCosts({ ...revised, items: [{ ...revised.items[0], unitCost: 99999 }] }, previous, sales.INITIAL_COSTS), /histórico/);
+});
+test('deleting a line preserves the remaining cost; new lines use current parameters', () => {
+  const previous = { ...sale, items: [{ ...sale.items[0], unitCost: 1111 }, { ...sale.items[0], unitCost: 2222 }] };
+  const remaining = { ...previous.items[1], lineId: 'legacy_1' };
+  const fresh = { ...sale.items[0], lineId: 'new_line', unitCost: 17398 };
+  const checked = sales.enforceSaleCosts({ ...sale, items: [remaining, fresh] }, previous, sales.INITIAL_COSTS);
+  assert.equal(checked.items[0].unitCost, 2222); assert.equal(checked.items[1].unitCost, 17398);
+});
+test('rejects obsolete parameters on new sales and duplicate line identities', () => {
+  assert.throws(() => sales.enforceSaleCosts(sale, null, { ...sales.INITIAL_COSTS, '30 ML': 20000 }), /parametrizado cambió/);
+  const item = { ...sale.items[0], lineId: 'same' };
+  assert.throws(() => sales.enforceSaleCosts({ ...sale, items: [item, item] }, null, sales.INITIAL_COSTS), /repetidas/);
+});
+
 test('sale totals include quantity, discount, delivery margin and fees exactly once', () => {
   const t = sales.saleTotals(sale);
   assert.equal(t.total, 102000); assert.equal(t.productCost, 34796); assert.equal(t.deliveryDifference, 1100); assert.equal(t.profit, 55804);

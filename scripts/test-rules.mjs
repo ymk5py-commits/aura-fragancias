@@ -188,6 +188,15 @@ await caso('guarda gastos privados y configuración de costos', async () => {
   await assertFails(getDoc(doc(anon(), 'expenses', 'e1')));
   await assertFails(deleteDoc(doc(cashAdmin(), 'expenses', 'e1')));
 });
+await caso('el guardado rechaza cambios del costo histórico y parámetros obsoletos', async () => {
+  const original = { ...venta, ...(await getDoc(doc(cashAdmin(), 'sales', 's1'))).data() };
+  await assert.rejects(ledger.saveSale({ ...original, items: original.items.map(i => ({ ...i, unitCost: 1 })) }), /histórico/);
+  const historicalCost = original.items[0].unitCost;
+  await ledger.saveSale({ ...original, customer: 'Cliente corregido', items: original.items.map(i => ({ ...i, quantity: 2 })), collected: 140000 });
+  assert.equal((await getDoc(doc(cashAdmin(), 'sales', 's1'))).data().items[0].unitCost, historicalCost);
+  await assert.rejects(ledger.saveSale({ ...venta, id: 'bad-new-cost', items: venta.items.map(i => ({ ...i, unitCost: 1 })) }), /parametrizado/);
+  assert.equal((await getDoc(doc(cashAdmin(), 'sales', 'bad-new-cost'))).exists(), false);
+});
 await caso('confirma el pedido y crea una única venta incluso con solicitudes simultáneas', async () => {
   await env.withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), 'orders', 'web1'), pedido));
   await Promise.all([ledger.confirmOrderAndRecordSale('web1'), ledger.confirmOrderAndRecordSale('web1')]);

@@ -1,6 +1,6 @@
 import { getFirebaseDb } from './firebase';
 import type { Order } from '../types';
-import { INITIAL_COSTS, SALE_SIZES, saleTotals, orderToSale, validateSale, type Sale, type SaleSize } from './sales';
+import { INITIAL_COSTS, SALE_SIZES, saleTotals, orderToSale, validateSale, enforceSaleCosts, type Sale, type SaleSize } from './sales';
 import { INITIAL_RECIPE, recipeCost, validateRecipe, validateExpense, type CostRecipe, type Expense } from './erp';
 import type { ImportRow } from './erpImport';
 
@@ -95,12 +95,13 @@ export async function saveSale(sale: Sale) {
   const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
   const ref = sdk.doc(db, 'sales', sale.id);
   await sdk.runTransaction(db, async (transaction) => {
-    const previous = await transaction.get(ref);
+    const [previous, config] = await Promise.all([transaction.get(ref), transaction.get(sdk.doc(db, 'salesConfig', 'costs'))]);
     if (previous.exists() && !sameTimestamp(previous.data().updatedAt, sale.updatedAt)) {
       throw new Error('Esta venta cambió en otra ventana. Cerrá el formulario y volvé a abrirla para editar.');
     }
     if (!previous.exists() && sale.sourceOrderId) throw new Error('Registrá el pedido web desde la bandeja de pedidos confirmados.');
-    const { id, createdAt, updatedAt, ...fields } = sale;
+    const protectedSale = enforceSaleCosts(sale, previous.exists() ? { ...previous.data(), id: previous.id } as Sale : null, { ...INITIAL_COSTS, ...config.data()?.costs });
+    const { id, createdAt, updatedAt, ...fields } = protectedSale;
     if (previous.exists() && previous.data().sourceOrderId !== sale.sourceOrderId) throw new Error('No se puede cambiar el pedido vinculado.');
     transaction.set(ref, {
       ...fields,

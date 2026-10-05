@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Loader2, Plus, Trash2, X } from 'lucide-react';
 import type { Perfume } from '../types';
-import { PAYMENT_METHODS, SALE_CHANNELS, SALE_SIZES, saleTotals, validateSale, type Sale, type SaleItem, type SaleSize } from '../lib/sales';
+import { PAYMENT_METHODS, SALE_CHANNELS, SALE_SIZES, saleTotals, validateSale, saleLineId, changeSaleSize, type Sale, type SaleItem, type SaleSize } from '../lib/sales';
 import { EXPENSE_TYPES, INITIAL_RECIPE, recipeCost, validateExpense, type CostRecipe, type Expense } from '../lib/erp';
 
 export const money = (n: number | null) => n == null ? 'Por completar' : `Gs. ${n.toLocaleString('es-PY')}`;
@@ -49,7 +49,7 @@ export function SaleForm({ initial, products, costs, prices, onSave, onClose }: 
   initial: Sale; products: Perfume[]; costs: Record<SaleSize, number>; prices: Record<SaleSize, number>;
   onSave: (sale: Sale) => Promise<void>; onClose: () => void;
 }) {
-  const [sale, setSale] = useState<Sale>(initial);
+  const [sale, setSale] = useState<Sale>(() => ({ ...initial, items: initial.items.map((item, i) => ({ ...item, lineId: saleLineId(item, i) })) }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const totals = saleTotals(sale);
@@ -79,21 +79,22 @@ export function SaleForm({ initial, products, costs, prices, onSave, onClose }: 
       <section className="space-y-3">
         <div className="flex items-center justify-between"><h4 className="font-semibold text-sm">Fragancias de la venta</h4><span className="text-xs text-zinc-500">{totals.units} unidades</span></div>
         <datalist id="erp-products">{products.map((p) => <option key={p.code} value={p.code}>{p.name}</option>)}</datalist>
-        {sale.items.map((item, index) => <div key={index} className="bg-white border border-zinc-200 rounded-xl p-4 space-y-3">
+        <p className="rounded-lg bg-aura-ivory p-3 text-xs text-zinc-600">Costo automático por presentación, parametrizado en Costos. En una venta guardada se conserva el costo histórico; cambiar cliente, precio, cantidad o delivery no modifica el costo unitario. Una presentación distinta utiliza el costo actual.</p>
+        {sale.items.map((item, index) => <div key={item.lineId} className="bg-white border border-zinc-200 rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between"><span className="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">Fragancia {index + 1}</span><button type="button" aria-label={`Quitar fragancia ${index + 1}`} disabled={sale.items.length === 1} onClick={() => patch({ items: sale.items.filter((_, i) => i !== index) })} className="p-1 text-zinc-400 hover:text-red-600 disabled:opacity-30"><Trash2 size={16} /></button></div>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Código"><input className={inputClass} required maxLength={60} list="erp-products" value={item.code} onChange={(e) => { const code = e.target.value.toUpperCase(); const product = products.find((p) => p.code === code); patchItem(index, { code, ...(product ? { name: product.name } : {}) }); }} placeholder="CC034" /></Field>
             <div className="col-span-2"><Field label="Fragancia"><input className={inputClass} required maxLength={200} value={item.name} onChange={(e) => patchItem(index, { name: e.target.value })} placeholder="Nombre de la fragancia" /></Field></div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <Field label="Presentación"><select className={inputClass} value={item.size} onChange={(e) => { const size = e.target.value as SaleSize; patchItem(index, { size, unitPrice: prices[size], unitCost: costs[size] }); }}>{SALE_SIZES.map((size) => <option key={size}>{size}</option>)}</select></Field>
+            <Field label="Presentación"><select className={inputClass} value={item.size} onChange={(e) => { const size = e.target.value as SaleSize; const original = initial.updatedAt ? initial.items.find((line, i) => saleLineId(line, i) === item.lineId) : undefined; patchItem(index, changeSaleSize(item, size, costs, prices, original)); }}>{SALE_SIZES.map((size) => <option key={size}>{size}</option>)}</select></Field>
             <Field label="Cantidad"><input className={inputClass} required type="number" min={1} max={10000} step={1} value={item.quantity} onChange={(e) => patchItem(index, { quantity: Number(e.target.value) })} /></Field>
             <Field label="Precio unitario (Gs.)"><MoneyInput label={`Precio fragancia ${index + 1}`} value={item.unitPrice} onChange={(n) => patchItem(index, { unitPrice: n })} /></Field>
-            <Field label="Costo unitario (Gs.)"><MoneyInput optional label={`Costo fragancia ${index + 1}`} value={item.unitCost} onChange={(n) => patchItem(index, { unitCost: n })} /></Field>
+            <Field label="Costo unitario automático (Gs.)" hint={initial.updatedAt && initial.items.some((line, i) => saleLineId(line, i) === item.lineId && line.size === item.size) ? "Costo histórico conservado." : "Parametrizado en Costos."}><input aria-label={`Costo fragancia ${index + 1}`} className={`${inputClass} bg-zinc-100 tabular-nums`} readOnly value={money(item.unitCost)} /></Field>
           </div>
           <p className="text-xs text-right text-zinc-500">Importe: <strong className="text-zinc-900">{money(item.unitPrice * item.quantity)}</strong></p>
         </div>)}
-        <button type="button" disabled={sale.items.length >= 50} className={`${secondaryClass} w-full`} onClick={() => patch({ items: [...sale.items, { code: '', name: '', size: '30 ML', quantity: 1, unitPrice: prices['30 ML'], unitCost: costs['30 ML'] }] })}><Plus size={15} /> Agregar fragancia</button>
+        <button type="button" disabled={sale.items.length >= 50} className={`${secondaryClass} w-full`} onClick={() => patch({ items: [...sale.items, { lineId: crypto.randomUUID(), code: '', name: '', size: '30 ML', quantity: 1, unitPrice: prices['30 ML'], unitCost: costs['30 ML'] }] })}><Plus size={15} /> Agregar fragancia</button>
       </section>
       <section className="bg-white rounded-xl border border-zinc-200 p-4 sm:p-5 grid grid-cols-2 gap-4">
         <Field label="Descuento de la venta (Gs.)"><MoneyInput label="Descuento" value={sale.discount} onChange={(n) => patch({ discount: n })} /></Field>

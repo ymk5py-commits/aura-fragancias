@@ -4,7 +4,7 @@ Acceso: `/admin#ventas`, pestaña **Caja / ERP**. Etiquetas mantiene su pestaña
 
 ## Uso
 
-- Registrar una venta: seleccionar código del catálogo, presentación y cantidad. Precio y costo son editables. Agregar las demás fragancias, descuento, delivery cobrado/real y comisión. Pagada registra el total cobrado; Pendiente permite un cobro parcial. Anulada conserva el movimiento y lo excluye del resultado.
+- Registrar una venta: seleccionar código del catálogo, presentación y cantidad. El precio es editable; el costo unitario es automático y está protegido. Las ventas nuevas usan el parámetro vigente en Costos y las guardadas conservan su costo histórico. Cambiar a otra presentación usa su costo actual; volver a la presentación original recupera el costo histórico. El costo total multiplica el costo unitario por la cantidad. Agregar las demás fragancias, descuento, delivery cobrado/real y comisión. Pagada registra el total cobrado; Pendiente permite un cobro parcial. Anulada conserva el movimiento y lo excluye del resultado.
 - Registrar un gasto: Operativo (publicidad, celular/internet, impuestos), Mercadería (insumos/envases), Inversión (equipamiento) o Retiro (socios). Elegir fecha, monto, categoría, detalle y estado.
 - Costos: receta y packaging por 10, 30 y 50 ml, según la pestaña COSTOS de AURA CAJA. Guardar afecta las próximas ventas. Las ventas existentes conservan el costo de cada unidad.
 - Resumen: elegir el mes. Ganancia = venta de productos menos costos vendidos, más diferencia de delivery, menos comisiones y gastos operativos. Compras, inversiones y retiros se presentan aparte. Flujo = cobros menos delivery real, comisiones y gastos pagados; no incluye saldo inicial.

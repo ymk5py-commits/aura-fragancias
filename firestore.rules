@@ -44,6 +44,16 @@ service cloud.firestore {
         && d.createdAt is timestamp && d.updatedAt == request.time;
     }
 
+    // Copia de preparación del historial: privada y separada de los movimientos.
+    match /erpImports/{id} {
+      allow read: if isCashAdmin();
+      allow create, update: if isCashAdmin() && id == 'aura-caja'
+        && request.resource.data.keys().hasOnly(['contents', 'updatedAt'])
+        && request.resource.data.contents is string && request.resource.data.contents.size() <= 800000
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
     match /sales/{id} {
       allow read: if isCashAdmin();
       allow create: if isCashAdmin() && validSale(request.resource.data) && request.resource.data.createdAt == request.time;

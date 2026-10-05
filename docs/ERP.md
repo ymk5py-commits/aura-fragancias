@@ -18,10 +18,18 @@ Confirmar desde Pedidos guarda el pedido y su venta en una única transacción, 
 
 La estructura se basa en AURA CAJA: Fecha, COD, Fragancia, Cliente, ML, Cantidad, PV, Total cobrado, Delivery cobrado/real, Costo UN, Total costo y Ganancia. El ERP agrupa varias fragancias en una venta y separa cobros, gastos y resultados.
 
-El historial de Sheets aún no está migrado. Antes de hacerlo hay que confirmar el alcance de meses, el importe CEL/INTERNET escrito como decimal y las fechas 01/07 repetidas en otros meses. Se deben preservar los precios y costos históricos, revisar códigos y filas incompletas y evitar duplicados por pestaña/fila. No se modifica la planilla original. Este módulo no calcula stock físico ni registra cuotas en meses distintos como movimientos separados.
+**Historial** carga una copia privada de las 20 pestañas de ventas y gastos de AURA CAJA, leída el 4 de octubre de 2026, incluyendo meses ocultos. La copia se prepara en `erpImports/aura-caja`; todavía no crea movimientos. También admite cargar o descargar una copia revisada. Los datos de clientes e importes no se incluyen en el repositorio ni en archivos públicos.
+
+Elegir todo el historial o un mes, revisar observaciones y corregir filas con **Revisar → Aplicar a la copia**. Las correcciones de CEL/INTERNET a Gs. 214.914 y de fechas ausentes o copiadas de otro mes requieren activar sus opciones explícitas; no se aplican por defecto. La fecha mensual asignada es el primer día del mes y conserva una nota de que el día real no está confirmado. Guardar la copia revisada antes de salir si se quiere conservar el trabajo de revisión sin importar.
+
+Se conserva una venta por fila, sin agrupar clientes ni deducir tickets. Cantidad, precio, costo histórico y delivery se toman de la fila. Diferencias entre cantidad × precio y Total Cobrado se presentan como descuentos para revisar; totales superiores al precio bloquean la fila. Códigos cortos reconocibles se completan con ceros y se señalan; códigos fuera del catálogo y fragancias combinadas se mantienen como históricos. Canal y pago no informados se registran como Otro. Costos desconocidos no se convierten en cero. Totales y fórmulas de filas vacías se omiten.
+
+**Importar registros revisados** incorpora solamente filas válidas y deja las incompletas pendientes. Una ID por planilla/pestaña/fila/bloque impide duplicados: repetir la importación conserva los registros existentes, incluso editados o anulados. Se procesa en transacciones de 20 movimientos; un error permite reanudar sin duplicar los bloques ya guardados. No modifica la planilla original ni envía conversiones a Meta.
+
+El resultado puede diferir del RESUMEN de Sheets cuando sus fórmulas difieren de los importes efectivos. Antes de la migración definitiva queda pendiente confirmar el alcance y los gastos dudosos. Este módulo no calcula stock físico ni registra cuotas en meses distintos como movimientos separados.
 
 ## Persistencia y verificación
 
-Firestore: `sales`, `expenses`, `salesConfig/costs`. Datos de caja privados para la cuenta administrativa actual. Los movimientos no se borran: se anulan. Ediciones con versiones anteriores se rechazan para evitar sobrescrituras entre ventanas. Las reglas de las colecciones existentes se conservan.
+Firestore: `sales`, `expenses`, `salesConfig/costs`, `erpImports/aura-caja`. Datos de caja privados para la cuenta administrativa actual. Los movimientos no se borran: se anulan. Ediciones con versiones anteriores se rechazan para evitar sobrescrituras entre ventanas. Las reglas de las colecciones existentes se conservan.
 
-Verificación: `npm run test:erp`, pruebas con emulador en `scripts/test-rules.mjs`, `npm run lint`, `npm run build` y prueba de formularios en navegador con movimientos locales temporales. No se cargan ventas ficticias en producción.
+Verificación: `npm run test:import` (incluye los cálculos ERP), pruebas con emulador en `scripts/test-rules.mjs`, `npm run lint`, `npm run build` y prueba de formularios en navegador con movimientos locales temporales. No se cargan ventas ficticias en producción.

@@ -217,6 +217,39 @@ await caso('el importador no registra pedidos pendientes ni cambia el vínculo d
   await assertFails(updateDoc(doc(cashAdmin(), 'sales', 'web_web1'), { sourceOrderId: 'otro', updatedAt: serverTimestamp() }));
 });
 
+await caso('importa ventas y gastos por origen y evita duplicados simultáneos', async () => {
+  const rows = [
+    { key: 'sheet_aura_history_1_2_sale', kind: 'sale', record: { ...venta, id: 'sheet_aura_history_1_2_sale' }, errors: [] },
+    { key: 'sheet_aura_history_2_3_0', kind: 'expense', record: { ...gasto, id: 'sheet_aura_history_2_3_0' }, errors: [] },
+  ];
+  const results = await Promise.all([ledger.importLedger(rows), ledger.importLedger(rows)]);
+  assert.equal(results.reduce((n, r) => n + r.created, 0), 2);
+  assert.equal(results.reduce((n, r) => n + r.skipped, 0), 2);
+  await updateDoc(doc(cashAdmin(), 'sales', rows[0].key), { customer: 'Corregido en ERP', updatedAt: serverTimestamp() });
+  const again = await ledger.importLedger(rows);
+  assert.equal(again.created, 0);
+  assert.equal((await getDoc(doc(cashAdmin(), 'sales', rows[0].key))).data().customer, 'Corregido en ERP');
+});
+await caso('rechaza filas pendientes y duplicadas antes de escribir', async () => {
+  const row = { key: 'sheet_aura_history_1_4_sale', kind: 'sale', record: { ...venta, id: 'sheet_aura_history_1_4_sale' }, errors: [] };
+  await assert.rejects(ledger.importLedger([{ ...row, errors: ['Falta fecha'] }]), /sin resolver/);
+  await assert.rejects(ledger.importLedger([row, row]), /repetidas/);
+  assert.equal((await getDoc(doc(cashAdmin(), 'sales', row.key))).exists(), false);
+});
+await caso('la copia de preparación del historial también es privada', async () => {
+  await assertSucceeds(setDoc(doc(cashAdmin(), 'erpImports', 'aura-caja'), { contents: '{}', updatedAt: serverTimestamp() }));
+  await assertSucceeds(getDoc(doc(cashAdmin(), 'erpImports', 'aura-caja')));
+  await assertFails(getDoc(doc(anon(), 'erpImports', 'aura-caja')));
+  await assertFails(getDoc(doc(outsider(), 'erpImports', 'aura-caja')));
+  await assertFails(setDoc(doc(outsider(), 'erpImports', 'aura-caja'), { contents: '{}', updatedAt: serverTimestamp() }));
+});
+await caso('reanuda una importación interrumpida después de un bloque sin duplicarlo', async () => {
+  const rows = Array.from({ length: 25 }, (_, i) => ({ key: `sheet_aura_resume_1_${i + 1}_sale`, kind: 'sale', record: { ...venta, id: `sheet_aura_resume_1_${i + 1}_sale` }, errors: [] }));
+  await assert.rejects(ledger.importLedger(rows, () => { throw new Error('Interrupción simulada'); }), /Interrupción/);
+  const result = await ledger.importLedger(rows);
+  assert.equal(result.created, 5); assert.equal(result.skipped, 20);
+});
+
 await env.cleanup();
 
 console.log(fallos ? `\n${fallos} caso(s) fallaron\n` : '\nTodo ok\n');

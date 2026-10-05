@@ -2,6 +2,45 @@ import { getFirebaseDb } from './firebase';
 import type { Order } from '../types';
 import { INITIAL_COSTS, SALE_SIZES, saleTotals, orderToSale, validateSale, type Sale, type SaleSize } from './sales';
 import { INITIAL_RECIPE, recipeCost, validateRecipe, validateExpense, type CostRecipe, type Expense } from './erp';
+import type { ImportRow } from './erpImport';
+
+export async function loadImportSnapshot() {
+  const [db, sdk, { parseSnapshot }] = await Promise.all([getFirebaseDb(), import('firebase/firestore'), import('./erpImport')]);
+  const snapshot = await sdk.getDoc(sdk.doc(db, 'erpImports', 'aura-caja'));
+  return snapshot.exists() ? parseSnapshot(snapshot.data().contents) : null;
+}
+
+/** Importación reanudable: crea solamente IDs de origen nuevos y nunca pisa una venta editada. */
+export async function importLedger(rows: ImportRow[], onProgress?: (done: number) => void) {
+  if (!rows.length || rows.length > 10000) throw new Error('Seleccioná entre 1 y 10.000 registros.');
+  const keys = new Set<string>();
+  for (const row of rows) {
+    if (!row.record || row.errors.length || row.record.id !== row.key || !/^sheet_[\w-]+_\d+_\d+_(sale|0|5|10)$/.test(row.key) || keys.has(row.key) || !['sale', 'expense'].includes(row.kind)) throw new Error('Hay filas sin resolver o repetidas.');
+    keys.add(row.key);
+    const error = row.kind === 'sale' ? validateSale(row.record as Sale) : validateExpense(row.record as Expense);
+    if (error) throw new Error(error);
+  }
+  const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
+  let created = 0; let skipped = 0;
+  for (let start = 0; start < rows.length; start += 20) {
+    const chunk = rows.slice(start, start + 20);
+    const result = await sdk.runTransaction(db, async transaction => {
+      const refs = chunk.map(row => sdk.doc(db, row.kind === 'sale' ? 'sales' : 'expenses', row.key));
+      const snapshots = await Promise.all(refs.map(ref => transaction.get(ref)));
+      let count = 0;
+      chunk.forEach((row, i) => {
+        if (snapshots[i].exists()) return;
+        const { id, createdAt, updatedAt, ...fields } = row.record!;
+        transaction.set(refs[i], { ...fields, createdAt: sdk.serverTimestamp(), updatedAt: sdk.serverTimestamp() });
+        count++;
+      });
+      return count;
+    });
+    created += result; skipped += chunk.length - result;
+    onProgress?.(Math.min(start + chunk.length, rows.length));
+  }
+  return { created, skipped };
+}
 
 export async function subscribeSales(from: string, to: string, callback: (sales: Sale[]) => void, onError: (error: Error) => void) {
   const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);

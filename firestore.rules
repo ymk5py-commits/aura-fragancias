@@ -2,6 +2,91 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Gift Cards privadas: emisión desde un pedido confirmado; importe y vigencia
+    // inmutables. Cada disminución de saldo exige un movimiento de canje atómico.
+    function validGiftCard(d) {
+      return d.keys().hasAll(['code', 'orderId', 'orderCode', 'customer', 'phone', 'amount', 'balance', 'activatedAt', 'expiresAt', 'status', 'recipient', 'sender', 'message', 'lineIndex', 'copyIndex'])
+        && d.keys().hasOnly(['code', 'orderId', 'orderCode', 'customer', 'phone', 'amount', 'balance', 'activatedAt', 'expiresAt', 'status', 'recipient', 'sender', 'message', 'lineIndex', 'copyIndex', 'lastRedemptionId'])
+        && d.code is string && d.code.matches('^AURA-[A-F0-9]{32}$')
+        && d.orderId is string && d.orderId.size() <= 100
+        && d.orderCode is string && d.orderCode.matches('^AURA-[A-Z0-9]{4,20}$')
+        && d.customer is string && d.customer.size() <= 120
+        && d.phone is string && d.phone.size() <= 40
+        && d.recipient is string && d.recipient.size() <= 80
+        && d.sender is string && d.sender.size() <= 80
+        && d.message is string && d.message.size() <= 300
+        && d.amount is int && d.amount >= 100000 && d.amount <= 50000000
+        && d.balance is int && d.balance >= 0 && d.balance <= d.amount
+        && d.activatedAt is int && d.expiresAt is int
+        && d.expiresAt == d.activatedAt + 5184000000
+        && d.status in ['activa', 'agotada', 'anulada']
+        && (d.status != 'activa' || d.balance > 0)
+        && (d.status != 'agotada' || d.balance == 0)
+        && d.lineIndex is int && d.lineIndex >= 0 && d.lineIndex < 50
+        && d.copyIndex is int && d.copyIndex >= 0 && d.copyIndex < 50;
+    }
+
+    function giftCardPaidOrder(d) {
+      let order = getAfter(/databases/$(database)/documents/orders/$(d.orderId)).data;
+      let claim = getAfter(/databases/$(database)/documents/giftCardPayments/$(d.orderCode)).data;
+      return order.status == 'confirmado' && order.orderId == d.orderCode
+        && claim.orderId == d.orderId && claim.activatedAt == d.activatedAt
+        && order.items[d.lineIndex].code == 'GIFT-CARD'
+        && order.items[d.lineIndex].price == d.amount
+        && order.items[d.lineIndex].quantity > d.copyIndex;
+    }
+
+    match /giftCardPayments/{code} {
+      allow read: if isCashAdmin();
+      allow create: if isCashAdmin()
+        && request.resource.data.keys().hasOnly(['orderId', 'orderCode', 'amount', 'activatedAt'])
+        && request.resource.data.orderId is string
+        && request.resource.data.orderCode == code
+        && request.resource.data.activatedAt is int
+        && request.resource.data.amount is int && request.resource.data.amount >= 100000
+        && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.status == 'confirmado'
+        && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.orderId == code
+        && getAfter(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.total == request.resource.data.amount;
+      allow update, delete: if false;
+    }
+
+    match /giftCards/{id} {
+      allow read: if isCashAdmin();
+      allow create: if isCashAdmin() && validGiftCard(request.resource.data)
+        && request.resource.data.balance == request.resource.data.amount
+        && request.resource.data.status == 'activa'
+        && id == request.resource.data.orderId + '_' + string(request.resource.data.lineIndex) + '_' + string(request.resource.data.copyIndex)
+        && giftCardPaidOrder(request.resource.data);
+      allow update: if isCashAdmin() && validGiftCard(request.resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['balance', 'status', 'lastRedemptionId'])
+        && (
+          (request.resource.data.balance == resource.data.balance && request.resource.data.status == 'anulada' && resource.data.balance == resource.data.amount)
+          || (resource.data.status == 'activa' && request.time.toMillis() < resource.data.expiresAt
+            && request.resource.data.balance < resource.data.balance
+            && request.resource.data.lastRedemptionId != resource.data.get('lastRedemptionId', '')
+            && getAfter(/databases/$(database)/documents/giftCardRedemptions/$(request.resource.data.lastRedemptionId)).data.giftCardId == id
+            && getAfter(/databases/$(database)/documents/giftCardRedemptions/$(request.resource.data.lastRedemptionId)).data.balanceBefore == resource.data.balance
+            && getAfter(/databases/$(database)/documents/giftCardRedemptions/$(request.resource.data.lastRedemptionId)).data.balanceAfter == request.resource.data.balance)
+        );
+      allow delete: if false;
+    }
+
+    match /giftCardRedemptions/{id} {
+      allow read: if isCashAdmin();
+      allow create: if isCashAdmin()
+        && request.resource.data.keys().hasOnly(['giftCardId', 'amount', 'balanceBefore', 'balanceAfter', 'reference', 'createdAt'])
+        && request.resource.data.giftCardId is string
+        && request.resource.data.amount is int && request.resource.data.amount > 0
+        && request.resource.data.balanceBefore is int && request.resource.data.balanceAfter is int && request.resource.data.balanceAfter >= 0
+        && request.resource.data.balanceBefore - request.resource.data.amount == request.resource.data.balanceAfter
+        && request.resource.data.reference is string && request.resource.data.reference.size() > 0 && request.resource.data.reference.size() <= 200
+        && request.resource.data.createdAt == request.time
+        && get(/databases/$(database)/documents/giftCards/$(request.resource.data.giftCardId)).data.balance == request.resource.data.balanceBefore
+        && getAfter(/databases/$(database)/documents/giftCards/$(request.resource.data.giftCardId)).data.balance == request.resource.data.balanceAfter
+        && getAfter(/databases/$(database)/documents/giftCards/$(request.resource.data.giftCardId)).data.lastRedemptionId == id;
+      allow update, delete: if false;
+    }
+
     // Caja privada: mismo acceso autenticado que el panel administrativo.
     function isCashAdmin() {
       return request.auth != null;

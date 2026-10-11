@@ -10,6 +10,7 @@ const collections = [
   { label: 'Hombres', href: '/hombres' },
   { label: 'Mujeres', href: '/mujeres' },
   { label: 'Nicho & Unisex', href: '/unisex' },
+  { label: 'Gift Card Äura', href: '/gift-card' },
 ];
 
 const Footer: React.FC = () => {

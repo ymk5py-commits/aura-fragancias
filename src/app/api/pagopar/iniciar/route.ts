@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { documentNumber, hubCall, PagoparError } from '../../../../lib/server/pagopar';
 import { currentPricing } from '../../../../lib/server/pricing';
 import { SITE } from '../../../../lib/site';
+import { isGiftCard, validateGiftCardAmount } from '../../../../lib/giftCards';
 import { MAX_SHIPPING_COST } from '../../../../lib/validation';
 
 export const runtime = 'nodejs';
@@ -73,17 +74,29 @@ export async function POST(req: NextRequest) {
     /* --- precios: los manda el navegador, los verificamos contra la tienda --- */
     const pricing = await currentPricing();
     let subtotal = 0;
+    let merchandiseSubtotal = 0;
+    let giftCardQuantity = 0;
     const hubItems = items.map((i) => {
       const size = String(i.size || '').trim().toUpperCase();
-      const quantity = Math.max(1, Math.min(50, Math.round(Number(i.quantity) || 1)));
-      const price = pricing.bySize[size];
+      const quantity = Number(i.quantity);
+      if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 50) throw new PagoparError('La cantidad debe ser de 1 a 50.');
+      const gift = isGiftCard(i);
+      const price = gift ? Number(i.price) : pricing.bySize[size];
+      if (gift) {
+        giftCardQuantity += quantity;
+        if (giftCardQuantity > 50) throw new PagoparError('El máximo por pedido es de 50 Gift Cards.');
+        const error = validateGiftCardAmount(price);
+        if (error) throw new PagoparError(error);
+        if (size !== 'DIGITAL') throw new PagoparError('La Gift Card es una tarjeta digital.');
+      }
       if (!price) throw new PagoparError(`Presentación desconocida: ${size || '(vacía)'}.`);
       if (Math.round(Number(i.price) || 0) !== price) {
         throw new PagoparError('Los precios cambiaron. Volvé al carrito y probá de nuevo.');
       }
       subtotal += price * quantity;
+      if (!gift) merchandiseSubtotal += price * quantity;
       return {
-        nombre: `${String(i.name || 'Perfume').slice(0, 120)} · ${size}`,
+        nombre: gift ? 'Gift Card Äura · Digital · Vigencia 60 días' : `${String(i.name || 'Perfume').slice(0, 120)} · ${size}`,
         cantidad: quantity,
         precioTotal: price * quantity,
         idProducto: String(i.code || 'aura').slice(0, 40),
@@ -93,23 +106,26 @@ export async function POST(req: NextRequest) {
 
     const discountPercent = Math.max(0, Math.min(100, Math.round(Number(b.discountPercent) || 0)));
     if (discountPercent > pricing.welcomePercent) return bad('El descuento no es válido.');
-    const discountAmount = discountPercent > 0 ? Math.round(subtotal * (discountPercent / 100)) : 0;
+    const discountAmount = discountPercent > 0 ? Math.round(merchandiseSubtotal * (discountPercent / 100)) : 0;
     const productsTotal = subtotal - discountAmount;
 
     // Delivery ya coordinado por WhatsApp (opcional): lo carga el cliente y
     // se cobra en la misma transacción, como un ítem más.
     const shippingCost = Math.max(0, Math.round(Number(b.shippingCost) || 0));
+    if (items.every(isGiftCard) && shippingCost > 0) return bad('La Gift Card digital no tiene costo de envío.');
     if (shippingCost > MAX_SHIPPING_COST) return bad('Revisá el monto del delivery.');
     const total = productsTotal + shippingCost;
     if (total < MIN_AMOUNT) return bad(`El monto mínimo para pagar con tarjeta es Gs. ${MIN_AMOUNT}.`);
     if (total > MAX_AMOUNT) return bad(`El monto máximo para pagar con tarjeta es Gs. ${MAX_AMOUNT}.`);
 
-    // Pagopar exige que la suma de los ítems sea el total: el descuento se
-    // reparte restándolo del último ítem.
-    if (discountAmount > 0) {
-      const last = hubItems[hubItems.length - 1];
-      last.precioTotal = Math.max(0, last.precioTotal - discountAmount);
-      last.nombre = `${last.nombre} (con ${discountPercent}% de descuento)`.slice(0, 200);
+    // Distribuir solamente entre perfumes, conservando exactamente el total.
+    let remainingDiscount = discountAmount;
+    for (let index = hubItems.length - 1; index >= 0 && remainingDiscount > 0; index--) {
+      if (isGiftCard(items[index])) continue;
+      const reduction = Math.min(hubItems[index].precioTotal, remainingDiscount);
+      hubItems[index].precioTotal -= reduction;
+      remainingDiscount -= reduction;
+      if (reduction) hubItems[index].nombre += ` (con descuento)`;
     }
     if (shippingCost > 0) {
       hubItems.push({

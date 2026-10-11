@@ -39,6 +39,7 @@ const Header: React.FC = () => {
     { name: 'Hombres', href: '/hombres' },
     { name: 'Mujeres', href: '/mujeres' },
     { name: 'Unisex', href: '/unisex' },
+    { name: 'Gift Card', href: '/gift-card' },
     { name: 'Top Ventas', href: '/#top-ventas' },
     { name: 'Mayoristas', href: '/mayoristas' },
   ];
@@ -73,7 +74,7 @@ const Header: React.FC = () => {
             <img src="/brand/aura-wordmark-burgundy.png" alt="Äura Fragancias" className="h-auto w-[132px] transition-transform duration-300 group-hover:scale-[1.03] sm:w-[150px] xl:w-[164px]" width={1600} height={534} />
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-5 xl:gap-8">
+          <nav className="hidden lg:flex items-center gap-3 xl:gap-5">
             {navLinks.map((link) => (
               <Link
                 key={link.name}

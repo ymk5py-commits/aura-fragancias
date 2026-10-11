@@ -7,6 +7,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { BANNER_IMAGE } from '../constants';
 import { useSettings } from '../context/SettingsContext';
 import smartImageLoader from '../lib/imageLoader';
+import { GIFT_CARD_IMAGE } from '../lib/giftCards';
 
 interface HeroProps {
   title?: string;
@@ -61,6 +62,31 @@ export default function Hero({
       </section>
     );
   }
+
+  if (['/editorial/hero-cc180.webp', '/banners/hero.jpg', GIFT_CARD_IMAGE].includes(image)) return (
+    <section className="overflow-hidden bg-aura-ivory pt-[104px] text-aura-wine lg:pt-[98px]" aria-label="Gift Card Äura">
+      <div className="section-shell relative grid items-center gap-0 pb-8 pt-4 sm:py-8 lg:min-h-[660px] lg:grid-cols-[44%_56%] lg:py-10">
+        <motion.div initial={reveal} animate={{ opacity: 1, y: 0 }} transition={transition} className="relative mx-auto h-[260px] w-full max-w-[390px] sm:aspect-[4/5] sm:h-auto sm:max-w-[440px] lg:max-w-none">
+          <Image src={GIFT_CARD_IMAGE} alt="Gift Card Äura: tarjeta marfil con el logo oficial y cinta bordó" fill priority fetchPriority="high" sizes="(min-width:1024px) 42vw, (min-width:640px) 440px, 88vw" loader={smartImageLoader} className="object-contain" />
+        </motion.div>
+        <div className="relative isolate pb-2 lg:py-14">
+          <span aria-hidden="true" className="pointer-events-none absolute -top-10 left-0 -z-10 whitespace-nowrap font-luxury text-[clamp(5.5rem,12vw,12rem)] font-semibold leading-none tracking-[-0.07em] text-aura-wine/[0.06] lg:-top-8">REGALÁ</span>
+          <motion.div initial={reveal} animate={{ opacity: 1, y: 0 }} transition={transition} className="relative bg-aura-sand/90 px-5 py-7 sm:px-9 sm:py-10 lg:px-12 lg:py-12">
+            <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.24em]">Gift Card Äura / Un regalo para elegir</p>
+            <h1 className="font-luxury text-[clamp(2.7rem,5.3vw,5.6rem)] font-semibold uppercase leading-[0.94] tracking-[-0.055em]">Regalá<br />la libertad<br />de elegir.</h1>
+            <p className="mt-5 max-w-[35ch] text-sm leading-relaxed text-aura-ink/75 sm:text-base">Vos elegís el monto. Esa persona, su próxima fragancia.</p>
+            <p className="mt-4 text-xs font-semibold">Desde Gs. 100.000 · Vigencia: 60 días</p>
+            <p className="mt-1 text-[11px] text-aura-ink/60">Desde la confirmación del pago. Entrega digital.</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href="/gift-card" className="group inline-flex min-h-12 items-center justify-center gap-3 bg-aura-wine px-5 text-[10px] font-bold uppercase tracking-[0.15em] text-white transition-colors hover:bg-aura-ink">Crear mi Gift Card <ArrowUpRight size={16} /></Link>
+              <Link href="/#top-ventas" className="inline-flex min-h-12 items-center gap-2 px-1 text-[10px] font-bold uppercase tracking-[0.13em] underline underline-offset-4">Explorar perfumes <ArrowDownRight size={15} /></Link>
+            </div>
+          </motion.div>
+          <span aria-hidden="true" className="pointer-events-none absolute -bottom-11 left-0 -z-10 whitespace-nowrap font-luxury text-[clamp(5.5rem,12vw,12rem)] font-semibold leading-none tracking-[-0.07em] text-aura-wine/[0.06]">REGALÁ</span>
+        </div>
+      </div>
+    </section>
+  );
 
   return (
     <section className="overflow-hidden bg-aura-wine pt-[104px] text-aura-ivory lg:pt-[98px]">

@@ -85,7 +85,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ onAccept, onReject }) => {
         </div>
 
         <div className="border-t border-white/5 p-4 text-center">
-          <p className="text-[9px] text-white/30 uppercase tracking-[0.25em]">Válido por tiempo limitado en toda la tienda</p>
+          <p className="text-[9px] text-white/30 uppercase tracking-[0.25em]">Válido en perfumes · No aplica a Gift Cards</p>
         </div>
       </div>
     </div>

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CartItem, Perfume } from '../types';
+import { CartItem, Perfume, GiftCardDetails } from '../types';
+import { GIFT_CARD_PRODUCT, isGiftCard, normalizeGiftCardDetails, validateGiftCardAmount } from '../lib/giftCards';
 import { useSettings } from './SettingsContext';
 import { useProducts } from './ProductsContext';
 import { trackEvent } from '../lib/pixel';
@@ -12,6 +13,7 @@ interface CartContextValue {
   cart: CartItem[];
   cartCount: number;
   addToCart: (perfume: Perfume, size: string, quantity?: number) => void;
+  addGiftCard: (amount: number, details: GiftCardDetails) => void;
   updateQuantity: (id: string, delta: number) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
@@ -59,6 +61,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (parsed?.ts && Date.now() - parsed.ts < TTL && Array.isArray(parsed.items)) {
           const restored: CartItem[] = [];
           for (const it of parsed.items) {
+            if (isGiftCard(it)) {
+              if (!validateGiftCardAmount(it.amount)) restored.push({ id: crypto.randomUUID(), perfume: GIFT_CARD_PRODUCT, size: 'Digital', price: it.amount, quantity: Math.max(1, Math.min(50, Math.round(Number(it.quantity) || 1))), giftCard: normalizeGiftCardDetails(it.giftCard) });
+              continue;
+            }
             const perfume = visibleProducts.find((p) => p.code === it.code);
             const price = prices.find((pr) => pr.size === it.size)?.price;
             if (perfume && price) {
@@ -79,7 +85,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!hydrated) return;
     try {
-      const items = cart.map((i) => ({ code: i.perfume.code, size: i.size, quantity: i.quantity }));
+      const items = cart.map((i) => ({ code: i.perfume.code, size: i.size, quantity: i.quantity, ...(isGiftCard(i) ? { amount: i.price, giftCard: i.giftCard } : {}) }));
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ ts: Date.now(), items }));
     } catch {
       /* noop */
@@ -124,9 +130,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsDrawerOpen(true);
   };
 
+  const addGiftCard = (amount: number, details: GiftCardDetails) => {
+    const error = validateGiftCardAmount(amount);
+    if (error) { showNotification(error); return; }
+    setCart(prev => [...prev, { id: crypto.randomUUID(), perfume: GIFT_CARD_PRODUCT, size: 'Digital', price: amount, quantity: 1, giftCard: normalizeGiftCardDetails(details) }]);
+    gaAddToCart(toItem(GIFT_CARD_PRODUCT, amount, 'Digital', 1));
+    trackEvent('AddToCart', { content_name: GIFT_CARD_PRODUCT.name, content_ids: [GIFT_CARD_PRODUCT.code], content_type: 'product', value: amount, currency: 'PYG' }, newEventId());
+    showNotification('Gift Card agregada al carrito');
+    setIsDrawerOpen(true);
+  };
+
   const updateQuantity = (id: string, delta: number) =>
     setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item))
+      prev.map((item) => (item.id === id ? { ...item, quantity: Math.max(1, Math.min(50, item.quantity + delta)) } : item))
     );
 
   const removeFromCart = (id: string) => setCart((prev) => prev.filter((item) => item.id !== id));
@@ -161,6 +177,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         cart,
         cartCount,
         addToCart,
+        addGiftCard,
         updateQuantity,
         removeFromCart,
         clearCart,

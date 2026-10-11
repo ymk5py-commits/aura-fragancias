@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { X, Plus, Minus, Trash2, ShoppingBag, Truck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { isGiftCard } from '../lib/giftCards';
 import smartImageLoader from '../lib/imageLoader';
 
 const FREE_SHIPPING = 300000;
@@ -18,8 +19,10 @@ const CartDrawer: React.FC = () => {
   }, [isDrawerOpen]);
 
   const subtotal = cart.reduce((acc, i) => acc + i.price * i.quantity, 0);
-  const remaining = Math.max(0, FREE_SHIPPING - subtotal);
-  const pct = Math.min(100, (subtotal / FREE_SHIPPING) * 100);
+  const merchandise = cart.filter(item => !isGiftCard(item)).reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const digitalOnly = cart.every(isGiftCard);
+  const remaining = Math.max(0, FREE_SHIPPING - merchandise);
+  const pct = Math.min(100, (merchandise / FREE_SHIPPING) * 100);
 
   return (
     <>
@@ -40,6 +43,8 @@ const CartDrawer: React.FC = () => {
         role="dialog"
         aria-label="Tu carrito"
         aria-modal={isDrawerOpen}
+        aria-hidden={!isDrawerOpen}
+        inert={!isDrawerOpen}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 bg-aura-ink text-white shrink-0">
@@ -69,14 +74,14 @@ const CartDrawer: React.FC = () => {
               <div className="flex items-center gap-2 mb-2">
                 <Truck size={13} className="text-aura-gold-deep" />
                 <p className="text-[11px] text-zinc-600 font-medium">
-                  {remaining > 0 ? (
+                  {digitalOnly ? (<>Gift Card digital · entrega por WhatsApp</>) : remaining > 0 ? (
                     <>Te faltan <span className="font-bold text-aura-ink">Gs. {remaining.toLocaleString('es-PY')}</span> para el envío gratis</>
                   ) : (
                     <span className="font-bold text-aura-gold-deep">¡Tenés envío gratis! 🎉</span>
                   )}
                 </p>
               </div>
-              <div className="h-1.5 bg-zinc-200 rounded-full overflow-hidden">
+              <div className={`h-1.5 bg-zinc-200 rounded-full overflow-hidden ${digitalOnly ? "hidden" : ""}`}>
                 <div className="h-full bg-aura-gold rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
               </div>
             </div>
@@ -92,12 +97,13 @@ const CartDrawer: React.FC = () => {
                   </div>
                   <div className="flex-grow min-w-0">
                     <span className="text-[8px] font-bold text-aura-gold-deep uppercase tracking-[0.2em] block">
-                      Inspiración {item.perfume.inspiration}
+                      {isGiftCard(item) ? 'Un regalo para elegir' : `Inspiración ${item.perfume.inspiration}`}
                     </span>
                     <h3 className="text-[12px] font-semibold text-aura-ink uppercase tracking-[0.05em] leading-tight line-clamp-2 mb-1">
                       {item.perfume.name}
                     </h3>
                     <span className="text-[10px] text-zinc-400 uppercase tracking-widest">{item.size}</span>
+                    {item.giftCard && <p className="text-xs text-aura-wine">Para {item.giftCard.recipient || "quien vos elijas"} · 60 días de vigencia</p>}
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center border border-zinc-200">
                         <button onClick={() => updateQuantity(item.id, -1)} aria-label="Restar" className="p-1.5 text-zinc-500 hover:bg-zinc-50"><Minus size={12} /></button>

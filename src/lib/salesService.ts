@@ -1,3 +1,5 @@
+import { giftCardEntries, newGiftCard } from './giftCardsService';
+import { isGiftCard, orderAmounts } from './giftCards';
 import { getFirebaseDb } from './firebase';
 import type { Order } from '../types';
 import { INITIAL_COSTS, SALE_SIZES, saleTotals, orderToSale, validateSale, enforceSaleCosts, type Sale, type SaleSize } from './sales';
@@ -124,7 +126,18 @@ export async function confirmOrderAndRecordSale(orderId: string, paymentFields: 
     const order = { ...orderSnapshot.data(), ...paymentFields, id: orderId } as Order;
     if (requireConfirmed && order.status !== 'confirmado') throw new Error('El pedido debe estar confirmado antes de registrarlo.');
     if (order.status === 'cancelado' && !requireConfirmed) throw new Error('Reabrí el pedido antes de confirmar la venta.');
-    if (!saleSnapshot.exists()) {
+    const entries = giftCardEntries(order);
+    const cardRefs = entries.map(entry => sdk.doc(db, 'giftCards', entry.id));
+    const cards = await Promise.all(cardRefs.map(ref => transaction.get(ref)));
+    const claimRef = sdk.doc(db, 'giftCardPayments', order.orderId);
+    const claim = entries.length ? await transaction.get(claimRef) : null;
+    if (claim?.exists() && claim.data().orderId !== orderId) throw new Error('Este pago ya tiene Gift Cards emitidas en otro registro.');
+    if (entries.length) {
+      const amounts = orderAmounts(order.items, order.discountPercent || 0);
+      if (amounts.total !== order.total || amounts.discountAmount !== order.discountAmount || amounts.subtotal !== order.subtotal) throw new Error('El importe del pedido no coincide. Revisalo antes de emitir la Gift Card.');
+    }
+    const hasMerchandise = order.items.some(item => !isGiftCard(item));
+    if (hasMerchandise && !saleSnapshot.exists()) {
       const sale = orderToSale(order, { ...INITIAL_COSTS, ...config.data()?.costs });
       const error = validateSale(sale);
       if (error) throw new Error(error);
@@ -136,8 +149,14 @@ export async function confirmOrderAndRecordSale(orderId: string, paymentFields: 
       const existing = { ...saleSnapshot.data(), id: saleRef.id } as Sale;
       transaction.update(saleRef, { status: 'pagada', collected: saleTotals(existing).total, updatedAt: sdk.serverTimestamp() });
     }
+    const activatedAt = Date.now();
+    if (entries.length && !claim?.exists()) transaction.set(claimRef, { orderId, orderCode: order.orderId, amount: order.total, activatedAt });
+    entries.forEach((entry, index) => {
+      if (!cards[index].exists()) transaction.set(cardRefs[index], newGiftCard(order, entry, activatedAt));
+      else if (cards[index].data().status === 'anulada') throw new Error('Este pedido tiene una Gift Card anulada. No se puede reactivar desde Pedidos.');
+    });
     if (!requireConfirmed) transaction.update(orderRef, { ...paymentFields, status: 'confirmado' });
-    return !saleSnapshot.exists();
+    return hasMerchandise ? !saleSnapshot.exists() : cards.some(card => !card.exists());
   });
 }
 
@@ -146,8 +165,15 @@ export async function cancelOrderAndSale(orderId: string) {
   const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
   await sdk.runTransaction(db, async (transaction) => {
     const saleRef = sdk.doc(db, 'sales', `web_${orderId}`);
-    const sale = await transaction.get(saleRef);
-    transaction.update(sdk.doc(db, 'orders', orderId), { status: 'cancelado' });
+    const orderRef = sdk.doc(db, 'orders', orderId);
+    const [sale, snapshot] = await Promise.all([transaction.get(saleRef), transaction.get(orderRef)]);
+    if (!snapshot.exists()) throw new Error('El pedido no existe.');
+    const order = { ...snapshot.data(), id: orderId } as Order;
+    const refs = giftCardEntries(order).map(entry => sdk.doc(db, 'giftCards', entry.id));
+    const cards = await Promise.all(refs.map(ref => transaction.get(ref)));
+    if (cards.some(card => card.exists() && card.data().balance !== card.data().amount)) throw new Error('Una Gift Card ya fue utilizada. Revisá el canje antes de anular el pedido.');
+    cards.forEach((card, index) => { if (card.exists()) transaction.update(refs[index], { status: 'anulada' }); });
+    transaction.update(orderRef, { status: 'cancelado' });
     if (sale.exists()) transaction.update(saleRef, { status: 'anulada', updatedAt: sdk.serverTimestamp() });
   });
 }

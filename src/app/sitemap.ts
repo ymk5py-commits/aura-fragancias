@@ -12,7 +12,7 @@ export const revalidate = 120;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [{ products }, settings] = await Promise.all([getProducts(), getSettings()]);
   const catalogUpdated = latestUpdate(settings.updatedAt, ...products.map((p) => p.updatedAt));
-  const sections = ['/hombres', '/mujeres', '/unisex', '/mayoristas'].map((p) => ({
+  const sections = ['/hombres', '/mujeres', '/unisex', '/mayoristas', '/gift-card'].map((p) => ({
     url: `${SITE}${p}`, ...(catalogUpdated ? { lastModified: catalogUpdated } : {}), changeFrequency: 'weekly' as const, priority: 0.9,
   }));
   const legal = ['/sobre-inspiraciones', '/terminos-y-condiciones', '/envios-y-devoluciones'].map((p) => ({

@@ -95,6 +95,7 @@ export const LEGAL_TEXTS = {
     - Pedidos: Los pedidos se gestionan principalmente vía WhatsApp para brindar un asesoramiento personalizado. El stock está sujeto a disponibilidad inmediata.
     - Precios: Los precios expresados en Guaraníes (Gs.) pueden ser modificados sin previo aviso, respetándose siempre el precio pactado al momento de confirmar el pedido por WhatsApp.
     - Responsabilidad: Äura no se hace responsable por reacciones alérgicas. Recomendamos realizar una prueba de sensibilidad en una pequeña zona de la piel antes de su uso regular.
+    - Gift Cards: Monto personalizable desde Gs. 100.000. Se activan al confirmar el pago y vencen 60 días después. Entrega digital por WhatsApp, sin costo. Para canjear, contactanos con el código y las fragancias elegidas. El delivery de perfumes se cotiza según la dirección. Los cupones de descuento no aplican a la compra de Gift Cards.
     - Menores de edad: Las compras deben ser realizadas por personas mayores de 18 años o bajo supervisión de un tutor.`
   },
   shipping: {

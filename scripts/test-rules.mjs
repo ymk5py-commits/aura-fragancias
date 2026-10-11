@@ -142,8 +142,10 @@ function loadModule(path, imports) {
 }
 const salesModel = loadModule('../src/lib/sales.ts', {});
 const erpModel = loadModule('../src/lib/erp.ts', { './sales': salesModel });
+const giftModel = loadModule('../src/lib/giftCards.ts', {});
+const giftService = loadModule('../src/lib/giftCardsService.ts', { './firebase': { getFirebaseDb: async () => cashAdmin() }, './giftCards': giftModel, 'firebase/firestore': firestoreSdk });
 const ledger = loadModule('../src/lib/salesService.ts', {
-  './firebase': { getFirebaseDb: async () => cashAdmin() }, './sales': salesModel, './erp': erpModel, 'firebase/firestore': firestoreSdk,
+  './giftCards': giftModel, './giftCardsService': giftService, './firebase': { getFirebaseDb: async () => cashAdmin() }, './sales': salesModel, './erp': erpModel, 'firebase/firestore': firestoreSdk,
 });
 const venta = {
   id: 's1', date: '2026-10-04', customer: 'Prueba', phone: '', channel: 'WhatsApp', paymentMethod: 'Transferencia', status: 'pagada',
@@ -163,7 +165,7 @@ await caso('anon no lee ventas ni costos privados', async () => {
 });
 await caso('otra cuenta del admin también lee, registra y actualiza la caja', async () => {
   const secondLedger = loadModule('../src/lib/salesService.ts', {
-    './firebase': { getFirebaseDb: async () => secondAdmin() }, './sales': salesModel, './erp': erpModel, 'firebase/firestore': firestoreSdk,
+    './giftCards': giftModel, './giftCardsService': giftService, './firebase': { getFirebaseDb: async () => secondAdmin() }, './sales': salesModel, './erp': erpModel, 'firebase/firestore': firestoreSdk,
   });
   await assertSucceeds(getDoc(doc(secondAdmin(), 'sales', 's1')));
   await secondLedger.saveSale({ ...venta, id: 'second-admin-sale' });
@@ -273,6 +275,70 @@ await caso('reanuda una importación interrumpida después de un bloque sin dupl
   await assert.rejects(ledger.importLedger(rows, () => { throw new Error('Interrupción simulada'); }), /Interrupción/);
   const result = await ledger.importLedger(rows);
   assert.equal(result.created, 5); assert.equal(result.skipped, 20);
+});
+
+
+console.log('\nGift Cards: emisión, vencimiento y canjes privados\n');
+const giftOrder = { ...pedido, orderId: 'AURA-GIFT01', subtotal: 200000, total: 200000, discountAmount: 0, discountPercent: 0, items: [{ code: 'GIFT-CARD', name: 'Gift Card Äura', size: 'Digital', price: 100000, quantity: 2, giftCard: { recipient: 'Ana', sender: 'Luis', message: 'Feliz cumpleaños' } }] };
+await caso('compra pública queda pendiente y no puede emitir ni leer Gift Cards', async () => {
+  await assertSucceeds(setDoc(doc(anon(), 'orders', 'gift1'), giftOrder));
+  await assertFails(setDoc(doc(anon(), 'giftCards', 'forged'), { amount: 100000, balance: 100000 }));
+  await assertFails(getDocs(collection(anon(), 'giftCards')));
+  await assertFails(setDoc(doc(anon(), 'giftCardPayments', 'AURA-GIFT01'), { orderId: 'gift1' }));
+});
+await caso('confirmar dos veces emite una tarjeta por unidad y no genera costos ficticios de perfumes', async () => {
+  await Promise.all([ledger.confirmOrderAndRecordSale('gift1'), ledger.confirmOrderAndRecordSale('gift1')]);
+  const cards = await getDocs(collection(cashAdmin(), 'giftCards'));
+  assert.equal(cards.size, 2);
+  const card = cards.docs[0].data();
+  assert.equal(card.balance, 100000); assert.equal(card.expiresAt - card.activatedAt, 60*86400000);
+  assert.equal((await getDoc(doc(cashAdmin(), 'sales', 'web_gift1'))).exists(), false);
+  const before = card.activatedAt;
+  await ledger.confirmOrderAndRecordSale('gift1', {}, true);
+  assert.equal((await getDoc(cards.docs[0].ref)).data().activatedAt, before);
+});
+await caso('rechaza el mismo pago en un segundo registro y montos inferiores al mínimo', async () => {
+  await setDoc(doc(anon(), 'orders', 'duplicateGift'), giftOrder);
+  await assert.rejects(ledger.confirmOrderAndRecordSale('duplicateGift'), /otro registro/);
+  await setDoc(doc(anon(), 'orders', 'smallGift'), { ...giftOrder, orderId: 'AURA-SMALL01', items: [{ ...giftOrder.items[0], price: 99999 }] });
+  await assert.rejects(ledger.confirmOrderAndRecordSale('smallGift'), /mínimo/);
+});
+await caso('el saldo y la vigencia no se pueden modificar sin un canje trazable', async () => {
+  const ref = doc(cashAdmin(), 'giftCards', 'gift1_0_0');
+  await assertFails(updateDoc(ref, { balance: 1 }));
+  await assertFails(updateDoc(ref, { expiresAt: Date.now()+90*86400000 }));
+  await assertFails(updateDoc(ref, { amount: 999999 }));
+  await assertFails(deleteDoc(ref));
+});
+await caso('el canje es idempotente, conserva saldo parcial y bloquea sobregiros', async () => {
+  await Promise.all([giftService.redeemGiftCard('gift1_0_0', 30000, 'VENTA-01', 'redemption-one'), giftService.redeemGiftCard('gift1_0_0', 30000, 'VENTA-01', 'redemption-one')]);
+  assert.equal((await getDoc(doc(cashAdmin(), 'giftCards', 'gift1_0_0'))).data().balance, 70000);
+  assert.equal((await getDocs(collection(cashAdmin(), 'giftCardRedemptions'))).size, 1);
+  await assert.rejects(giftService.redeemGiftCard('gift1_0_0', 70001, 'VENTA-02', 'redemption-over'), /saldo/);
+  await assert.rejects(ledger.cancelOrderAndSale('gift1'), /utilizada/);
+  await giftService.redeemGiftCard('gift1_0_0', 70000, 'VENTA-02', 'redemption-full');
+  assert.equal((await getDoc(doc(cashAdmin(), 'giftCards', 'gift1_0_0'))).data().status, 'agotada');
+  await assertFails(updateDoc(doc(cashAdmin(), 'giftCardRedemptions', 'redemption-one'), { amount: 1 }));
+});
+await caso('una Gift Card vencida no admite canjes ni reactivación', async () => {
+  const expiredAt = Date.now() - 61*86400000;
+  await env.withSecurityRulesDisabled(async ctx => updateDoc(doc(ctx.firestore(), 'giftCards', 'gift1_0_1'), { activatedAt: expiredAt, expiresAt: expiredAt+60*86400000 }));
+  await assert.rejects(giftService.redeemGiftCard('gift1_0_1', 10000, 'VENTA-03', 'redemption-expired'), /vencida/);
+  await assertFails(updateDoc(doc(cashAdmin(), 'giftCards', 'gift1_0_1'), { activatedAt: Date.now(), expiresAt: Date.now()+60*86400000 }));
+});
+await caso('cancelar un pedido sin canjes anula sus Gift Cards y conserva el historial', async () => {
+  await setDoc(doc(anon(), 'orders', 'giftCancel'), { ...giftOrder, orderId: 'AURA-GIFTCANCEL' });
+  await ledger.confirmOrderAndRecordSale('giftCancel');
+  await ledger.cancelOrderAndSale('giftCancel');
+  assert.equal((await getDoc(doc(cashAdmin(), 'giftCards', 'giftCancel_0_0'))).data().status, 'anulada');
+});
+await caso('un pedido mixto emite la Gift Card y lleva solamente perfumes y sus costos a Caja', async () => {
+  const items = [giftOrder.items[0], { code: 'A01', name: 'Perfume', size: '30 ML', price: 70000, quantity: 1 }];
+  await setDoc(doc(anon(), 'orders', 'giftMixed'), { ...giftOrder, orderId: 'AURA-GIFTMIXED', items, subtotal: 270000, total: 263000, discountPercent: 10, discountAmount: 7000 });
+  await ledger.confirmOrderAndRecordSale('giftMixed');
+  const sale = (await getDoc(doc(cashAdmin(), 'sales', 'web_giftMixed'))).data();
+  assert.equal(sale.items.length, 1); assert.equal(sale.items[0].code, 'A01');
+  assert.equal(sale.discount, 7000); assert.equal(sale.collected, 63000);
 });
 
 await env.cleanup();

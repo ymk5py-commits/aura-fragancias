@@ -4,6 +4,12 @@ import { Download, Tags } from 'lucide-react';
 
 const downloads = [
   {
+    title: 'Campaña Regalá Äura y Gift Card',
+    detail: 'Cuatro flyers cuadrados, reel animado del 20%, portada y textos para publicar.',
+    href: '/brand/descargas/AURA-campana-regala-2026.zip',
+    meta: 'ZIP · flyers 1080 × 1080 · reel 1080 × 1920',
+  },
+  {
     title: 'Kit para redes sociales',
     detail: 'Foto de perfil, logo completo en borgoña, blanco y negro, y versiones vectoriales.',
     href: '/brand/descargas/AURA-logo-redes-sociales.zip',
@@ -72,7 +78,7 @@ export default function AdminBrand({ onGoToLabels }: { onGoToLabels: () => void 
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {downloads.map(item => (
           <a key={item.href} href={item.href} download className="group flex min-h-44 flex-col justify-between border border-zinc-200 bg-white p-5 transition-colors hover:border-aura-wine">
             <span>

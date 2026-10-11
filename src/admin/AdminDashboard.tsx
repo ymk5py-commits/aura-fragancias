@@ -13,6 +13,7 @@ import { cldn } from '../lib/img';
 import SettingsForm from './SettingsForm';
 import AdminSales from './AdminSales';
 import AdminOrders from './AdminOrders';
+import AdminGiftCards from './AdminGiftCards';
 import AdminLabels from './AdminLabels';
 import AdminBrand from './AdminBrand';
 import AdminReviews from './AdminReviews';
@@ -20,9 +21,10 @@ import AdminAlertas from './AdminAlertas';
 import { subscribeIncidents, INCIDENT_LABELS } from '../lib/incidentsService';
 import type { Incident } from '../types';
 
-type AdminTab = 'products' | 'orders' | 'settings' | 'sales' | 'reviews' | 'alertas' | 'labels' | 'brand';
+type AdminTab = 'products' | 'orders' | 'settings' | 'sales' | 'reviews' | 'alertas' | 'labels' | 'brand' | 'giftCards';
 const tabHashes: Record<AdminTab, string> = {
   products: '', orders: 'pedidos', sales: 'ventas', labels: 'etiquetas', brand: 'marca', reviews: 'resenas', alertas: 'alertas', settings: 'configuracion',
+  giftCards: 'gift-cards',
 };
 
 const AdminDashboard: React.FC = () => {
@@ -153,6 +155,7 @@ const AdminDashboard: React.FC = () => {
             { key: 'products', label: 'Productos' },
             { key: 'orders', label: 'Pedidos' },
             { key: 'sales', label: 'Caja / ERP' },
+            { key: 'giftCards', label: 'Gift Cards' },
             { key: 'labels', label: 'Etiquetas' },
             { key: 'brand', label: 'Marca' },
             { key: 'reviews', label: 'Reseñas' },
@@ -198,6 +201,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
         {tab === 'orders' && <AdminOrders />}
+        {tab === 'giftCards' && <AdminGiftCards />}
         {tab === 'alertas' && <AdminAlertas incidents={incidents} loading={incidentsLoading} />}
         {tab === 'settings' && <SettingsForm />}
         {tab === 'sales' && <AdminSales />}

@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import Footer from './Footer';
@@ -10,8 +11,9 @@ import CartDrawer from './CartDrawer';
 import { useCart } from '../context/CartContext';
 
 const StoreChrome: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const pathname = usePathname();
   const {
-    showCheckout, cart, updateQuantity, removeFromCart, appliedDiscount,
+    isDrawerOpen, showCheckout, cart, updateQuantity, removeFromCart, appliedDiscount,
     closeCheckout, notification, applyWelcomeDiscount,
   } = useCart();
   const [showWelcome, setShowWelcome] = useState(false);
@@ -59,7 +61,7 @@ const StoreChrome: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
       )}
 
-      {showWelcome && (
+      {showWelcome && !showCheckout && !isDrawerOpen && pathname !== '/gift-card' && (
         <WelcomeModal
           onAccept={() => { applyWelcomeDiscount(); localStorage.setItem('hasSeenWelcome', 'true'); setShowWelcome(false); }}
           onReject={() => { localStorage.setItem('hasSeenWelcome', 'true'); setShowWelcome(false); }}

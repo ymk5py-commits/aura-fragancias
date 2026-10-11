@@ -1,4 +1,4 @@
-import { LOGO_AURA_TRAZOS } from './logo-aura'
+import { LOGO_AURA_TRAZOS, LOGO_AURA_VIEWBOX } from './logo-aura'
 
 export const DISENOS_AURA = [
   { id: 'silencio', nombre: 'Silencio', detalle: 'Logo amplio y mucho aire' },
@@ -26,7 +26,7 @@ const FUENTE_SANS = 'Avenir Next, Arial, sans-serif'
 
 function logoOficial(x: number, y: number, ancho: number): string {
   const alto = Math.round(ancho * 631 / 1889)
-  return `<svg x="${x}" y="${y}" width="${ancho}" height="${alto}" viewBox="0 0 1889 631" data-brand-logo="aura-oficial" aria-hidden="true">${LOGO_AURA_TRAZOS}</svg>`
+  return `<svg x="${x}" y="${y}" width="${ancho}" height="${alto}" viewBox="${LOGO_AURA_VIEWBOX}" data-brand-logo="aura-oficial" aria-hidden="true">${LOGO_AURA_TRAZOS}</svg>`
 }
 
 const PLANTILLAS: Record<DisenoAura, PlantillaNombre[]> = {

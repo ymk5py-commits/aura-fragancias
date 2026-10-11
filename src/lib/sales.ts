@@ -118,20 +118,22 @@ export function validateSale(sale: Sale): string | null {
 export function orderToSale(order: Order, costs: Record<SaleSize, number>): Sale {
   if (!order.id) throw new Error('El pedido no tiene identificador.');
   const timestamp = order.paidAt || (order.createdAt as { seconds?: number })?.seconds * 1000 || Date.now();
-  const items = order.items.map((item) => {
+  const items = order.items.filter(item => item.code !== 'GIFT-CARD').map((item) => {
     const ml = Number(item.size.replace(/[^\d]/g, ''));
     const size = `${ml} ML` as SaleSize;
     if (!SALE_SIZES.includes(size)) throw new Error(`Presentación no reconocida: ${item.size}.`);
     return { code: item.code, name: item.name, size, quantity: item.quantity, unitPrice: item.price, unitCost: costs[size] ?? null };
   });
   const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
+  const giftValue = order.items.filter(item => item.code === 'GIFT-CARD').reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const discount = order.discountAmount ?? subtotal - (order.total - giftValue);
   return {
     id: `web_${order.id}`, sourceOrderId: order.id, sourceOrderCode: order.orderId,
     date: paraguayDate(timestamp), customer: order.name, phone: order.phone, channel: 'Web',
     paymentMethod: /tarjeta|pagopar/i.test(order.paymentMethod) ? 'Tarjeta' : 'Transferencia',
-    status: 'pagada', items, discount: subtotal - order.total,
+    status: 'pagada', items, discount,
     deliveryCharged: order.shippingCost || 0, deliveryActual: 0, otherCosts: 0,
-    collected: order.total + (order.shippingCost || 0),
+    collected: subtotal - discount + (order.shippingCost || 0),
     notes: 'Pedido web confirmado. Revisar el costo real del delivery y las comisiones de cobro.',
   };
 }

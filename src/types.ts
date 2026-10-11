@@ -28,6 +28,13 @@ export interface CartItem {
   size: string;
   price: number;
   quantity: number;
+  giftCard?: GiftCardDetails;
+}
+
+export interface GiftCardDetails {
+  recipient: string;
+  sender: string;
+  message: string;
 }
 
 export interface WholesaleScale {
@@ -74,6 +81,7 @@ export interface OrderItem {
   size: string;
   price: number;
   quantity: number;
+  giftCard?: GiftCardDetails;
 }
 
 export interface Order {

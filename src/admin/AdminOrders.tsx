@@ -5,6 +5,7 @@ import {
   Loader2, FileText, ExternalLink, CheckCircle2, XCircle, PackageOpen, Search, Phone, MapPin, RefreshCw, CreditCard,
 } from 'lucide-react';
 import { Order, OrderStatus } from '../types';
+import { isGiftCard } from '../lib/giftCards';
 import { subscribeOrders, setOrderStatus } from '../lib/ordersService';
 import { fetchPaymentStatus, isCardPayment } from '../lib/payments';
 import { confirmOrderAndRecordSale, cancelOrderAndSale } from '../lib/salesService';
@@ -48,6 +49,7 @@ const AdminOrders: React.FC = () => {
     try {
       const st = await fetchPaymentStatus(o.pagoparHash);
       if (st.pagado) {
+        if (st.orderId !== o.orderId || Number(st.monto) !== o.total + (o.shippingCost || 0)) throw new Error('El pago no coincide con el número o importe de este pedido. Revisalo antes de confirmar.');
         await confirmOrderAndRecordSale(o.id, {
           status: 'confirmado',
           pagoparStatus: 'pagado',
@@ -136,7 +138,7 @@ const AdminOrders: React.FC = () => {
     if (!confirm(`¿Cancelar el pedido ${o.orderId}?`)) return;
     setBusy(o.id);
     try { await cancelOrderAndSale(o.id); notify('Pedido cancelado.'); }
-    catch { notify('No se pudo cancelar.'); }
+    catch (error) { notify(error instanceof Error ? error.message : 'No se pudo cancelar.'); }
     finally { setBusy(null); }
   };
 
@@ -239,7 +241,7 @@ const AdminOrders: React.FC = () => {
                     <span className="inline-flex items-center gap-1 min-w-0"><MapPin size={12} className="shrink-0" /> <span className="truncate">{o.cityAndNeighborhood} · {o.address}</span></span>
                   </div>
                   <p className="text-[11px] text-zinc-500 mt-2 leading-relaxed">
-                    {(o.items || []).map((i) => `${i.quantity}× ${i.name} (${i.size})`).join(' · ')}
+                    {(o.items || []).map((i) => `${i.quantity}× ${i.name} (${i.size})${i.giftCard?.recipient ? ` · Para ${i.giftCard.recipient}` : ''}`).join(' · ')}
                   </p>
                   {o.invoice?.ruc && (
                     <p className="text-[11px] text-zinc-700 mt-1.5">
@@ -271,7 +273,7 @@ const AdminOrders: React.FC = () => {
                     <span className="block text-lg font-bold text-aura-ink tabular">{fmt(o.total + (o.shippingCost || 0))}</span>
                     {o.discountAmount > 0 && <span className="block text-[10px] text-aura-gold-deep">−{fmt(o.discountAmount)} ({o.discountPercent}%)</span>}
                     <span className="block text-[10px] text-zinc-400">
-                      {o.freeShipping ? 'Envío gratis' : (o.shippingCost || 0) > 0 ? `incluye ${fmt(o.shippingCost || 0)} de delivery` : '+ envío'}
+                      {o.items.every(isGiftCard) ? 'Entrega digital' : o.freeShipping ? 'Envío gratis' : (o.shippingCost || 0) > 0 ? `incluye ${fmt(o.shippingCost || 0)} de delivery` : '+ envío'}
                     </span>
                   </div>
                   {o.status === 'pendiente' && isCardPayment(o.paymentMethod) && o.pagoparHash && (
@@ -292,16 +294,22 @@ const AdminOrders: React.FC = () => {
                       </button>
                     </div>
                   )}
+                  {o.items.some(isGiftCard) && <a href="/admin#gift-cards" className="inline-flex items-center px-3 py-2 text-[10px] font-bold uppercase text-aura-wine underline underline-offset-4">Ver Gift Cards</a>}
                   {o.status === 'confirmado' && (
                     <div className="flex flex-col items-end gap-2"><span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-green-700">
                       <CheckCircle2 size={13} /> Venta confirmada
                     </span><button disabled={busy === o.id} className="text-[10px] text-zinc-500 underline disabled:opacity-50" onClick={async () => {
                       if (!o.id) return;
                       setBusy(o.id);
-                      try { const created = await confirmOrderAndRecordSale(o.id, {}, true); notify(created ? 'Pedido registrado en Caja / ERP. Revisá delivery y comisiones.' : 'Este pedido ya tiene su registro de caja.'); }
+                      try {
+                        const created = await confirmOrderAndRecordSale(o.id, {}, true);
+                        notify(o.items.every(isGiftCard)
+                          ? created ? 'Gift Cards emitidas. Ya podés descargarlas desde Gift Cards.' : 'Las Gift Cards de este pedido ya están emitidas.'
+                          : created ? 'Pedido registrado en Caja / ERP. Revisá delivery y comisiones.' : 'Este pedido ya tiene su registro de caja.');
+                      }
                       catch (e) { notify(e instanceof Error ? e.message : 'No se pudo registrar en caja.'); }
                       finally { setBusy(null); }
-                    }}>Registrar en caja (pedidos anteriores)</button></div>
+                    }}>{o.items.every(isGiftCard) ? 'Emitir Gift Cards (pedidos anteriores)' : 'Registrar en caja (pedidos anteriores)'}</button></div>
                   )}
                   {o.status === 'cancelado' && (
                     <button onClick={() => o.id && setOrderStatus(o.id, 'pendiente')}

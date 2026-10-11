@@ -12,3 +12,7 @@ next-env.d.ts
 # Internal business assets — NOT for public deploy
 03_AURA_PERFUMES/
 tsconfig.tsbuildinfo
+
+# Local visual checks and intermediate animation frames
+output/verification/
+output/marketing/**/reel-frame-*.png

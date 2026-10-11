@@ -48,7 +48,7 @@ export default function GiftCardProduct() {
             <label className="block text-sm font-semibold">De <span className="font-normal text-zinc-500">(opcional)</span><input className={`${input} mt-2`} value={sender} onChange={e => setSender(e.target.value)} maxLength={80} placeholder="Tu nombre" /></label>
           </div>
           <label className="block text-sm font-semibold">Tu dedicatoria <span className="font-normal text-zinc-500">(opcional)</span><textarea className={`${input} mt-2 resize-none`} rows={2} maxLength={300} value={message} onChange={e => setMessage(e.target.value)} placeholder="Unas palabras para acompañar el regalo…" /></label>
-          <p id="gift-card-conditions" className="text-xs leading-relaxed text-aura-ink/70">Mínimo Gs. 100.000. Vigencia: {GIFT_CARD_DAYS} días desde la confirmación del pago. Entrega digital por WhatsApp, sin costo de envío. Los cupones de descuento no aplican a Gift Cards.</p>
+          <p id="gift-card-conditions" className="text-xs leading-relaxed text-aura-ink/70">Mínimo Gs. 100.000. Vigencia: {GIFT_CARD_DAYS} días desde la confirmación del pago. Recibís un PDF por WhatsApp, sin costo de envío. Los cupones de descuento no aplican a Gift Cards.</p>
           {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
           <button className="flex min-h-14 w-full items-center justify-between bg-aura-wine px-5 text-sm font-semibold text-white transition-colors hover:bg-aura-ink"><span className="flex items-center gap-2"><Gift size={18} /> Agregar Gift Card</span><span className="flex items-center gap-2">{value > 0 ? money(value) : ''}<ArrowUpRight size={18} /></span></button>
         </form>
@@ -63,7 +63,7 @@ export default function GiftCardProduct() {
       <h2 className="mb-6 font-luxury text-3xl font-semibold tracking-tight text-aura-wine">Así se regala Äura</h2>
       <div className="grid gap-6 border-t border-aura-ink/15 pt-6 sm:grid-cols-3">{[
         ['01', 'Personalizá el regalo', 'Elegí desde Gs. 100.000 y sumá el nombre y una dedicatoria.'],
-        ['02', 'Completá la compra', 'Una vez verificado el pago, te enviamos la Gift Card digital por WhatsApp para que puedas regalarla.'],
+        ['02', 'Completá la compra', 'Una vez verificado el pago, te enviamos la Gift Card en PDF al WhatsApp que indicás al comprar. Podés reenviarla a la persona que recibe el regalo.'],
         ['03', 'Elegí la próxima fragancia', 'La persona que recibe el regalo nos contacta con su código. Tiene 60 días desde la confirmación del pago para utilizarlo. El delivery de los perfumes se cotiza según la dirección.'],
       ].map(([n, heading, text]) => <div key={n}><span className="text-xs font-bold text-aura-wine">{n}</span><h3 className="mb-2 mt-3 font-luxury text-xl font-semibold">{heading}</h3><p className="text-sm leading-relaxed text-aura-ink/65">{text}</p></div>)}</div>
     </section>

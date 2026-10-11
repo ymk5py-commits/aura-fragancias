@@ -628,7 +628,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
                 <ul className="mt-5 space-y-2 text-[11px] text-zinc-500">
                   <li className="flex items-center gap-2"><Lock size={12} className="text-aura-gold-deep shrink-0" /> Tus datos de tarjeta los procesa Pagopar/Bancard; nunca pasan por nuestra web.</li>
                   <li className="flex items-center gap-2"><Check size={12} className="text-aura-gold-deep shrink-0" /> El pedido se confirma solo cuando Pagopar aprueba el pago.</li>
-                  <li className="flex items-center gap-2"><MessageCircle size={12} className="text-aura-gold-deep shrink-0" /> {digitalOnly ? 'Te enviamos la Gift Card por WhatsApp después de verificar el pago.' : shippingCost > 0 ? 'El delivery ya queda pago: después de la confirmación coordinamos la entrega por WhatsApp.' : 'El envío lo coordinamos por WhatsApp después de la confirmación.'}</li>
+                  <li className="flex items-center gap-2"><MessageCircle size={12} className="text-aura-gold-deep shrink-0" /> {digitalOnly ? 'Te enviamos la Gift Card en PDF por WhatsApp después de verificar el pago.' : shippingCost > 0 ? 'El delivery ya queda pago: después de la confirmación coordinamos la entrega por WhatsApp.' : 'El envío lo coordinamos por WhatsApp después de la confirmación.'}</li>
                 </ul>
               </div>
             ) : (
@@ -819,7 +819,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
               )}
               {isFreeShipping && <div className="mb-6 sm:mb-8" />}
 
-              {hasGiftCards && <p className="mb-5 border-l-2 border-aura-wine pl-3 text-xs leading-relaxed text-zinc-600">Gift Cards: mínimo Gs. 100.000, vigencia de {GIFT_CARD_DAYS} días desde la confirmación del pago. Se envían por WhatsApp. Los cupones aplican únicamente a perfumes. Para canjearlas, contactanos con el código.</p>}
+              {hasGiftCards && <p className="mb-5 border-l-2 border-aura-wine pl-3 text-xs leading-relaxed text-zinc-600">Gift Cards: mínimo Gs. 100.000, vigencia de {GIFT_CARD_DAYS} días desde la confirmación del pago. Se envían en PDF por WhatsApp. Los cupones aplican únicamente a perfumes. Para canjearlas, contactanos con el código.</p>}
               {/* Sellos de confianza */}
               <div className="grid grid-cols-2 gap-2 mb-5">
                 {(digitalOnly ? ['Entrega digital', 'Vigencia: 60 días', 'Atención por WhatsApp'] : ['Envío gratis +300k', 'Extrait 30% macerado 21d', 'Atención por WhatsApp']).map((t) => (

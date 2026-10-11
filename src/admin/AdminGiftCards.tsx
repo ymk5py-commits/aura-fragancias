@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Copy, Download, Gift, Search } from 'lucide-react';
+import { Copy, Download, Gift, Search, MessageCircle } from 'lucide-react';
 import { giftCardState, type GiftCard } from '../lib/giftCards';
 import { redeemGiftCard, subscribeGiftCards, subscribeGiftCardUses } from '../lib/giftCardsService';
-import { downloadGiftCard } from '../lib/giftCardVoucher';
+import { downloadGiftCard, giftCardWhatsAppUrl } from '../lib/giftCardVoucher';
 
 const money = (amount: number) => `Gs. ${amount.toLocaleString('es-PY')}`;
 const date = (timestamp: number) => new Intl.DateTimeFormat('es-PY', { timeZone: 'America/Asuncion', dateStyle: 'short', timeStyle: 'short' }).format(timestamp);
@@ -20,9 +20,11 @@ export default function AdminGiftCards() {
   const [amount, setAmount] = useState('');
   const [reference, setReference] = useState('');
   const [busy, setBusy] = useState(false);
+  const [pdfBusy, setPdfBusy] = useState(false);
   const [uses, setUses] = useState<{ id: string; amount: number; reference: string; createdAt?: { seconds: number } }[]>([]);
   const operation = useRef({ signature: '', id: '' });
   const card = cards.find(item => item.id === selected);
+  const whatsappUrl = card ? giftCardWhatsAppUrl(card) : null;
 
   useEffect(() => {
     let active = true; let unsubscribe = () => {};
@@ -40,7 +42,7 @@ export default function AdminGiftCards() {
   const activeBalance = cards.filter(item => giftCardState(item) === 'Activa').reduce((sum, item) => sum + item.balance, 0);
 
   return <div className="space-y-6">
-    <div><p className="eyebrow text-aura-wine">Regalos Äura</p><h2 className="mt-2 font-luxury text-3xl font-semibold tracking-tight">Gift Cards</h2><p className="mt-2 text-sm text-zinc-600">Se emiten al confirmar el pago en Pedidos. Mínimo Gs. 100.000 · vigencia de 60 días. Descargá la tarjeta para enviarla al comprador y registrá cada canje.</p></div>
+    <div><p className="eyebrow text-aura-wine">Regalos Äura</p><h2 className="mt-2 font-luxury text-3xl font-semibold tracking-tight">Gift Cards</h2><p className="mt-2 text-sm text-zinc-600">Se emiten al confirmar el pago en Pedidos. Mínimo Gs. 100.000 · vigencia de 60 días. Descargá el PDF para enviarlo al comprador por WhatsApp y registrá cada canje.</p></div>
     <div className="grid gap-3 sm:grid-cols-3">{[['Tarjetas emitidas', String(cards.length)], ['Importe emitido', money(cards.reduce((sum, item) => sum + item.amount, 0))], ['Saldo activo por canjear', money(activeBalance)]].map(([label, value]) => <div key={label} className="border border-zinc-200 bg-white p-5"><p className="text-xs text-zinc-500">{label}</p><p className="mt-2 text-xl font-semibold">{value}</p></div>)}</div>
     <p className="border-l-2 border-aura-wine bg-aura-ivory px-4 py-3 text-xs leading-relaxed text-zinc-600">El cobro de Gift Cards se muestra aquí por separado: no suma unidades ni margen de perfumes en Caja / ERP. Al canjear, registrá la venta de los perfumes en Caja y usá su número como referencia del canje para conservar los costos reales.</p>
     {error && <p role="alert" className="bg-red-50 p-3 text-sm text-red-700">{error}</p>}
@@ -54,7 +56,17 @@ export default function AdminGiftCards() {
         <p className="text-sm">Para: {card.recipient || 'A definir'}<br/>De: {card.sender || card.customer}</p>
         {card.message && <p className="whitespace-pre-wrap text-sm italic text-zinc-500">{card.message}</p>}
         <div className="bg-aura-ivory p-4"><p className="mb-2 text-xs text-zinc-500">Código de canje · {giftCardState(card)}</p><p className="break-all font-mono text-sm">{card.code}</p><p className="mt-3 text-xs">Activada: {date(card.activatedAt)}<br/>Vence: {date(card.expiresAt)} (hora Paraguay)</p></div>
-        <div className="flex flex-wrap gap-2"><button type="button" className="inline-flex min-h-11 items-center gap-2 border border-zinc-200 px-3 text-xs" onClick={() => navigator.clipboard.writeText(card.code).then(() => setNotice('Código copiado.')).catch(() => setError('No se pudo copiar. Seleccioná el código para copiarlo.'))}><Copy size={14}/> Copiar código</button><button type="button" className="inline-flex min-h-11 items-center gap-2 bg-aura-wine px-3 text-xs text-white" onClick={() => downloadGiftCard(card).catch(() => setError('No se pudo descargar la tarjeta.'))}><Download size={14}/> Descargar tarjeta PNG</button></div>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" className="inline-flex min-h-11 items-center gap-2 border border-zinc-200 px-3 text-xs" onClick={() => navigator.clipboard.writeText(card.code).then(() => setNotice('Código copiado.')).catch(() => setError('No se pudo copiar. Seleccioná el código para copiarlo.'))}><Copy size={14}/> Copiar código</button>
+          <button type="button" disabled={pdfBusy} className="inline-flex min-h-11 items-center gap-2 bg-aura-wine px-3 text-xs text-white disabled:opacity-40" onClick={async () => {
+            setPdfBusy(true); setError('');
+            try { await downloadGiftCard(card); setNotice('PDF preparado. Abrí WhatsApp, adjuntá el archivo descargado y enviáselo al comprador.'); }
+            catch { setError('No se pudo descargar el PDF. Volvé a intentar.'); }
+            finally { setPdfBusy(false); }
+          }}><Download size={14}/> {pdfBusy ? 'Preparando PDF…' : 'Descargar Gift Card PDF'}</button>
+          {whatsappUrl && <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 border border-zinc-200 px-3 text-xs"><MessageCircle size={14}/> Abrir WhatsApp del comprador</a>}
+        </div>
+        <p className="text-xs leading-relaxed text-zinc-500">Descargá el PDF, abrí el WhatsApp del comprador ({card.phone}) y adjuntá el archivo como documento antes de enviar. El comprador puede reenviarlo a la persona que recibe el regalo. Abrir WhatsApp prepara el mensaje; el PDF se adjunta manualmente.</p>
         <form className="space-y-3 border-t border-zinc-200 pt-5" onSubmit={async e => {
           e.preventDefault(); if (busy) return; setBusy(true); setError(''); setNotice('');
           const signature = `${card.id}|${amount}|${reference}`;

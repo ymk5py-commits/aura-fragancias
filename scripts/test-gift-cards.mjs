@@ -14,6 +14,8 @@ function load(file, imports = {}) {
 const gift = load('../src/lib/giftCards.ts');
 const logo = load('../src/lib/labels/logo-aura.ts');
 const labels = load('../src/lib/labels/aura.ts', { './logo-aura': logo });
+const validation = load('../src/lib/validation.ts');
+const voucher = load('../src/lib/giftCardVoucher.ts', { './labels/logo-aura': logo, './validation': validation });
 let gatewayCalls = [];
 class PagoparError extends Error {}
 const route = load('../src/app/api/pagopar/iniciar/route.ts', {
@@ -68,4 +70,19 @@ test('the three print designs use the exact current official logo at 40 × 40 mm
     assert.ok(result.svg); assert.ok(result.svg.includes('width="40mm" height="40mm"'));
     assert.ok(result.svg.includes(paths)); assert.ok(result.svg.includes('CC180')); assert.ok(result.svg.includes(`${ml} ML`));
   }
+});
+
+test('WhatsApp opens a draft for the buyer with the exact code and expiration', () => {
+  const card = { customer: 'Luis Pérez', phone: '0981 123 456', recipient: 'Ana', amount: 150000, code: 'MUESTRA-SIN-VALOR', expiresAt: Date.parse('2026-12-10T22:00:00Z') };
+  const url = new URL(voucher.giftCardWhatsAppUrl(card));
+  assert.equal(url.origin, 'https://wa.me');
+  assert.equal(url.pathname, '/595981123456');
+  const text = url.searchParams.get('text');
+  assert.ok(text.includes('150.000'));
+  assert.ok(text.includes('Ana'));
+  assert.ok(text.includes(card.code));
+  assert.ok(text.includes('PDF'));
+  assert.ok(text.includes('10 dic. 2026'));
+  assert.equal(voucher.giftCardWhatsAppUrl({ ...card, phone: '+595981123456' }), url.toString());
+  assert.equal(voucher.giftCardWhatsAppUrl({ ...card, phone: 'no válido' }), null);
 });

@@ -78,6 +78,14 @@ export default function AdminBrand({ onGoToLabels }: { onGoToLabels: () => void 
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-4 border border-aura-wine/20 bg-aura-ivory p-5">
+        <div>
+          <p className="font-semibold text-aura-ink">Copys de la campaña listos para publicar</p>
+          <p className="mt-1 text-xs leading-relaxed text-zinc-600">Los textos de los cuatro flyers y del reel, en un archivo que podés abrir y copiar desde el celular.</p>
+        </div>
+        <a href="/brand/descargas/AURA-copys-para-redes.txt" download className="inline-flex min-h-11 items-center justify-center gap-2 bg-aura-wine px-4 text-[11px] font-bold uppercase tracking-[0.12em] text-white hover:bg-aura-ink"><Download size={15} /> Descargar copys</a>
+      </div>
+
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {downloads.map(item => (
           <a key={item.href} href={item.href} download className="group flex min-h-44 flex-col justify-between border border-zinc-200 bg-white p-5 transition-colors hover:border-aura-wine">

@@ -10,7 +10,7 @@ El pago usa el checkout existente: transferencia/QR y Pagopar cuando está habil
 
 La Gift Card se emite al confirmar el pago en Pedidos. Un pago con tarjeta debe coincidir en código de pedido e importe con la respuesta de Pagopar. La confirmación guarda pedido, venta de perfumes cuando corresponda y tarjetas en una transacción. Los IDs por pedido/línea/unidad y un registro único por código de pedido impiden emisiones duplicadas. Reintentar nunca reinicia la vigencia.
 
-En Gift Cards se puede descargar la tarjeta PDF personalizada. El código queda seleccionable en el documento. Un acceso abre el WhatsApp del comprador con el mensaje preparado; el administrador adjunta el PDF como documento y confirma el envío. El comprador puede reenviarlo al destinatario. El mensaje y el archivo no se envían automáticamente ni se marcan como entregados al abrir WhatsApp. La vigencia es exactamente 60 días desde la confirmación, con fecha y hora de vencimiento en Paraguay en la tarjeta.
+En Gift Cards se puede descargar la tarjeta PDF personalizada en formato horizontal tipo cheque de 180 × 80 mm. Usa el logotipo oficial, fondo marfil, un talón borgoña con el importe y detalles dorados. Nombres y dedicatorias se distribuyen en varias líneas cuando hace falta, sin recortarlos. El código queda seleccionable en el documento. Un acceso abre el WhatsApp del comprador con el mensaje preparado; el administrador adjunta el PDF como documento y confirma el envío. El comprador puede reenviarlo al destinatario. El mensaje y el archivo no se envían automáticamente ni se marcan como entregados al abrir WhatsApp. La vigencia es exactamente 60 días desde la confirmación, con fecha y hora de vencimiento en Paraguay en la tarjeta.
 
 ## Canjes y caja
 

@@ -41,7 +41,9 @@ Vos elegís el monto. Esa persona, su próxima fragancia. 🎁
 
 Regalá la libertad de elegir con una Gift Card Äura digital, personalizada con su nombre y tu dedicatoria.
 
-Desde Gs. 100.000. Vigencia de 60 días desde la confirmación del pago. La recibís por WhatsApp para compartirla con quien quieras sorprender.
+Desde Gs. 100.000, con el monto que vos elijas. La recibís por WhatsApp en un PDF personalizado, listo para compartir con quien quieras sorprender.
+
+Válida por 60 días desde la confirmación del pago.
 
 Creá tu regalo en aurafragancias.store/gift-card
 
@@ -63,7 +65,7 @@ aurafragancias.store
 
 ### Archivos y publicación
 
-- Flyers: PNG y JPG, 1080 × 1080 px.
+- Flyers: PNG y JPG, 1080 × 1080 px. Los cinco copys también están en `AURA-copys-para-redes.txt`, descargable por separado desde Marca.
 - Reel: dos versiones MP4 (con audio original y sin audio, para sumar música en Instagram), más portada JPG. H.264, 1080 × 1920 px, 30 fps, duración 9,3 segundos. Audio ambiental y efecto de interruptor originales.
 - El reel es una adaptación gráfica animada del concepto del interruptor de la referencia; usa las piezas de Äura y no incluye a la modelo del video original.
 - El porcentaje 20% proviene de la referencia indicada por el usuario. No se modificaron los descuentos de la tienda. La fecha y las fragancias participantes no se habían especificado al preparar esta versión; por eso la pieza remite a consulta por WhatsApp.

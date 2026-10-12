@@ -16,3 +16,11 @@ tsconfig.tsbuildinfo
 # Local visual checks and intermediate animation frames
 output/verification/
 output/marketing/**/reel-frame-*.png
+
+# Local campaign references and intermediate files
+output/marketing/2026-10-plan-posteos/productos/
+output/marketing/2026-10-plan-posteos/referencias/
+output/marketing/2026-10-plan-posteos/fuentes/
+output/marketing/2026-10-plan-posteos/generation.json
+output/marketing/2026-10-plan-posteos/fonts/*-static.ttf
+output/marketing/2026-10-plan-posteos/fonts/fonts.conf

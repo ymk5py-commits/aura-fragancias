@@ -1,0 +1,858 @@
+{
+  "brand": "Äura Fragancias",
+  "campaign": "Tu aroma, tu estilo.",
+  "period": "13 al 31 de octubre de 2026",
+  "timezone": "America/Asuncion",
+  "format": {
+    "width": 1080,
+    "height": 1080,
+    "type": "Carrusel de 5 imágenes en Instagram / publicación de 5 imágenes en Facebook",
+    "slidesPerContent": 5,
+    "totalSlides": 50
+  },
+  "channels": [
+    {
+      "network": "instagram",
+      "time": "19:00",
+      "account": "@aura_fraganciaspy"
+    },
+    {
+      "network": "facebook",
+      "time": "10:00",
+      "account": "Página conectada a la marca aura_fraganciaspy"
+    }
+  ],
+  "quota": {
+    "contents": 10,
+    "publications": 20
+  },
+  "reference": {
+    "path": "/home/croman/Escritorio/CROMAN/NOVUM/Marca Novudent (borrador 8-oct-2026, v2)/Novudent - Guia de posteos.pdf",
+    "basis": "Estructura de mensaje, reglas de logo y márgenes, tipografía jerárquica, modelos y ritmo editorial. Äura conserva su propia identidad.",
+    "manual": "/home/croman/Escritorio/CROMAN/NOVUM/Marca Novudent (borrador 8-oct-2026, v2)/Novudent - Manual de marca.pdf"
+  },
+  "rules": [
+    "Una idea principal y un llamado a la acción por contenido.",
+    "Logo oficial, borgoña #580c17, marfil #f8f5f0 y detalles champán #c4a275.",
+    "Bricolage Grotesque para títulos y Jost para texto. Márgenes de seguridad de al menos 72 px.",
+    "Fotografía publicitaria ilustrativa generada con la herramienta integrada: adultos y situaciones cotidianas. No se presentan como clientes reales, personal de Äura ni testimonios.",
+    "Ingredientes como ambientación de familias olfativas, sin atribuirlos a una fórmula específica.",
+    "Gift Card: mínimo Gs. 100.000, PDF por WhatsApp, 60 días desde la confirmación del pago.",
+    "Delivery de perfumes cotizado según dirección.",
+    "No se incluyen descuentos con vigencia o alcance sin confirmar.",
+    "Humanizar es mostrar personas y momentos. Cada escena se vincula a una bondad verificable de Äura.",
+    "Las fichas usan las imágenes actuales del catálogo. Nombres de referencia siempre precedidos por Inspirado en; se vende la fragancia Äura.",
+    "Cada carrusel incluye cinco imágenes en orden, una sola publicación por red. Instagram usa carrusel; Facebook usa publicación con varias fotos."
+  ],
+  "posts": [
+    {
+      "n": 1,
+      "key": "01-firma",
+      "date": "2026-10-13",
+      "pillar": "Marca",
+      "objective": "Presentar Äura y llevar visitas al catálogo.",
+      "title": "Tu aroma, tu estilo.",
+      "hook": "Tu aroma también dice quién sos. ✨",
+      "body": "Deslizá y conocé tres inspiraciones Äura de nuestras colecciones. ¿Cuál va más con tu estilo?",
+      "cta": "Descubrí la colección",
+      "detail": "Marca y catálogo",
+      "visual": "Mujer adulta en un momento cotidiano, expresión natural y segura; perfume como parte de la rutina.",
+      "file": "AURA-01-13-oct-firma-1080",
+      "instagram": "Tu aroma también dice quién sos. ✨\n\nDeslizá y conocé tres inspiraciones Äura de nuestras colecciones. ¿Cuál va más con tu estilo?\n\n• DD161 · Inspirado en Good Girl Blush\n• CC180 · Inspirado en The Most Wanted Parfum\n• UU002 · Inspirado en Santal 33\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nPedinos el código por WhatsApp al +595 994 414 986 o entrá desde el enlace de nuestra biografía.\n\n#AuraFraganciasPy #PerfumesParaguay #Asuncion",
+      "facebook": "Tu aroma también dice quién sos. ✨\n\nDeslizá y conocé tres inspiraciones Äura de nuestras colecciones. ¿Cuál va más con tu estilo?\n\n• DD161 · Inspirado en Good Girl Blush\n• CC180 · Inspirado en The Most Wanted Parfum\n• UU002 · Inspirado en Santal 33\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nElegí acá: https://www.aurafragancias.store\nWhatsApp: +595 994 414 986.\n\n#AuraFraganciasPy #PerfumesParaguay",
+      "benefit": "Tres inspiraciones para empezar a elegir.",
+      "headline": [
+        "Tu aroma,",
+        "tu estilo."
+      ],
+      "products": [
+        {
+          "code": "DD161",
+          "name": "GOOD GIRL BLUSH CH",
+          "inspiration": "Carolina Herrera",
+          "gender": "Woman",
+          "family": "CHIPRE FLORAL",
+          "notes": [
+            "VAINILLA",
+            "PEONÍA",
+            "BERGAMOTA"
+          ],
+          "displayName": "Good Girl Blush"
+        },
+        {
+          "code": "CC180",
+          "name": "The Most Wanted Parfum",
+          "inspiration": "Azzaro",
+          "gender": "Man",
+          "family": "ORIENTAL ESPACIADO",
+          "notes": [
+            "CARDAMOMO",
+            "TÓFE",
+            "AMBARWOOD"
+          ],
+          "displayName": "The Most Wanted Parfum"
+        },
+        {
+          "code": "UU002",
+          "name": "SANTAL 33 LE LABO",
+          "inspiration": "Le Labo",
+          "gender": "Unisex",
+          "family": "Amaderada Aromática",
+          "notes": [
+            "SÁNDALO",
+            "CUERO",
+            "PAPIRO",
+            "CEDRO",
+            "CARDAMOMO",
+            "VIOLETA",
+            "IRIS",
+            "ÁMBAR"
+          ],
+          "displayName": "Santal 33"
+        }
+      ],
+      "slides": [
+        "Portada humanizada",
+        "DD161 · Inspiración Good Girl Blush",
+        "CC180 · Inspiración The Most Wanted Parfum",
+        "UU002 · Inspiración Santal 33",
+        "Cierre · precios, asesoramiento y pedido"
+      ],
+      "slideFiles": [
+        "AURA-01-13-oct-firma-1080-s01.jpg",
+        "AURA-01-13-oct-firma-1080-s02.jpg",
+        "AURA-01-13-oct-firma-1080-s03.jpg",
+        "AURA-01-13-oct-firma-1080-s04.jpg",
+        "AURA-01-13-oct-firma-1080-s05.jpg"
+      ],
+      "facebookTime": "10:00",
+      "instagramTime": "19:00"
+    },
+    {
+      "n": 2,
+      "key": "02-familias",
+      "date": "2026-10-15",
+      "pillar": "Educación",
+      "objective": "Ayudar a reconocer preferencias y generar comentarios.",
+      "title": "Elegir puede ser simple.",
+      "hook": "¿Fresco, dulce o amaderado? 🤍",
+      "body": "Te mostramos tres perfiles diferentes para empezar a elegir. Contanos qué aromas disfrutás y te ayudamos a recorrer el catálogo.",
+      "cta": "Contanos tu estilo",
+      "detail": "Familias olfativas",
+      "visual": "Hombre adulto explorando sus preferencias con cercanía; lenguaje claro y gesto natural.",
+      "file": "AURA-02-15-oct-familias-1080",
+      "instagram": "¿Fresco, dulce o amaderado? 🤍\n\nTe mostramos tres perfiles diferentes para empezar a elegir. Contanos qué aromas disfrutás y te ayudamos a recorrer el catálogo.\n\n• CC016 · Inspirado en Acqua di Giò Profondo\n• DD094 · Inspirado en La Vie Est Belle\n• UU049 · Inspirado en Amber Wood\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nPedinos el código por WhatsApp al +595 994 414 986 o entrá desde el enlace de nuestra biografía.\n\n#AuraFraganciasPy #PerfumesParaguay #Asuncion",
+      "facebook": "¿Fresco, dulce o amaderado? 🤍\n\nTe mostramos tres perfiles diferentes para empezar a elegir. Contanos qué aromas disfrutás y te ayudamos a recorrer el catálogo.\n\n• CC016 · Inspirado en Acqua di Giò Profondo\n• DD094 · Inspirado en La Vie Est Belle\n• UU049 · Inspirado en Amber Wood\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nElegí acá: https://www.aurafragancias.store\nWhatsApp: +595 994 414 986.\n\n#AuraFraganciasPy #PerfumesParaguay",
+      "benefit": "Fresco, dulce o amaderado: encontrá tu perfil.",
+      "headline": [
+        "Elegir puede",
+        "ser simple."
+      ],
+      "products": [
+        {
+          "code": "CC016",
+          "name": "AQCUA DI GIO PROFONDO GIRGIO ARMANI",
+          "inspiration": "Giorgio Armani",
+          "gender": "Man",
+          "family": "FRESCO, AMADERADO, CITRICO",
+          "notes": [
+            "BERGAMOTA",
+            "ROMERO",
+            "PACHULÍ"
+          ],
+          "displayName": "Acqua di Giò Profondo"
+        },
+        {
+          "code": "DD094",
+          "name": "LA VIDA ES BELLA LANCOME",
+          "inspiration": "Lancome",
+          "gender": "Woman",
+          "family": "DULCE, AVAINILLADO, AFRUTADO",
+          "notes": [
+            "VAINILLA",
+            "PACHULI",
+            "GROSELLAS NEGRAS"
+          ],
+          "displayName": "La Vie Est Belle"
+        },
+        {
+          "code": "UU049",
+          "name": "AMBER WOOD",
+          "inspiration": "AJMAL",
+          "gender": "Unisex",
+          "family": "ORIENTAL AMADERADO",
+          "notes": [
+            "CARDAMOMO",
+            "LAVANDA",
+            "MANZANA",
+            "PIMIENTA",
+            "CEDRO",
+            "PACHULI"
+          ],
+          "displayName": "Amber Wood"
+        }
+      ],
+      "slides": [
+        "Portada humanizada",
+        "CC016 · Inspiración Acqua di Giò Profondo",
+        "DD094 · Inspiración La Vie Est Belle",
+        "UU049 · Inspiración Amber Wood",
+        "Cierre · precios, asesoramiento y pedido"
+      ],
+      "slideFiles": [
+        "AURA-02-15-oct-familias-1080-s01.jpg",
+        "AURA-02-15-oct-familias-1080-s02.jpg",
+        "AURA-02-15-oct-familias-1080-s03.jpg",
+        "AURA-02-15-oct-familias-1080-s04.jpg",
+        "AURA-02-15-oct-familias-1080-s05.jpg"
+      ],
+      "facebookTime": "10:00",
+      "instagramTime": "19:00"
+    },
+    {
+      "n": 3,
+      "key": "03-formatos",
+      "date": "2026-10-17",
+      "pillar": "Producto",
+      "objective": "Explicar las presentaciones y facilitar la elección.",
+      "title": "A tu ritmo. A tu medida.",
+      "hook": "Un aroma que acompañe tu rutina.",
+      "body": "Elegí tu inspiración y la presentación que te resulte cómoda: 10, 30 o 50 ml. Las tres son Extrait de Parfum con 30% de concentración.",
+      "cta": "Elegí tu presentación",
+      "detail": "10 · 30 · 50 ML",
+      "visual": "Mujer adulta preparando su bolso, con el frasco aprobado; tamaños escritos sin inventar envases.",
+      "file": "AURA-03-17-oct-formatos-1080",
+      "instagram": "Un aroma que acompañe tu rutina.\n\nElegí tu inspiración y la presentación que te resulte cómoda: 10, 30 o 50 ml. Las tres son Extrait de Parfum con 30% de concentración.\n\n• CC104 · Inspirado en Polo Blue\n• DD089 · Inspirado en Light Blue Women\n• UU021 · Inspirado en One\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nPedinos el código por WhatsApp al +595 994 414 986 o entrá desde el enlace de nuestra biografía.\n\n#AuraFraganciasPy #PerfumesParaguay #Asuncion",
+      "facebook": "Un aroma que acompañe tu rutina.\n\nElegí tu inspiración y la presentación que te resulte cómoda: 10, 30 o 50 ml. Las tres son Extrait de Parfum con 30% de concentración.\n\n• CC104 · Inspirado en Polo Blue\n• DD089 · Inspirado en Light Blue Women\n• UU021 · Inspirado en One\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nElegí acá: https://www.aurafragancias.store\nWhatsApp: +595 994 414 986.\n\n#AuraFraganciasPy #PerfumesParaguay",
+      "benefit": "Tu favorita en 10, 30 y 50 ml.",
+      "headline": [
+        "A tu ritmo.",
+        "A tu medida."
+      ],
+      "products": [
+        {
+          "code": "CC104",
+          "name": "POLO BLUE",
+          "inspiration": "RALPH LAUREN",
+          "gender": "Man",
+          "family": "AEOMATICA FOUGERE",
+          "notes": [
+            "PEPINO",
+            "MELON",
+            "MANDARINA"
+          ],
+          "displayName": "Polo Blue"
+        },
+        {
+          "code": "DD089",
+          "name": "LIGHT BLUE WOMEN",
+          "inspiration": "DOLCE&GABBANA",
+          "gender": "Woman",
+          "family": "FLORAL FRUTAL",
+          "notes": [
+            "LIMON SICILIANO",
+            "MANZANA",
+            "CEDRO"
+          ],
+          "displayName": "Light Blue Women"
+        },
+        {
+          "code": "UU021",
+          "name": "ONE",
+          "inspiration": "CALVIN KLEIN",
+          "gender": "Unisex",
+          "family": "CITRICO AROMATICA",
+          "notes": [
+            "LIMON",
+            "JAZMIN",
+            "PIÑA",
+            "CEDRO"
+          ],
+          "displayName": "One"
+        }
+      ],
+      "slides": [
+        "Portada humanizada",
+        "CC104 · Inspiración Polo Blue",
+        "DD089 · Inspiración Light Blue Women",
+        "UU021 · Inspiración One",
+        "Cierre · precios, asesoramiento y pedido"
+      ],
+      "slideFiles": [
+        "AURA-03-17-oct-formatos-1080-s01.jpg",
+        "AURA-03-17-oct-formatos-1080-s02.jpg",
+        "AURA-03-17-oct-formatos-1080-s03.jpg",
+        "AURA-03-17-oct-formatos-1080-s04.jpg",
+        "AURA-03-17-oct-formatos-1080-s05.jpg"
+      ],
+      "facebookTime": "10:00",
+      "instagramTime": "19:00"
+    },
+    {
+      "n": 4,
+      "key": "04-frescos",
+      "date": "2026-10-19",
+      "pillar": "Educación",
+      "objective": "Conectar una ocasión cotidiana con la búsqueda de fragancias frescas.",
+      "title": "Frescos para tu día.",
+      "hook": "Para esos días en los que buscás frescura. 🍋",
+      "body": "Deslizá para conocer estas inspiraciones de perfiles frescos, cítricos o aromáticos que tenemos en el catálogo.",
+      "cta": "Buscá tu próximo fresco",
+      "detail": "Aromas para el día",
+      "visual": "Hombre adulto en luz de día y entorno cotidiano, expresión relajada y natural.",
+      "file": "AURA-04-19-oct-frescos-1080",
+      "instagram": "Para esos días en los que buscás frescura. 🍋\n\nDeslizá para conocer estas inspiraciones de perfiles frescos, cítricos o aromáticos que tenemos en el catálogo.\n\n• CC087 · Inspirado en Light Blue Men\n• DD013 · Inspirado en Ralph\n• UU052 · Inspirado en Blue Mediterraneo\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nPedinos el código por WhatsApp al +595 994 414 986 o entrá desde el enlace de nuestra biografía.\n\n#AuraFraganciasPy #PerfumesParaguay #Asuncion",
+      "facebook": "Para esos días en los que buscás frescura. 🍋\n\nDeslizá para conocer estas inspiraciones de perfiles frescos, cítricos o aromáticos que tenemos en el catálogo.\n\n• CC087 · Inspirado en Light Blue Men\n• DD013 · Inspirado en Ralph\n• UU052 · Inspirado en Blue Mediterraneo\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nElegí acá: https://www.aurafragancias.store\nWhatsApp: +595 994 414 986.\n\n#AuraFraganciasPy #PerfumesParaguay",
+      "benefit": "Opciones para una rutina más fresca.",
+      "headline": [
+        "Frescos",
+        "para tu día."
+      ],
+      "products": [
+        {
+          "code": "CC087",
+          "name": "LIGHT BLUE MEN",
+          "inspiration": "DOLCE&GABBANA",
+          "gender": "Man",
+          "family": "AMADERADA AROMATICA",
+          "notes": [
+            "LIMON",
+            "ROMERO",
+            "PACHULI"
+          ],
+          "displayName": "Light Blue Men"
+        },
+        {
+          "code": "DD013",
+          "name": "RALPH LAUREN",
+          "inspiration": "RALPH",
+          "gender": "Woman",
+          "family": "FLORAL FRUTAL",
+          "notes": [
+            "HOJAS DE MANZANO",
+            "MANDARINA ITALIANA",
+            "MAGNOLIA"
+          ],
+          "displayName": "Ralph"
+        },
+        {
+          "code": "UU052",
+          "name": "BLUE MEDITERRANEO",
+          "inspiration": "ACQUA DI PARMA",
+          "gender": "Unisex",
+          "family": "AMADERADA AROMATICA",
+          "notes": [
+            "LIMON",
+            "ALBAHACA",
+            "NOTAS MARINAS",
+            "JAZMIN"
+          ],
+          "displayName": "Blue Mediterraneo"
+        }
+      ],
+      "slides": [
+        "Portada humanizada",
+        "CC087 · Inspiración Light Blue Men",
+        "DD013 · Inspiración Ralph",
+        "UU052 · Inspiración Blue Mediterraneo",
+        "Cierre · precios, asesoramiento y pedido"
+      ],
+      "slideFiles": [
+        "AURA-04-19-oct-frescos-1080-s01.jpg",
+        "AURA-04-19-oct-frescos-1080-s02.jpg",
+        "AURA-04-19-oct-frescos-1080-s03.jpg",
+        "AURA-04-19-oct-frescos-1080-s04.jpg",
+        "AURA-04-19-oct-frescos-1080-s05.jpg"
+      ],
+      "facebookTime": "10:00",
+      "instagramTime": "19:00"
+    },
+    {
+      "n": 5,
+      "key": "05-noches",
+      "date": "2026-10-21",
+      "pillar": "Inspiración",
+      "objective": "Asociar la marca a ocasiones especiales.",
+      "title": "Hay momentos que merecen su aroma.",
+      "hook": "Hay momentos que merecen su propio aroma.",
+      "body": "Una cena, una salida, un encuentro. Explorá estas inspiraciones cálidas y con carácter para elegir la que vaya con vos.",
+      "cta": "Encontrá tu aroma de noche",
+      "detail": "Fragancias con carácter",
+      "visual": "Pareja adulta en un encuentro cálido de noche; emoción cercana y estética sobria.",
+      "file": "AURA-05-21-oct-noches-1080",
+      "instagram": "Hay momentos que merecen su propio aroma.\n\nUna cena, una salida, un encuentro. Explorá estas inspiraciones cálidas y con carácter para elegir la que vaya con vos.\n\n• CC009 · Inspirado en Armani Code\n• DD022 · Inspirado en Black Opium\n• UU013 · Inspirado en Layton\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nPedinos el código por WhatsApp al +595 994 414 986 o entrá desde el enlace de nuestra biografía.\n\n#AuraFraganciasPy #PerfumesParaguay #Asuncion",
+      "facebook": "Hay momentos que merecen su propio aroma.\n\nUna cena, una salida, un encuentro. Explorá estas inspiraciones cálidas y con carácter para elegir la que vaya con vos.\n\n• CC009 · Inspirado en Armani Code\n• DD022 · Inspirado en Black Opium\n• UU013 · Inspirado en Layton\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nElegí acá: https://www.aurafragancias.store\nWhatsApp: +595 994 414 986.\n\n#AuraFraganciasPy #PerfumesParaguay",
+      "benefit": "Tres inspiraciones para una ocasión especial.",
+      "headline": [
+        "Hay momentos",
+        "que merecen",
+        "su aroma."
+      ],
+      "products": [
+        {
+          "code": "CC009",
+          "name": "ARMANI CODE",
+          "inspiration": "GIOGIO ARMANI",
+          "gender": "Man",
+          "family": "ORIENTAL ESPECIADA",
+          "notes": [
+            "BERGAMOTA",
+            "ANIS ESTRELLADO",
+            "CUERO"
+          ],
+          "displayName": "Armani Code"
+        },
+        {
+          "code": "DD022",
+          "name": "BLACK OPIUM",
+          "inspiration": "YVES SAINT LAURENT",
+          "gender": "Woman",
+          "family": "ORIENTAL VAINILLA",
+          "notes": [
+            "PERA",
+            "PIMIENTA ROSA",
+            "FLOR DE AZAHAR",
+            "CAFE"
+          ],
+          "displayName": "Black Opium"
+        },
+        {
+          "code": "UU013",
+          "name": "LAYTON DE MARLY",
+          "inspiration": "Parfums de Marly",
+          "gender": "Unisex",
+          "family": "ESPECIADO AMADERADO AVAINILLADO",
+          "notes": [
+            "VAINILLA",
+            "MANZANA VERDE",
+            "CARDAMOMO"
+          ],
+          "displayName": "Layton"
+        }
+      ],
+      "slides": [
+        "Portada humanizada",
+        "CC009 · Inspiración Armani Code",
+        "DD022 · Inspiración Black Opium",
+        "UU013 · Inspiración Layton",
+        "Cierre · precios, asesoramiento y pedido"
+      ],
+      "slideFiles": [
+        "AURA-05-21-oct-noches-1080-s01.jpg",
+        "AURA-05-21-oct-noches-1080-s02.jpg",
+        "AURA-05-21-oct-noches-1080-s03.jpg",
+        "AURA-05-21-oct-noches-1080-s04.jpg",
+        "AURA-05-21-oct-noches-1080-s05.jpg"
+      ],
+      "facebookTime": "12:00",
+      "instagramTime": "19:00"
+    },
+    {
+      "n": 6,
+      "key": "06-regala",
+      "date": "2026-10-23",
+      "pillar": "Regalos",
+      "objective": "Generar consultas para regalar perfumes.",
+      "title": "Un regalo que dice mucho.",
+      "hook": "Hay regalos que se usan. Y otros que se recuerdan. 🎁",
+      "body": "Te mostramos tres inspiraciones para regalar. Si no sabés cuál elegir, contanos los gustos de esa persona y te orientamos.",
+      "cta": "Te ayudamos a elegir",
+      "detail": "Regalos con intención",
+      "visual": "Dos personas adultas en una escena de regalo, frasco aprobado y alegría natural.",
+      "file": "AURA-06-23-oct-regala-1080",
+      "instagram": "Hay regalos que se usan. Y otros que se recuerdan. 🎁\n\nTe mostramos tres inspiraciones para regalar. Si no sabés cuál elegir, contanos los gustos de esa persona y te orientamos.\n\n• DD101 · Inspirado en My Way\n• CC034 · Inspirado en Aventus\n• UU048 · Inspirado en Erba Gold\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nPedinos el código por WhatsApp al +595 994 414 986 o entrá desde el enlace de nuestra biografía.\n\n#AuraFraganciasPy #PerfumesParaguay #Asuncion",
+      "facebook": "Hay regalos que se usan. Y otros que se recuerdan. 🎁\n\nTe mostramos tres inspiraciones para regalar. Si no sabés cuál elegir, contanos los gustos de esa persona y te orientamos.\n\n• DD101 · Inspirado en My Way\n• CC034 · Inspirado en Aventus\n• UU048 · Inspirado en Erba Gold\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nElegí acá: https://www.aurafragancias.store\nWhatsApp: +595 994 414 986.\n\n#AuraFraganciasPy #PerfumesParaguay",
+      "benefit": "Elegí pensando en esa persona.",
+      "headline": [
+        "Un regalo",
+        "que dice",
+        "mucho."
+      ],
+      "products": [
+        {
+          "code": "DD101",
+          "name": "MY WAY GIORGIO ARMANI",
+          "inspiration": "Giorgio Armani",
+          "gender": "Woman",
+          "family": "FLORAL BLANCO, CITRICO",
+          "notes": [
+            "FLOR DE AZAHAR",
+            "BERGAMOTA",
+            "NARDO"
+          ],
+          "displayName": "My Way"
+        },
+        {
+          "code": "CC034",
+          "name": "CREED AVENTUS",
+          "inspiration": "Creed",
+          "gender": "Man",
+          "family": "AFRUTADO DULCE CUERO AMADERADO",
+          "notes": [
+            "PIÑA",
+            "GROSELLAS NEGRAS",
+            "BERGAMOTA",
+            "MANZANA"
+          ],
+          "displayName": "Aventus"
+        },
+        {
+          "code": "UU048",
+          "name": "ERBA GOLD",
+          "inspiration": "XERJOFF",
+          "gender": "Unisex",
+          "family": "TROPICAL",
+          "notes": [
+            "NARANJA",
+            "BERGAMOTA DE CALABRIA",
+            "LIMON",
+            "JENGIBRE",
+            "MELON",
+            "PERA",
+            "MANZANA V",
+            "CANELA"
+          ],
+          "displayName": "Erba Gold"
+        }
+      ],
+      "slides": [
+        "Portada humanizada",
+        "DD101 · Inspiración My Way",
+        "CC034 · Inspiración Aventus",
+        "UU048 · Inspiración Erba Gold",
+        "Cierre · precios, asesoramiento y pedido"
+      ],
+      "slideFiles": [
+        "AURA-06-23-oct-regala-1080-s01.jpg",
+        "AURA-06-23-oct-regala-1080-s02.jpg",
+        "AURA-06-23-oct-regala-1080-s03.jpg",
+        "AURA-06-23-oct-regala-1080-s04.jpg",
+        "AURA-06-23-oct-regala-1080-s05.jpg"
+      ],
+      "facebookTime": "10:00",
+      "instagramTime": "19:00"
+    },
+    {
+      "n": 7,
+      "key": "07-gift-card",
+      "date": "2026-10-25",
+      "pillar": "Gift Card",
+      "objective": "Llevar compras a la página de Gift Card.",
+      "title": "Regalá la libertad de elegir.",
+      "hook": "Vos elegís el monto. Esa persona, su próxima fragancia. 🎁",
+      "body": "Gift Card Äura desde Gs. 100.000, con importe personalizable, nombre y dedicatoria. La recibís por WhatsApp en PDF. Válida por 60 días desde la confirmación del pago. Deslizá para ver dos de las inspiraciones que puede elegir.",
+      "cta": "Creá tu Gift Card",
+      "detail": "Desde Gs. 100.000 · 60 días",
+      "visual": "Mujer adulta recibiendo un regalo digital en el teléfono y tarjeta cheque ilustrada, sin códigos reales.",
+      "file": "AURA-07-25-oct-gift-card-1080",
+      "instagram": "Vos elegís el monto. Esa persona, su próxima fragancia. 🎁\n\nGift Card Äura desde Gs. 100.000, con importe personalizable, nombre y dedicatoria. La recibís por WhatsApp en PDF. Válida por 60 días desde la confirmación del pago. Deslizá para ver dos de las inspiraciones que puede elegir.\n\n• DD197 · Inspirado en Miss Dior\n• CC116 · Inspirado en Sauvage\n\nGift Card: entrega digital sin costo, canje por WhatsApp y delivery de perfumes a cotizar. Los cupones no aplican a Gift Cards.\n\nPedinos el código por WhatsApp al +595 994 414 986 o entrá desde el enlace de nuestra biografía.\n\n#AuraFraganciasPy #PerfumesParaguay #Asuncion",
+      "facebook": "Vos elegís el monto. Esa persona, su próxima fragancia. 🎁\n\nGift Card Äura desde Gs. 100.000, con importe personalizable, nombre y dedicatoria. La recibís por WhatsApp en PDF. Válida por 60 días desde la confirmación del pago. Deslizá para ver dos de las inspiraciones que puede elegir.\n\n• DD197 · Inspirado en Miss Dior\n• CC116 · Inspirado en Sauvage\n\nGift Card: entrega digital sin costo, canje por WhatsApp y delivery de perfumes a cotizar. Los cupones no aplican a Gift Cards.\n\nElegí acá: https://www.aurafragancias.store/gift-card\nWhatsApp: +595 994 414 986.\n\n#AuraFraganciasPy #PerfumesParaguay",
+      "benefit": "PDF por WhatsApp · Desde Gs. 100.000.",
+      "headline": [
+        "Regalá",
+        "la libertad",
+        "de elegir."
+      ],
+      "products": [
+        {
+          "code": "DD197",
+          "name": "MISS DIOR (2021)",
+          "inspiration": "Dior",
+          "gender": "Woman",
+          "family": "ORIENTAL FLORAL",
+          "notes": [
+            "IRIS",
+            "PEONÍA",
+            "LIRIO DE LOS VALLES"
+          ],
+          "displayName": "Miss Dior"
+        },
+        {
+          "code": "CC116",
+          "name": "SAUVAGE",
+          "inspiration": "DIOR",
+          "gender": "Man",
+          "family": "Aromática Fougère",
+          "notes": [
+            "PIMIENTA SICHUAN",
+            "LAVANDA",
+            "VETIVER",
+            "PACHULI"
+          ],
+          "displayName": "Sauvage"
+        }
+      ],
+      "slides": [
+        "Portada humanizada",
+        "DD197 · Inspiración Miss Dior",
+        "CC116 · Inspiración Sauvage",
+        "Gift Card · mínimo, vigencia y PDF por WhatsApp",
+        "Cierre · precios, asesoramiento y pedido"
+      ],
+      "slideFiles": [
+        "AURA-07-25-oct-gift-card-1080-s01.jpg",
+        "AURA-07-25-oct-gift-card-1080-s02.jpg",
+        "AURA-07-25-oct-gift-card-1080-s03.jpg",
+        "AURA-07-25-oct-gift-card-1080-s04.jpg",
+        "AURA-07-25-oct-gift-card-1080-s05.jpg"
+      ],
+      "facebookTime": "10:00",
+      "instagramTime": "19:00"
+    },
+    {
+      "n": 8,
+      "key": "08-asesoria",
+      "date": "2026-10-27",
+      "pillar": "Asesoramiento",
+      "objective": "Convertir dudas en conversaciones de WhatsApp.",
+      "title": "Te escuchamos. Te orientamos.",
+      "hook": "Tu próxima fragancia puede empezar con una conversación. ✨",
+      "body": "Si te atraen los perfiles dulces, frutales o avainillados, estas tres inspiraciones pueden ser un punto de partida. Contanos tus gustos y el momento para el que buscás el perfume.",
+      "cta": "Escribinos por WhatsApp",
+      "detail": "Te ayudamos a elegir",
+      "visual": "Persona adulta consultando desde su teléfono; no se representa a un empleado real.",
+      "file": "AURA-08-27-oct-asesoria-1080",
+      "instagram": "Tu próxima fragancia puede empezar con una conversación. ✨\n\nSi te atraen los perfiles dulces, frutales o avainillados, estas tres inspiraciones pueden ser un punto de partida. Contanos tus gustos y el momento para el que buscás el perfume.\n\n• DD159 · Inspirado en Cloud\n• CC122 · Inspirado en Ultra Male\n• UU036 · Inspirado en Lost Cherry\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nPedinos el código por WhatsApp al +595 994 414 986 o entrá desde el enlace de nuestra biografía.\n\n#AuraFraganciasPy #PerfumesParaguay #Asuncion",
+      "facebook": "Tu próxima fragancia puede empezar con una conversación. ✨\n\nSi te atraen los perfiles dulces, frutales o avainillados, estas tres inspiraciones pueden ser un punto de partida. Contanos tus gustos y el momento para el que buscás el perfume.\n\n• DD159 · Inspirado en Cloud\n• CC122 · Inspirado en Ultra Male\n• UU036 · Inspirado en Lost Cherry\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nElegí acá: https://www.aurafragancias.store\nWhatsApp: +595 994 414 986.\n\n#AuraFraganciasPy #PerfumesParaguay",
+      "benefit": "Contanos tus gustos y te ayudamos a elegir.",
+      "headline": [
+        "Te escuchamos.",
+        "Te orientamos."
+      ],
+      "products": [
+        {
+          "code": "DD159",
+          "name": "CLOUD BY ARIANA GRANDE",
+          "inspiration": "Ariana Grande",
+          "gender": "Woman",
+          "family": "FLORAL FRUTAL",
+          "notes": [
+            "CREMA BATIDA",
+            "PRALINE",
+            "COCO"
+          ],
+          "displayName": "Cloud"
+        },
+        {
+          "code": "CC122",
+          "name": "Ultra Male Jean Paul Gaultier",
+          "inspiration": "JPG",
+          "gender": "Man",
+          "family": "AVAINILLADO, DULCE, AFRUTADOS",
+          "notes": [
+            "PERA",
+            "VAINA DE VAINILLA",
+            "CANELA"
+          ],
+          "displayName": "Ultra Male"
+        },
+        {
+          "code": "UU036",
+          "name": "LOST CHERRY",
+          "inspiration": "TOM FORD",
+          "gender": "Unisex",
+          "family": "ORIENTAL FLORAL",
+          "notes": [
+            "ALMENDRA AMARGA",
+            "CEREZA NEGRA",
+            "LICOR DE CEREZA",
+            "CIRUELA",
+            "ROSA TURCA",
+            "JAZMIN"
+          ],
+          "displayName": "Lost Cherry"
+        }
+      ],
+      "slides": [
+        "Portada humanizada",
+        "DD159 · Inspiración Cloud",
+        "CC122 · Inspiración Ultra Male",
+        "UU036 · Inspiración Lost Cherry",
+        "Cierre · precios, asesoramiento y pedido"
+      ],
+      "slideFiles": [
+        "AURA-08-27-oct-asesoria-1080-s01.jpg",
+        "AURA-08-27-oct-asesoria-1080-s02.jpg",
+        "AURA-08-27-oct-asesoria-1080-s03.jpg",
+        "AURA-08-27-oct-asesoria-1080-s04.jpg",
+        "AURA-08-27-oct-asesoria-1080-s05.jpg"
+      ],
+      "facebookTime": "10:00",
+      "instagramTime": "19:00"
+    },
+    {
+      "n": 9,
+      "key": "09-compra",
+      "date": "2026-10-29",
+      "pillar": "Compra online",
+      "objective": "Explicar el proceso de compra y reducir dudas de entrega.",
+      "title": "Elegí desde donde estés.",
+      "hook": "Tu próximo aroma, desde donde estés. 🤍",
+      "body": "Explorá estas inspiraciones en nuestra tienda online, elegí la presentación y armá tu pedido. Coordinamos con vos la entrega; el delivery se cotiza según tu dirección.",
+      "cta": "Visitá la tienda online",
+      "detail": "Compra y entrega",
+      "visual": "Hombre adulto comprando desde casa, pantalla fuera de cámara; entrega cotizada con claridad.",
+      "file": "AURA-09-29-oct-compra-1080",
+      "instagram": "Tu próximo aroma, desde donde estés. 🤍\n\nExplorá estas inspiraciones en nuestra tienda online, elegí la presentación y armá tu pedido. Coordinamos con vos la entrega; el delivery se cotiza según tu dirección.\n\n• CC189 · Inspirado en Y Eau de Parfum\n• DD192 · Inspirado en La Bomba\n• UU041 · Inspirado en Coro\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nPedinos el código por WhatsApp al +595 994 414 986 o entrá desde el enlace de nuestra biografía.\n\n#AuraFraganciasPy #PerfumesParaguay #Asuncion",
+      "facebook": "Tu próximo aroma, desde donde estés. 🤍\n\nExplorá estas inspiraciones en nuestra tienda online, elegí la presentación y armá tu pedido. Coordinamos con vos la entrega; el delivery se cotiza según tu dirección.\n\n• CC189 · Inspirado en Y Eau de Parfum\n• DD192 · Inspirado en La Bomba\n• UU041 · Inspirado en Coro\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nElegí acá: https://www.aurafragancias.store\nWhatsApp: +595 994 414 986.\n\n#AuraFraganciasPy #PerfumesParaguay",
+      "benefit": "Tienda online y entrega a coordinar.",
+      "headline": [
+        "Elegí desde",
+        "donde estés."
+      ],
+      "products": [
+        {
+          "code": "CC189",
+          "name": "Y EAU PARFUM",
+          "inspiration": "YVES SAINT LAURENT",
+          "gender": "Man",
+          "family": "AROMATICA FOUGERE",
+          "notes": [
+            "MANZANA",
+            "JENGIBRE",
+            "BERGAMOTA",
+            "SALVIA",
+            "BAYAS DE ENEBRO"
+          ],
+          "displayName": "Y Eau de Parfum"
+        },
+        {
+          "code": "DD192",
+          "name": "LA BOMBA CAROLINA HERRERA",
+          "inspiration": "Carolina Herrera",
+          "gender": "Woman",
+          "family": "ORIENTAL FLORAL",
+          "notes": [
+            "PITAHAYA",
+            "PEONÍA ROJA",
+            "FRANGIPANI",
+            "VAINILLA",
+            "PACHULÍ"
+          ],
+          "displayName": "La Bomba"
+        },
+        {
+          "code": "UU041",
+          "name": "CORO",
+          "inspiration": "XERJOFF",
+          "gender": "Unisex",
+          "family": "FLORAL FRUTAL",
+          "notes": [
+            "FRUTAS TROPICALES",
+            "MANGO",
+            "PIÑA",
+            "JAZMIN",
+            "VAINILLA",
+            "AMIZCLE",
+            "AMBAR",
+            "SANDALO"
+          ],
+          "displayName": "Coro"
+        }
+      ],
+      "slides": [
+        "Portada humanizada",
+        "CC189 · Inspiración Y Eau de Parfum",
+        "DD192 · Inspiración La Bomba",
+        "UU041 · Inspiración Coro",
+        "Cierre · precios, asesoramiento y pedido"
+      ],
+      "slideFiles": [
+        "AURA-09-29-oct-compra-1080-s01.jpg",
+        "AURA-09-29-oct-compra-1080-s02.jpg",
+        "AURA-09-29-oct-compra-1080-s03.jpg",
+        "AURA-09-29-oct-compra-1080-s04.jpg",
+        "AURA-09-29-oct-compra-1080-s05.jpg"
+      ],
+      "facebookTime": "10:00",
+      "instagramTime": "19:00"
+    },
+    {
+      "n": 10,
+      "key": "10-recuerdos",
+      "date": "2026-10-31",
+      "pillar": "Comunidad",
+      "objective": "Cerrar el mes con una pregunta que invite a comentar y recordar la marca.",
+      "title": "Hay aromas que nos acercan.",
+      "hook": "¿Qué aroma te lleva a un buen recuerdo?",
+      "body": "Una persona, un lugar, un momento compartido. Descubrí estas inspiraciones Äura y contanos cuál te gustaría conocer.",
+      "cta": "Encontrá tu próximo favorito",
+      "detail": "Aromas y recuerdos",
+      "visual": "Dos generaciones adultas compartiendo un momento afectuoso, sin testimonios ni promesas inventadas.",
+      "file": "AURA-10-31-oct-recuerdos-1080",
+      "instagram": "¿Qué aroma te lleva a un buen recuerdo?\n\nUna persona, un lugar, un momento compartido. Descubrí estas inspiraciones Äura y contanos cuál te gustaría conocer.\n\n• DD096 · Inspirado en Libre\n• CC157 · Inspirado en Uomo Born in Roma Intense\n• UU019 · Inspirado en Erba Pura\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nPedinos el código por WhatsApp al +595 994 414 986 o entrá desde el enlace de nuestra biografía.\n\n#AuraFraganciasPy #PerfumesParaguay #Asuncion",
+      "facebook": "¿Qué aroma te lleva a un buen recuerdo?\n\nUna persona, un lugar, un momento compartido. Descubrí estas inspiraciones Äura y contanos cuál te gustaría conocer.\n\n• DD096 · Inspirado en Libre\n• CC157 · Inspirado en Uomo Born in Roma Intense\n• UU019 · Inspirado en Erba Pura\n\n10 ml Gs. 30.000 · 30 ml Gs. 70.000 · 50 ml Gs. 120.000. Delivery a cotizar.\n\nElegí acá: https://www.aurafragancias.store\nWhatsApp: +595 994 414 986.\n\n#AuraFraganciasPy #PerfumesParaguay",
+      "benefit": "Inspiraciones para momentos compartidos.",
+      "headline": [
+        "Hay aromas",
+        "que nos",
+        "acercan."
+      ],
+      "products": [
+        {
+          "code": "DD096",
+          "name": "LIBRE YVES SAINT LAURENT",
+          "inspiration": "YSL",
+          "gender": "Woman",
+          "family": "FLORAL BLANCO, CITRICO, LAVANDER",
+          "notes": [
+            "LAVANDA",
+            "MANDARINA",
+            "VAINILLA"
+          ],
+          "displayName": "Libre"
+        },
+        {
+          "code": "CC157",
+          "name": "Valentino Uomo Born In Roma Intense",
+          "inspiration": "Valentino",
+          "gender": "Man",
+          "family": "ORIENTAL AVAINILLADO",
+          "notes": [
+            "VAINILLA",
+            "LAVANDA",
+            "VETIVER"
+          ],
+          "displayName": "Uomo Born in Roma Intense"
+        },
+        {
+          "code": "UU019",
+          "name": "ERBA PURA XERJOFF",
+          "inspiration": "Xerjoff",
+          "gender": "Unisex",
+          "family": "AFRUTADO CITRICO DULCE",
+          "notes": [
+            "FRUTAS",
+            "ALMIZCLE",
+            "VAINILLA"
+          ],
+          "displayName": "Erba Pura"
+        }
+      ],
+      "slides": [
+        "Portada humanizada",
+        "DD096 · Inspiración Libre",
+        "CC157 · Inspiración Uomo Born in Roma Intense",
+        "UU019 · Inspiración Erba Pura",
+        "Cierre · precios, asesoramiento y pedido"
+      ],
+      "slideFiles": [
+        "AURA-10-31-oct-recuerdos-1080-s01.jpg",
+        "AURA-10-31-oct-recuerdos-1080-s02.jpg",
+        "AURA-10-31-oct-recuerdos-1080-s03.jpg",
+        "AURA-10-31-oct-recuerdos-1080-s04.jpg",
+        "AURA-10-31-oct-recuerdos-1080-s05.jpg"
+      ],
+      "facebookTime": "10:00",
+      "instagramTime": "19:00"
+    }
+  ],
+  "approach": "Portada humanizada + fragancias reales del catálogo + cierre de venta. Humanizar, educar y mostrar el valor de Äura para convertir consultas y compras.",
+  "prices": {
+    "10 ML": 30000,
+    "30 ML": 70000,
+    "50 ML": 120000,
+    "verifiedOn": "2026-10-11"
+  },
+  "catalogSource": "Catálogo público de la tienda (Firestore) y flyers oficiales de Marca; 104 productos visibles al revisar."
+}

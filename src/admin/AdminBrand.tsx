@@ -4,6 +4,12 @@ import { Download, Tags } from 'lucide-react';
 
 const downloads = [
   {
+    title: 'Plan y carruseles · octubre 2026',
+    detail: 'Diez contenidos humanizados: 50 imágenes, guía de campaña, calendario y copys para Instagram y Facebook.',
+    href: '/brand/descargas/AURA-10-carruseles-octubre-2026.zip',
+    meta: 'ZIP · 1080 × 1080 px · del 13 al 31 de octubre',
+  },
+  {
     title: 'Campaña Regalá Äura y Gift Card',
     detail: 'Cuatro flyers cuadrados, reel animado del 20%, portada y textos para publicar.',
     href: '/brand/descargas/AURA-campana-regala-2026.zip',
@@ -75,6 +81,17 @@ export default function AdminBrand({ onGoToLabels }: { onGoToLabels: () => void 
               <a href="/brand/aura-wordmark-white.svg" download className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-white hover:underline"><Download size={14} /> SVG vectorial</a>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-4 border border-aura-wine/20 bg-aura-ivory p-5">
+        <div>
+          <p className="font-semibold text-aura-ink">Octubre: plan de posteos y copys</p>
+          <p className="mt-1 text-xs leading-relaxed text-zinc-600">Consultá el calendario y los textos de los diez carruseles para Instagram y Facebook.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <a href="/brand/descargas/AURA-PDP-Octubre-2026.pdf" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-2 border border-aura-wine px-4 text-[11px] font-bold uppercase tracking-[0.12em] text-aura-wine hover:bg-white"><Download size={15} /> Ver plan PDF</a>
+          <a href="/brand/descargas/AURA-COPYS-OCTUBRE-2026.txt" download className="inline-flex min-h-11 items-center justify-center gap-2 bg-aura-wine px-4 text-[11px] font-bold uppercase tracking-[0.12em] text-white hover:bg-aura-ink"><Download size={15} /> Copys de octubre</a>
         </div>
       </div>
 

@@ -1,0 +1,662 @@
+{
+  "groups": [
+    [
+      "DD161",
+      "CC180",
+      "UU002"
+    ],
+    [
+      "CC016",
+      "DD094",
+      "UU049"
+    ],
+    [
+      "CC104",
+      "DD089",
+      "UU021"
+    ],
+    [
+      "CC087",
+      "DD013",
+      "UU052"
+    ],
+    [
+      "CC009",
+      "DD022",
+      "UU013"
+    ],
+    [
+      "DD101",
+      "CC034",
+      "UU048"
+    ],
+    [
+      "DD197",
+      "CC116"
+    ],
+    [
+      "DD159",
+      "CC122",
+      "UU036"
+    ],
+    [
+      "CC189",
+      "DD192",
+      "UU041"
+    ],
+    [
+      "DD096",
+      "CC157",
+      "UU019"
+    ]
+  ],
+  "products": [
+    {
+      "visible": true,
+      "code": "CC009",
+      "updatedAt": "2026-06-09T19:45:11.904Z",
+      "gender": "Man",
+      "badge": "New",
+      "category": "Night",
+      "duration": "8-12h",
+      "intensity": 4,
+      "name": "ARMANI CODE",
+      "inspiration": "GIOGIO ARMANI",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FCC009-1781034304351-FOTO_AURA_WEB_(62).png?alt=media&token=c51c0399-dacd-48d2-8cdf-240f378f46b2",
+      "notes": [
+        "BERGAMOTA",
+        "ANIS ESTRELLADO",
+        "CUERO"
+      ],
+      "family": "ORIENTAL ESPECIADA",
+      "salesScore": 0
+    },
+    {
+      "notes": [
+        "BERGAMOTA",
+        "ROMERO",
+        "PACHULÍ"
+      ],
+      "salesScore": 0,
+      "category": "Daily",
+      "updatedAt": "2026-06-07T21:58:34.231Z",
+      "name": "AQCUA DI GIO PROFONDO GIRGIO ARMANI",
+      "gender": "Man",
+      "visible": true,
+      "family": "FRESCO, AMADERADO, CITRICO",
+      "code": "CC016",
+      "duration": "10h",
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219340/CC016_mdwnkl.png",
+      "intensity": 4,
+      "inspiration": "Giorgio Armani"
+    },
+    {
+      "salesScore": 0,
+      "name": "CREED AVENTUS",
+      "updatedAt": "2026-06-07T21:58:32.979Z",
+      "inspiration": "Creed",
+      "notes": [
+        "PIÑA",
+        "GROSELLAS NEGRAS",
+        "BERGAMOTA",
+        "MANZANA"
+      ],
+      "category": "Casual",
+      "family": "AFRUTADO DULCE CUERO AMADERADO",
+      "gender": "Man",
+      "intensity": 4,
+      "duration": "10-12h",
+      "visible": true,
+      "code": "CC034",
+      "badge": "Bestseller",
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219340/CC034_mmpsoj.png"
+    },
+    {
+      "category": "Daily",
+      "code": "CC087",
+      "salesScore": 0,
+      "gender": "Man",
+      "notes": [
+        "LIMON",
+        "ROMERO",
+        "PACHULI"
+      ],
+      "updatedAt": "2026-06-09T18:18:39.651Z",
+      "inspiration": "DOLCE&GABBANA",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FCC087-1781029110033-FOTO_AURA_WEB_(48).png?alt=media&token=79509150-8593-46cb-b26a-25578cc9c0bd",
+      "family": "AMADERADA AROMATICA",
+      "intensity": 5,
+      "badge": "New",
+      "visible": true,
+      "duration": "8-12h",
+      "name": "LIGHT BLUE MEN"
+    },
+    {
+      "inspiration": "RALPH LAUREN",
+      "family": "AEOMATICA FOUGERE",
+      "badge": "New",
+      "category": "Daily",
+      "intensity": 3,
+      "code": "CC104",
+      "duration": "8-12h",
+      "notes": [
+        "PEPINO",
+        "MELON",
+        "MANDARINA"
+      ],
+      "name": "POLO BLUE",
+      "visible": true,
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FCC104-1781027097723-FOTO_AURA_WEB_(41).png?alt=media&token=4f06cad0-2505-42e2-9cc4-693eba0cfa69",
+      "updatedAt": "2026-06-09T17:45:12.602Z",
+      "gender": "Man",
+      "salesScore": 0
+    },
+    {
+      "notes": [
+        "PIMIENTA SICHUAN",
+        "LAVANDA",
+        "VETIVER",
+        "PACHULI"
+      ],
+      "updatedAt": "2026-07-02T13:16:33.856Z",
+      "name": "SAUVAGE",
+      "duration": "8-12h",
+      "gender": "Man",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FCC116-1782998177230-FOTO_AURA_WEB_(67).png?alt=media&token=274e0b23-6d6a-47ea-9e1d-2321282b050b",
+      "salesScore": 0,
+      "inspiration": "DIOR",
+      "visible": true,
+      "intensity": 3,
+      "badge": "New",
+      "family": "Aromática Fougère",
+      "code": "CC116",
+      "category": "Daily"
+    },
+    {
+      "name": "Ultra Male Jean Paul Gaultier",
+      "gender": "Man",
+      "duration": "12h+",
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219349/CC122_ekvlhg.png",
+      "updatedAt": "2026-06-07T21:58:35.375Z",
+      "visible": true,
+      "salesScore": 0,
+      "inspiration": "JPG",
+      "notes": [
+        "PERA",
+        "VAINA DE VAINILLA",
+        "CANELA"
+      ],
+      "intensity": 5,
+      "code": "CC122",
+      "family": "AVAINILLADO, DULCE, AFRUTADOS",
+      "category": "Night"
+    },
+    {
+      "notes": [
+        "VAINILLA",
+        "LAVANDA",
+        "VETIVER"
+      ],
+      "gender": "Man",
+      "intensity": 5,
+      "code": "CC157",
+      "inspiration": "Valentino",
+      "salesScore": 0,
+      "category": "Night",
+      "name": "Valentino Uomo Born In Roma Intense",
+      "duration": "12h+",
+      "visible": true,
+      "badge": "New",
+      "family": "ORIENTAL AVAINILLADO",
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219357/CC157_zrgxcz.png",
+      "updatedAt": "2026-06-07T21:58:32.162Z"
+    },
+    {
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219357/CC180_fjtxba.png",
+      "name": "The Most Wanted Parfum",
+      "badge": "Bestseller",
+      "inspiration": "Azzaro",
+      "visible": true,
+      "duration": "12h+",
+      "intensity": 5,
+      "gender": "Man",
+      "notes": [
+        "CARDAMOMO",
+        "TÓFE",
+        "AMBARWOOD"
+      ],
+      "family": "ORIENTAL ESPACIADO",
+      "category": "Night",
+      "salesScore": 0,
+      "code": "CC180",
+      "updatedAt": "2026-06-07T21:58:32.644Z"
+    },
+    {
+      "intensity": 5,
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FCC189-1788467332996-FOTO_AURA_WEB_(84).png?alt=media&token=bc2fa63c-4a98-4293-ac3f-df03066b750d",
+      "code": "CC189",
+      "visible": true,
+      "badge": "New",
+      "family": "AROMATICA FOUGERE",
+      "duration": "8-12h",
+      "inspiration": "YVES SAINT LAURENT",
+      "name": "Y EAU PARFUM",
+      "gender": "Man",
+      "salesScore": 0,
+      "category": "Daily",
+      "updatedAt": "2026-09-03T20:29:00.787Z",
+      "notes": [
+        "MANZANA",
+        "JENGIBRE",
+        "BERGAMOTA",
+        "SALVIA",
+        "BAYAS DE ENEBRO"
+      ],
+      "description": ""
+    },
+    {
+      "family": "FLORAL FRUTAL",
+      "duration": "8-12h",
+      "notes": [
+        "HOJAS DE MANZANO",
+        "MANDARINA ITALIANA",
+        "MAGNOLIA"
+      ],
+      "visible": true,
+      "updatedAt": "2026-06-09T19:48:40.295Z",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FDD013-1781034513186-FOTO_AURA_WEB_(63).png?alt=media&token=103ccf97-15b9-4368-b61c-73418cfc415e",
+      "name": "RALPH LAUREN",
+      "intensity": 3,
+      "inspiration": "RALPH",
+      "badge": "New",
+      "code": "DD013",
+      "salesScore": 0,
+      "category": "Daily",
+      "gender": "Woman"
+    },
+    {
+      "name": "BLACK OPIUM",
+      "duration": "8-12h",
+      "inspiration": "YVES SAINT LAURENT",
+      "updatedAt": "2026-10-03T16:44:57.883Z",
+      "notes": [
+        "PERA",
+        "PIMIENTA ROSA",
+        "FLOR DE AZAHAR",
+        "CAFE"
+      ],
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FDD022-1791045887318-FOTO_AURA_WEB_(17).png?alt=media&token=bf9b8016-211e-45cd-b319-441276f9507e",
+      "gender": "Woman",
+      "description": "",
+      "intensity": 5,
+      "salesScore": 0,
+      "visible": true,
+      "family": "ORIENTAL VAINILLA",
+      "code": "DD022",
+      "badge": "Recommended",
+      "category": "Daily"
+    },
+    {
+      "code": "DD089",
+      "notes": [
+        "LIMON SICILIANO",
+        "MANZANA",
+        "CEDRO"
+      ],
+      "family": "FLORAL FRUTAL",
+      "category": "Daily",
+      "visible": true,
+      "inspiration": "DOLCE&GABBANA",
+      "updatedAt": "2026-06-09T17:50:14.379Z",
+      "badge": "New",
+      "salesScore": 0,
+      "gender": "Woman",
+      "duration": "8-12h",
+      "name": "LIGHT BLUE WOMEN",
+      "intensity": 3,
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FDD089-1781027403441-FOTO_AURA_WEB_(42).png?alt=media&token=266fac34-095c-4ee1-a969-944216c51f4d"
+    },
+    {
+      "badge": "Bestseller",
+      "family": "DULCE, AVAINILLADO, AFRUTADO",
+      "name": "LA VIDA ES BELLA LANCOME",
+      "visible": true,
+      "category": "Casual",
+      "intensity": 4,
+      "code": "DD094",
+      "notes": [
+        "VAINILLA",
+        "PACHULI",
+        "GROSELLAS NEGRAS"
+      ],
+      "salesScore": 0,
+      "inspiration": "Lancome",
+      "gender": "Woman",
+      "duration": "10h",
+      "updatedAt": "2026-06-07T21:58:37.331Z",
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219368/DD094_vjzgtf.png"
+    },
+    {
+      "intensity": 4,
+      "notes": [
+        "LAVANDA",
+        "MANDARINA",
+        "VAINILLA"
+      ],
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219367/DD096_ymvwyq.png",
+      "visible": true,
+      "name": "LIBRE YVES SAINT LAURENT",
+      "duration": "10h",
+      "family": "FLORAL BLANCO, CITRICO, LAVANDER",
+      "salesScore": 0,
+      "inspiration": "YSL",
+      "gender": "Woman",
+      "category": "Casual",
+      "updatedAt": "2026-06-07T21:58:37.672Z",
+      "code": "DD096"
+    },
+    {
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219380/DD101_v7dzxn.png",
+      "gender": "Woman",
+      "intensity": 4,
+      "name": "MY WAY GIORGIO ARMANI",
+      "duration": "10h",
+      "code": "DD101",
+      "visible": true,
+      "category": "Casual",
+      "notes": [
+        "FLOR DE AZAHAR",
+        "BERGAMOTA",
+        "NARDO"
+      ],
+      "family": "FLORAL BLANCO, CITRICO",
+      "salesScore": 0,
+      "inspiration": "Giorgio Armani",
+      "updatedAt": "2026-06-07T21:58:36.954Z"
+    },
+    {
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219375/DD159_pcymra.png",
+      "family": "FLORAL FRUTAL",
+      "salesScore": 0,
+      "code": "DD159",
+      "duration": "10h",
+      "visible": true,
+      "intensity": 4,
+      "category": "Casual",
+      "name": "CLOUD BY ARIANA GRANDE",
+      "inspiration": "Ariana Grande",
+      "notes": [
+        "CREMA BATIDA",
+        "PRALINE",
+        "COCO"
+      ],
+      "gender": "Woman",
+      "updatedAt": "2026-06-07T21:58:37.067Z"
+    },
+    {
+      "salesScore": 0,
+      "code": "DD161",
+      "gender": "Woman",
+      "duration": "10h",
+      "visible": true,
+      "inspiration": "Carolina Herrera",
+      "intensity": 4,
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219566/DD193_kzc359.png",
+      "notes": [
+        "VAINILLA",
+        "PEONÍA",
+        "BERGAMOTA"
+      ],
+      "family": "CHIPRE FLORAL",
+      "category": "Night",
+      "updatedAt": "2026-06-07T21:58:37.190Z",
+      "name": "GOOD GIRL BLUSH CH"
+    },
+    {
+      "name": "LA BOMBA CAROLINA HERRERA",
+      "category": "Night",
+      "salesScore": 0,
+      "updatedAt": "2026-06-07T21:58:36.285Z",
+      "visible": true,
+      "badge": "Bestseller",
+      "family": "ORIENTAL FLORAL",
+      "gender": "Woman",
+      "intensity": 4,
+      "inspiration": "Carolina Herrera",
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219379/DD192_ahw119.png",
+      "notes": [
+        "PITAHAYA",
+        "PEONÍA ROJA",
+        "FRANGIPANI",
+        "VAINILLA",
+        "PACHULÍ"
+      ],
+      "code": "DD192",
+      "duration": "10h"
+    },
+    {
+      "intensity": 4,
+      "visible": true,
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219393/DD197_ovm1gi.png",
+      "salesScore": 0,
+      "inspiration": "Dior",
+      "gender": "Woman",
+      "code": "DD197",
+      "duration": "10h",
+      "notes": [
+        "IRIS",
+        "PEONÍA",
+        "LIRIO DE LOS VALLES"
+      ],
+      "name": "MISS DIOR (2021)",
+      "category": "Casual",
+      "updatedAt": "2026-06-07T21:58:36.399Z",
+      "family": "ORIENTAL FLORAL"
+    },
+    {
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775223256/UU002_yqrnur.png",
+      "notes": [
+        "SÁNDALO",
+        "CUERO",
+        "PAPIRO",
+        "CEDRO",
+        "CARDAMOMO",
+        "VIOLETA",
+        "IRIS",
+        "ÁMBAR"
+      ],
+      "family": "Amaderada Aromática",
+      "inspiration": "Le Labo",
+      "visible": true,
+      "duration": "10h",
+      "code": "UU002",
+      "updatedAt": "2026-06-07T21:58:39.233Z",
+      "category": "Casual",
+      "name": "SANTAL 33 LE LABO",
+      "salesScore": 0,
+      "intensity": 4,
+      "gender": "Unisex"
+    },
+    {
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219387/UU013_ywjtrj.png",
+      "family": "ESPECIADO AMADERADO AVAINILLADO",
+      "duration": "12h+",
+      "intensity": 5,
+      "name": "LAYTON DE MARLY",
+      "salesScore": 0,
+      "notes": [
+        "VAINILLA",
+        "MANZANA VERDE",
+        "CARDAMOMO"
+      ],
+      "code": "UU013",
+      "visible": true,
+      "category": "Night",
+      "inspiration": "Parfums de Marly",
+      "gender": "Unisex",
+      "updatedAt": "2026-06-07T21:58:39.434Z"
+    },
+    {
+      "imageUrl": "https://res.cloudinary.com/drtvcb5ei/image/upload/v1775219386/UU019_kgbn89.png",
+      "gender": "Unisex",
+      "notes": [
+        "FRUTAS",
+        "ALMIZCLE",
+        "VAINILLA"
+      ],
+      "intensity": 5,
+      "duration": "12h+",
+      "code": "UU019",
+      "visible": true,
+      "category": "Night",
+      "name": "ERBA PURA XERJOFF",
+      "family": "AFRUTADO CITRICO DULCE",
+      "inspiration": "Xerjoff",
+      "salesScore": 0,
+      "updatedAt": "2026-06-07T21:58:39.549Z",
+      "badge": "Bestseller"
+    },
+    {
+      "updatedAt": "2026-10-03T16:31:50.390Z",
+      "family": "CITRICO AROMATICA",
+      "duration": "8-12h",
+      "badge": "Recommended",
+      "name": "ONE",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FUU021-1791045105378-FOTO_AURA_WEB_(21).png?alt=media&token=4e97b05b-0fcf-43b7-8b73-2659ca0985a4",
+      "visible": true,
+      "salesScore": 0,
+      "description": "",
+      "code": "UU021",
+      "intensity": 5,
+      "category": "Daily",
+      "gender": "Unisex",
+      "inspiration": "CALVIN KLEIN",
+      "notes": [
+        "LIMON",
+        "JAZMIN",
+        "PIÑA",
+        "CEDRO"
+      ]
+    },
+    {
+      "notes": [
+        "ALMENDRA AMARGA",
+        "CEREZA NEGRA",
+        "LICOR DE CEREZA",
+        "CIRUELA",
+        "ROSA TURCA",
+        "JAZMIN"
+      ],
+      "name": "LOST CHERRY",
+      "intensity": 5,
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FUU036-1788467002969-FOTO_AURA_WEB_(81).png?alt=media&token=c7b21c95-e5aa-4990-9c3e-7a57a50dfd73",
+      "family": "ORIENTAL FLORAL",
+      "salesScore": 0,
+      "visible": true,
+      "duration": "8-12h",
+      "updatedAt": "2026-09-03T20:23:30.855Z",
+      "category": "Daily",
+      "inspiration": "TOM FORD",
+      "gender": "Unisex",
+      "code": "UU036",
+      "description": ""
+    },
+    {
+      "duration": "8-12h",
+      "notes": [
+        "FRUTAS TROPICALES",
+        "MANGO",
+        "PIÑA",
+        "JAZMIN",
+        "VAINILLA",
+        "AMIZCLE",
+        "AMBAR",
+        "SANDALO"
+      ],
+      "family": "FLORAL FRUTAL",
+      "inspiration": "XERJOFF",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FUU041-1788466912431-FOTO_AURA_WEB_(80).png?alt=media&token=ac726442-5a89-40fe-b1fd-c35bf85b7a65",
+      "description": "",
+      "code": "UU041",
+      "updatedAt": "2026-09-03T20:22:00.938Z",
+      "salesScore": 0,
+      "name": "CORO",
+      "visible": true,
+      "intensity": 5,
+      "category": "Daily",
+      "gender": "Unisex"
+    },
+    {
+      "badge": "New",
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FUU048-1788466832345-FOTO_AURA_WEB_(79).png?alt=media&token=760485be-7803-436a-930e-e01eb81632a0",
+      "updatedAt": "2026-09-03T20:20:39.392Z",
+      "family": "TROPICAL",
+      "duration": "8-12h",
+      "name": "ERBA GOLD",
+      "intensity": 5,
+      "visible": true,
+      "code": "UU048",
+      "category": "Daily",
+      "notes": [
+        "NARANJA",
+        "BERGAMOTA DE CALABRIA",
+        "LIMON",
+        "JENGIBRE",
+        "MELON",
+        "PERA",
+        "MANZANA V",
+        "CANELA"
+      ],
+      "inspiration": "XERJOFF",
+      "gender": "Unisex",
+      "salesScore": 0,
+      "description": ""
+    },
+    {
+      "salesScore": 0,
+      "duration": "8-12h",
+      "gender": "Unisex",
+      "updatedAt": "2026-09-12T01:58:37.744Z",
+      "notes": [
+        "CARDAMOMO",
+        "LAVANDA",
+        "MANZANA",
+        "PIMIENTA",
+        "CEDRO",
+        "PACHULI"
+      ],
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FUU049-1789178306156-FOTO_AURA_WEB_(90).png?alt=media&token=dc62ad4e-5469-4ae8-b9ce-96021b5885d3",
+      "code": "UU049",
+      "description": "",
+      "name": "AMBER WOOD",
+      "family": "ORIENTAL AMADERADO",
+      "category": "Daily",
+      "visible": true,
+      "badge": "New",
+      "inspiration": "AJMAL",
+      "intensity": 5
+    },
+    {
+      "name": "BLUE MEDITERRANEO",
+      "badge": "New",
+      "category": "Daily",
+      "salesScore": 0,
+      "gender": "Unisex",
+      "updatedAt": "2026-10-03T16:28:00.897Z",
+      "notes": [
+        "LIMON",
+        "ALBAHACA",
+        "NOTAS MARINAS",
+        "JAZMIN"
+      ],
+      "duration": "8-12h",
+      "family": "AMADERADA AROMATICA",
+      "description": "",
+      "visible": true,
+      "inspiration": "ACQUA DI PARMA",
+      "intensity": 5,
+      "imageUrl": "https://firebasestorage.googleapis.com/v0/b/aura-fragancias.firebasestorage.app/o/products%2FUU052-1791044857561-FOTO_AURA_WEB_(22).png?alt=media&token=2d22941c-8fcd-4d4f-9d80-48a8db19fd80",
+      "code": "UU052"
+    }
+  ]
+}

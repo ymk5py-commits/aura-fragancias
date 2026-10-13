@@ -16,6 +16,14 @@ const products = [
   { code: 'CC165', notes: ['PIMIENTA ROSA', 'PIMIENTA NEGRA', 'TABACO'], imageUrl: 'original.jpg' },
 ];
 
+test('Google puede rastrear las imágenes públicas; administración y pagos siguen excluidos', () => {
+  const robots = load('../src/app/robots.ts', { '../lib/site': { SITE: 'https://www.aurafragancias.store' } }).default();
+  assert.ok(robots.rules.allow.includes('/api/perfume-art/'));
+  assert.ok(robots.rules.disallow.includes('/admin'));
+  assert.ok(robots.rules.disallow.includes('/pago'));
+  assert.ok(robots.rules.disallow.includes('/api'));
+});
+
 test('las notas controlan la ambientación, incluidas tildes y errores conocidos; pimienta rosa no produce rosas', () => {
   assert.deepEqual(Array.from(art.productBotanicals(products[0].notes)), ['peonia', 'vainilla', 'bergamota']);
   assert.deepEqual(Array.from(art.productBotanicals(products[1].notes)), ['pimienta-rosa']);

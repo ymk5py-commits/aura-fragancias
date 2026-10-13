@@ -73,3 +73,10 @@ export async function renderProductArtwork(code: string, keys: BotanicalKey[]): 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#f8f5f0"/><g transform="translate(-216 -170) scale(1.4)">${scene}</g></svg>`;
   return sharp(Buffer.from(svg)).resize(960, 1200).jpeg({ quality: 92, chromaSubsampling: '4:4:4' }).toBuffer();
 }
+
+/** Vista rápida: transparencia real y encuadre ajustado al frasco y sus notas. */
+export async function renderProductCutout(code: string, keys: BotanicalKey[]): Promise<Buffer> {
+  const scene = await productSceneSvg(code, keys);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="820" viewBox="110 235 900 738">${scene}</svg>`;
+  return sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toBuffer();
+}

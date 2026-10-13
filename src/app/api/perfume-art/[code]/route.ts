@@ -1,4 +1,4 @@
-import { parseArtworkNotes, renderProductArtwork } from '../../../../lib/server/productArtwork';
+import { parseArtworkNotes, renderProductArtwork, renderProductCutout } from '../../../../lib/server/productArtwork';
 
 export const runtime = 'nodejs';
 
@@ -6,14 +6,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ code
   const { code } = await params;
   const url = new URL(request.url);
   const keys = parseArtworkNotes(url.searchParams.get('notes') || '');
-  if (!/^(CC|DD|UU)\d{3,6}$/.test(code) || !keys || !['1', '2', '3'].includes(url.searchParams.get('v') || '')) {
+  const view = url.searchParams.get('view') || '';
+  if (!/^(CC|DD|UU)\d{3,6}$/.test(code) || !keys || !['1', '2', '3'].includes(url.searchParams.get('v') || '') || !['', 'cutout'].includes(view)) {
     return new Response('Imagen no disponible', { status: 400 });
   }
   try {
-    const image = await renderProductArtwork(code, keys);
+    const image = await (view === 'cutout' ? renderProductCutout(code, keys) : renderProductArtwork(code, keys));
     return new Response(new Uint8Array(image), {
       headers: {
-        'Content-Type': 'image/jpeg',
+        'Content-Type': view === 'cutout' ? 'image/png' : 'image/jpeg',
         'Cache-Control': 'public, max-age=604800, s-maxage=31536000, immutable',
         'X-Content-Type-Options': 'nosniff',
       },

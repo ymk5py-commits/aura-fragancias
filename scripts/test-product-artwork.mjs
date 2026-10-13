@@ -42,6 +42,15 @@ test('nuevos códigos generan imagen sin alterar la foto de administración; la 
   assert.notEqual(art.productArtworkUrl(products[0]), art.productArtworkUrl({ ...products[0], notes: ['LIMÓN'] }));
 });
 
+test('la vista rápida pide transparencia en una URL independiente de las fichas del catálogo', () => {
+  const original = art.productArtworkUrl(products[0]);
+  const cutout = new URL(art.productArtworkUrl(products[0], 'cutout'), 'https://example.com');
+  assert.equal(cutout.searchParams.get('view'), 'cutout');
+  assert.equal(cutout.searchParams.get('notes'), new URL(original, 'https://example.com').searchParams.get('notes'));
+  assert.equal(art.productArtworkUrl(products[0]), original);
+  assert.equal(art.productArtworkUrl({ code: 'GIFT-CARD', notes: [], imageUrl: '/gift.jpg' }, 'cutout'), '/gift.jpg');
+});
+
 test('los perfiles que quedaban con un detalle ahora ofrecen tres notas distintas', () => {
   const cases = [
     { code: 'DD094', notes: ['VAINILLA', 'PACHULÍ', 'GROSELLAS NEGRAS'] },
@@ -70,16 +79,23 @@ test('el endpoint rechaza inyección, claves ajenas y composiciones ilimitadas a
     '../../../../lib/server/productArtwork': {
       parseArtworkNotes: actual.parseArtworkNotes,
       renderProductArtwork: async (code, keys) => { calls.push({ code, keys }); return new Uint8Array([255, 216, 255]); },
+      renderProductCutout: async (code, keys) => { calls.push({ code, keys, cutout: true }); return new Uint8Array([137, 80, 78, 71]); },
     },
   });
-  const request = (code, notes, version = '3') => route.GET(new Request(`https://example.com/api/perfume-art/x?v=${version}&notes=${encodeURIComponent(notes)}`), { params: Promise.resolve({ code }) });
+  const request = (code, notes, version = '3', view = '') => route.GET(new Request(`https://example.com/api/perfume-art/x?v=${version}&notes=${encodeURIComponent(notes)}&view=${encodeURIComponent(view)}`), { params: Promise.resolve({ code }) });
   for (const [code, notes, version] of [['<script>', 'rosa', '1'], ['DD161', '../../private', '1'], ['DD161', 'rosa,rosa', '1'], ['DD161', 'rosa,limon,pera,coco', '1'], ['DD161', 'rosa', '99']]) {
     assert.equal((await request(code, notes, version)).status, 400);
   }
+  assert.equal(calls.length, 0);
+  assert.equal((await request('DD161', 'rosa', '3', '../../private')).status, 400);
   assert.equal(calls.length, 0);
   const response = await request('DD161', 'peonia,vainilla,bergamota');
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('Content-Type'), 'image/jpeg');
   assert.match(response.headers.get('Cache-Control'), /immutable/);
   assert.equal(calls[0].code, 'DD161');
+  const transparent = await request('DD161', 'peonia,vainilla,bergamota', '3', 'cutout');
+  assert.equal(transparent.status, 200);
+  assert.equal(transparent.headers.get('Content-Type'), 'image/png');
+  assert.equal(calls[1].cutout, true);
 });

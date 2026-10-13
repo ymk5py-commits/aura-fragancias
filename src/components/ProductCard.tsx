@@ -256,7 +256,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
     return createPortal(
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-0 sm:p-4 animate-fade-in">
           <div className="absolute inset-0 bg-aura-ink/92 backdrop-blur-xl" onClick={() => setShowDetails(false)} />
-          <div className="relative w-full h-full sm:h-auto sm:max-w-4xl bg-white shadow-2xl overflow-y-auto sm:overflow-hidden animate-scale-in flex flex-col md:flex-row sm:max-h-[90vh] z-[1001]">
+          <div role="dialog" aria-modal="true" aria-labelledby={`quick-view-${perfume.code}`} className="relative w-full h-full sm:h-auto sm:max-w-5xl bg-white shadow-2xl overflow-y-auto sm:overflow-hidden animate-scale-in flex flex-col md:flex-row sm:max-h-[90vh] z-[1001]">
             <button
               onClick={() => setShowDetails(false)}
               aria-label="Cerrar"
@@ -266,16 +266,16 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
             </button>
 
             {/* Visual */}
-            <div className="w-full md:w-5/12 bg-aura-ivory p-5 sm:p-10 flex items-center justify-center shrink-0 border-b md:border-b-0 md:border-r border-zinc-100">
-              <div className="relative w-full max-w-[360px] aspect-[4/5] bg-white border border-zinc-100 shadow-2xl overflow-hidden">
+            <div className="w-full md:w-1/2 p-4 sm:p-5 md:p-3 flex items-center justify-center shrink-0">
+              <div className="relative w-full max-w-[520px] aspect-[6/5] md:aspect-[4/5]">
                 {artworkUrl ? (
                   <Image
-                    src={artworkUrl}
+                    src={productArtworkUrl(perfume, 'cutout')}
                     alt={perfume.name}
                     fill
-                    sizes="(max-width: 768px) 90vw, 360px"
+                    sizes="(max-width: 768px) 95vw, 500px"
                     loader={smartImageLoader}
-                    className="object-cover"
+                    className="object-contain"
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col justify-center items-center p-8 text-center">
@@ -287,12 +287,12 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
             </div>
 
             {/* Info */}
-            <div className="w-full md:w-7/12 p-7 sm:p-12 flex flex-col bg-white overflow-y-auto">
+            <div className="w-full md:w-1/2 p-7 sm:p-10 flex flex-col bg-white overflow-y-auto">
               <div className="mb-8">
                 <span className="text-aura-gold-deep font-semibold tracking-[0.35em] text-[10px] uppercase mb-3 block">
                   Inspiración {perfume.inspiration}
                 </span>
-                <h2 className="text-3xl sm:text-4xl font-luxury text-aura-ink leading-tight mb-2">{perfume.name}</h2>
+                <h2 id={`quick-view-${perfume.code}`} className="text-3xl sm:text-4xl font-luxury text-aura-ink leading-tight mb-2">{perfume.name}</h2>
                 <p className="text-[11px] text-zinc-500 font-medium tracking-[0.2em] uppercase">{perfume.family}</p>
                 <div className="flex flex-wrap items-center gap-2 mt-5">
                   <div className="flex items-center gap-2 bg-aura-ivory px-3.5 py-2 border border-zinc-100">

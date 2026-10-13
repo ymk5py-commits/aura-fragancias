@@ -4,12 +4,35 @@ Emisor autorizado: **+595 994 414 986** (YCloud / cuenta Meta **Aura**).
 Destino autorizado: **+595 984 348 058**. Ambos están fijados en código; ningún
 campo del checkout puede cambiar el destinatario.
 
-## Estado de la implementación
+## Estado en producción
 
-El código y las pruebas están preparados. **Agregar estos archivos o desplegar
-la web no activa los avisos.** Se requieren la conexión real de YCloud, secretos
-en Firebase, despliegue de las funciones y una prueba de entrega al destinatario.
-No se incorporan claves al repositorio.
+**Activado el 13/10/2026.** Las cinco funciones están desplegadas en Firebase y
+la conexión existente de YCloud está guardada en Secret Manager. La fecha de
+corte configurada es `2026-10-13T23:21:51Z`; no se reenvía el historial previo.
+Las claves no se incorporan al repositorio ni a la web pública. Desplegar
+solamente la web en Vercel no modifica estas funciones ni sus secretos.
+
+Se verificó la entrega real desde el disparador de Firestore, la cola, el
+trabajador y YCloud hasta el teléfono autorizado:
+
+| Aviso de prueba | ID de YCloud | Entregado el 13/10, hora de Asunción |
+| --- | --- | --- |
+| Nuevo pedido | `6acec050ef512c313a91aa22` | 20:35:52 |
+| Pago confirmado | `6acec090871280044bac2d40` | 20:36:51 |
+
+Ambos corresponden a `AURA-PRUEBA13OCT2026`, fueron entregados y tienen un único
+intento. Se repitió la transición de confirmación y se comprobó que conservaran
+los mismos IDs y un solo intento. La prueba utilizó un registro privado de
+diagnóstico; no generó pedidos comerciales, ventas ni eventos Purchase.
+Pasaron nueve pruebas unitarias y siete pruebas con Firestore Emulator.
+
+YCloud informó un costo final de **USD 0,0113 por mensaje de prueba**. Es el costo
+observado en esas entregas, no una tarifa garantizada para futuros mensajes.
+
+Existe una comprobación interna en `whatsappAlertTests`, sin acceso desde el
+checkout o el panel. Solo acepta códigos `AURA-PRUEBA…` y recorre el mismo
+trabajador de envío y conciliación. No crea pedidos, ventas ni conversiones.
+Los registros de prueba se conservan separados del historial comercial.
 
 Plantillas creadas en Meta el 13/10/2026, categoría Utilidad, idioma `es`,
 WABA `1397375458766668`:
@@ -20,8 +43,9 @@ WABA `1397375458766668`:
 | `aura_pago_confirmado_web` | `39432628936350786` | código, importe cobrado, medio de pago |
 
 Ambas tienen un botón estático **Ver pedidos** hacia
-`https://www.aurafragancias.store/admin#pedidos`. Hay que comprobar que ambas
-figuren aprobadas y disponibles en YCloud antes de activar.
+`https://www.aurafragancias.store/admin#pedidos`. Ambas figuran aprobadas en Meta
+y YCloud. Se configuró una ventana de entrega de **12 horas** en Meta, para que
+el aviso no venza a los diez minutos si el teléfono está temporalmente sin red.
 
 ## Funcionamiento
 
@@ -55,7 +79,7 @@ La verificación automática y una confirmación posterior desde el administrado
 la misma identidad de aviso; no generan dos mensajes de pago. Si se confirma
 el pago antes de enviar el aviso pendiente, ese aviso pendiente se omite.
 
-## Activación segura
+## Configuración y despliegues posteriores
 
 Proyecto Firebase existente: `aura-fragancias`; Firestore Standard,
 `southamerica-east1`. La facturación del proyecto ya está habilitada. Las

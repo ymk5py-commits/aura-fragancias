@@ -19,21 +19,22 @@ const outbox = db.collection('whatsappAlerts');
 const paymentChecks = db.collection('whatsappPaymentChecks');
 const API = 'https://api.ycloud.com/v2/whatsapp/messages';
 
-async function enqueue(order, documentId, event, verifiedMethod) {
+async function enqueue(order, documentId, event, verifiedMethod, testing = false) {
   const ref = outbox.doc(alertKey(order.orderId, event));
   await db.runTransaction(async tx => {
     if ((await tx.get(ref)).exists) return;
-    tx.create(ref, { ...makeAlert(order, documentId, event, Date.now(), verifiedMethod), updatedAt: FieldValue.serverTimestamp() });
+    tx.create(ref, { ...makeAlert(order, documentId, event, Date.now(), verifiedMethod), ...(testing ? { test: true } : {}), updatedAt: FieldValue.serverTimestamp() });
   });
 }
 
-export const auraOrderAlerts = onDocumentWritten({ ...options, document: 'orders/{orderId}', retry: true }, async event => {
+async function handleOrder(event, testing = false) {
   if (!enabled.value()) return;
   const after = event.data?.after.data();
   // createTime lo fija Firestore; no confiar en la fecha enviada por el comprador.
   if (!eligibleOrder({ ...after, createdAt: event.data?.after.createTime }, startedAt.value())) return;
+  if (testing && !/^AURA-PRUEBA[A-Z0-9]+$/.test(after.orderId)) return;
   const before = event.data.before.data();
-  if (/pagopar|tarjeta/i.test(after.paymentMethod || '') && /^[A-Za-z0-9_-]{6,128}$/.test(after.pagoparHash || '')) {
+  if (!testing && /pagopar|tarjeta/i.test(after.paymentMethod || '') && /^[A-Za-z0-9_-]{6,128}$/.test(after.pagoparHash || '')) {
     // Una comprobación por pedido: el trabajador lee siempre el hash actual.
     const ref = paymentChecks.doc(alertKey(after.orderId, 'pago'));
     await db.runTransaction(async tx => {
@@ -42,9 +43,15 @@ export const auraOrderAlerts = onDocumentWritten({ ...options, document: 'orders
         expiresAtMs: Date.now() + 7 * 24 * 60 * 60_000 });
     });
   }
-  if (!before) await enqueue(after, event.params.orderId, after.status === 'confirmado' ? 'pago' : 'pedido');
-  else if (before.status !== 'confirmado' && after.status === 'confirmado') await enqueue(after, event.params.orderId, 'pago');
-});
+  if (!before) await enqueue(after, event.params.orderId, after.status === 'confirmado' ? 'pago' : 'pedido', undefined, testing);
+  else if (before.status !== 'confirmado' && after.status === 'confirmado') await enqueue(after, event.params.orderId, 'pago', undefined, testing);
+}
+
+export const auraOrderAlerts = onDocumentWritten({ ...options, document: 'orders/{orderId}', retry: true }, event => handleOrder(event));
+
+// Colección privada sin acceso del checkout ni del panel. Permite comprobar la
+// entrega completa sin crear pedidos, ventas, Gift Cards ni conversiones falsas.
+export const auraOrderAlertTests = onDocumentWritten({ ...options, document: 'whatsappAlertTests/{orderId}', retry: true }, event => handleOrder(event, true));
 
 async function patch(ref, fields) {
   await ref.update({ ...fields, updatedAt: FieldValue.serverTimestamp() });
@@ -62,7 +69,7 @@ async function dispatch(ref) {
       tx.update(ref, { state: 'expired', updatedAt: FieldValue.serverTimestamp() });
       return null;
     }
-    const order = await tx.get(db.collection('orders').doc(alert.orderDocumentId));
+    const order = await tx.get(db.collection(alert.test === true ? 'whatsappAlertTests' : 'orders').doc(alert.orderDocumentId));
     if (!order.exists || order.data().status === 'cancelado') {
       tx.update(ref, { state: 'cancelled', updatedAt: FieldValue.serverTimestamp() });
       return null;

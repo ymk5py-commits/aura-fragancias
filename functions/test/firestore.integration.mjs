@@ -8,7 +8,7 @@ process.env.WHATSAPP_ALERTS_ENABLED = 'true';
 process.env.WHATSAPP_ALERTS_STARTED_AT = new Date(Date.now() - 60 * 60_000).toISOString();
 process.env.WHATSAPP_ALERTS_DAILY_LIMIT = '100';
 process.env.YCLOUD_API_KEY = 'local-test-key-never-used-on-network';
-const { auraOrderAlerts, auraSendOrderAlert, auraReconcileOrderAlerts, auraVerifyCardPayments } = await import('../src/index.js');
+const { auraOrderAlerts, auraOrderAlertTests, auraSendOrderAlert, auraReconcileOrderAlerts, auraVerifyCardPayments } = await import('../src/index.js');
 const { getFirestore } = await import('firebase-admin/firestore');
 const { alertKey } = await import('../src/alerts.js');
 const db = getFirestore();
@@ -134,6 +134,27 @@ test('circular payment cursor reaches more than one batch of pending orders', as
   assert.equal(verifiedOrders.size, 50);
   await auraVerifyCardPayments.run({});
   assert.equal(verifiedOrders.size, 55);
+});
+
+test('private diagnostic path exercises the same sender without creating a business order or sale', async () => {
+  const ref = db.collection('whatsappAlertTests').doc('diagnostic-test');
+  const before = await ref.get();
+  await ref.set({ orderId: 'AURA-PRUEBAPRIVADA', status: 'pendiente', total: 100000,
+    items: [{ code: 'PRUEBA', quantity: 1 }], paymentMethod: 'Transferencia' });
+  const after = await ref.get();
+  await auraOrderAlertTests.run({ data: { before, after }, params: { orderId: ref.id } });
+  const notification = alertRef('AURA-PRUEBAPRIVADA');
+  assert.equal((await notification.get()).data().test, true);
+  const count = sent.length;
+  await send(notification);
+  assert.equal(sent.length, count + 1);
+  assert.equal(sent.at(-1).template.components[0].parameters[0].text, 'AURA-PRUEBAPRIVADA');
+  await ref.update({ status: 'confirmado' });
+  await auraOrderAlertTests.run({ data: { before: after, after: await ref.get() }, params: { orderId: ref.id } });
+  await send(alertRef('AURA-PRUEBAPRIVADA', 'pago'));
+  assert.equal(sent.length, count + 2);
+  assert.equal((await db.collection('orders').doc(ref.id).get()).exists, false);
+  assert.equal((await db.collection('sales').doc(`web_${ref.id}`).get()).exists, false);
 });
 
 test('delivery reconciliation progresses through more than 100 accepted messages', async () => {

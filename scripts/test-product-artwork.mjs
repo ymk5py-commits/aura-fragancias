@@ -10,7 +10,8 @@ function load(file, imports = {}) {
   vm.runInNewContext(outputText, { exports, URLSearchParams, URL, Response, Uint8Array, process: { cwd: () => '' }, console, require: name => { assert.ok(name in imports, name); return imports[name]; } });
   return exports;
 }
-const art = load('../src/lib/productArtwork.ts');
+const catalogNotes = load('../src/lib/catalogNotes.ts');
+const art = load('../src/lib/productArtwork.ts', { './catalogNotes': catalogNotes });
 const products = [
   { code: 'DD161', notes: ['VAINILLA', 'PEONÍA', 'BERGAMOTA'], imageUrl: 'original.jpg' },
   { code: 'CC165', notes: ['PIMIENTA ROSA', 'PIMIENTA NEGRA', 'TABACO'], imageUrl: 'original.jpg' },
@@ -26,19 +27,38 @@ test('Google puede rastrear las imágenes públicas; administración y pagos sig
 
 test('las notas controlan la ambientación, incluidas tildes y errores conocidos; pimienta rosa no produce rosas', () => {
   assert.deepEqual(Array.from(art.productBotanicals(products[0].notes)), ['peonia', 'vainilla', 'bergamota']);
-  assert.deepEqual(Array.from(art.productBotanicals(products[1].notes)), ['pimienta-rosa']);
+  assert.deepEqual(Array.from(art.productBotanicals(products[1].notes)), ['pimienta-rosa', 'pimienta-negra', 'tabaco']);
   assert.deepEqual(Array.from(art.productBotanicals(['BERGAMONTA', 'CARDOMOMO'])), ['bergamota', 'cardamomo']);
-  assert.deepEqual(Array.from(art.productBotanicals(['NOTAS MARINAS'])), []);
+  assert.deepEqual(Array.from(art.productBotanicals(['NOTAS MARINAS'])), ['acuatico']);
   assert.ok(art.productBotanicals(['ROSA', 'JAZMÍN', 'LAVANDA', 'VAINILLA']).length <= 3);
 });
 
 test('nuevos códigos generan imagen sin alterar la foto de administración; la Gift Card conserva su arte', () => {
   const newProduct = { code: 'UU9999', notes: ['COCO'], imageUrl: '' };
-  assert.match(art.productArtworkUrl(newProduct), /\/api\/perfume-art\/UU9999\?v=2&notes=coco$/);
+  assert.match(art.productArtworkUrl(newProduct), /\/api\/perfume-art\/UU9999\?v=3&notes=coco$/);
   assert.equal(newProduct.imageUrl, '');
   assert.equal(products[0].imageUrl, 'original.jpg');
   assert.equal(art.productArtworkUrl({ code: 'GIFT-CARD', notes: [], imageUrl: '/gift.jpg' }), '/gift.jpg');
   assert.notEqual(art.productArtworkUrl(products[0]), art.productArtworkUrl({ ...products[0], notes: ['LIMÓN'] }));
+});
+
+test('los perfiles que quedaban con un detalle ahora ofrecen tres notas distintas', () => {
+  const cases = [
+    { code: 'DD094', notes: ['VAINILLA', 'PACHULÍ', 'GROSELLAS NEGRAS'] },
+    { code: 'CC180', notes: ['CARDAMOMO', 'TÓFE', 'AMBARWOOD'] },
+    { code: 'DD159', notes: ['CREMA BATIDA', 'PRALINE', 'COCO'] },
+    { code: 'CC251', notes: ['BERGAMOTA', 'FLOR DEL NARANJO'] },
+    { code: 'DD185', notes: ['ORIENTAL  VAINILLA'] },
+  ];
+  for (const product of cases) {
+    const original = JSON.stringify(product);
+    const selection = art.productBotanicalSelections(catalogNotes.catalogOlfactoryNotes(product));
+    assert.equal(selection.length, 3, product.code);
+    assert.equal(new Set(selection.map(item => item.key)).size, 3);
+    assert.equal(JSON.stringify(product), original);
+  }
+  const custom = { code: 'DD185', notes: ['LIMÓN', 'BERGAMOTA', 'MENTA'] };
+  assert.equal(catalogNotes.catalogOlfactoryNotes(custom), custom.notes);
 });
 
 test('el endpoint rechaza inyección, claves ajenas y composiciones ilimitadas antes de renderizar', async () => {
@@ -52,7 +72,7 @@ test('el endpoint rechaza inyección, claves ajenas y composiciones ilimitadas a
       renderProductArtwork: async (code, keys) => { calls.push({ code, keys }); return new Uint8Array([255, 216, 255]); },
     },
   });
-  const request = (code, notes, version = '2') => route.GET(new Request(`https://example.com/api/perfume-art/x?v=${version}&notes=${encodeURIComponent(notes)}`), { params: Promise.resolve({ code }) });
+  const request = (code, notes, version = '3') => route.GET(new Request(`https://example.com/api/perfume-art/x?v=${version}&notes=${encodeURIComponent(notes)}`), { params: Promise.resolve({ code }) });
   for (const [code, notes, version] of [['<script>', 'rosa', '1'], ['DD161', '../../private', '1'], ['DD161', 'rosa,rosa', '1'], ['DD161', 'rosa,limon,pera,coco', '1'], ['DD161', 'rosa', '99']]) {
     assert.equal((await request(code, notes, version)).status, 400);
   }

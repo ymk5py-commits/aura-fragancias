@@ -2,6 +2,7 @@ import type { Perfume, SiteSettings } from '../types';
 import { SITE } from './site';
 import { cldn } from './img';
 import { productArtworkUrl } from './productArtwork';
+import { catalogOlfactoryNotes } from './catalogNotes';
 
 export const SIZE_KEYS = ['10', '30', '50'] as const;
 export type SizeKey = typeof SIZE_KEYS[number];
@@ -14,7 +15,7 @@ export function productLink(code: string, size?: SizeKey) {
 
 // Correcciones ortográficas inequívocas; no cambia códigos ni descripciones propias.
 export function cleanCatalogProduct(p: Perfume): Perfume {
-  return { ...p, inspiration: p.inspiration?.replace(/\bGIOGIO\b/gi, 'GIORGIO'), family: p.family?.replace(/\bESPACIADO\b/gi, 'ESPECIADO') };
+  return { ...p, notes: catalogOlfactoryNotes(p), inspiration: p.inspiration?.replace(/\bGIOGIO\b/gi, 'GIORGIO'), family: p.family?.replace(/\bESPACIADO\b/gi, 'ESPECIADO') };
 }
 
 export function latestUpdate(...values: (string | undefined)[]): string | undefined {

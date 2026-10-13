@@ -22,8 +22,9 @@ function load(file, imports, globals = {}) {
   return exports;
 }
 
-const artwork = load('../src/lib/productArtwork.ts', {});
-const seo = load('../src/lib/catalogSeo.ts', { './site': { SITE: 'https://www.aurafragancias.store' }, './img': { cldn: (url) => url }, './productArtwork': artwork });
+const catalogNotes = load('../src/lib/catalogNotes.ts', {});
+const artwork = load('../src/lib/productArtwork.ts', { './catalogNotes': catalogNotes });
+const seo = load('../src/lib/catalogSeo.ts', { './site': { SITE: 'https://www.aurafragancias.store' }, './img': { cldn: (url) => url }, './productArtwork': artwork, './catalogNotes': catalogNotes });
 function serverData(fetch) {
   return load('../src/lib/serverData.ts', {
     './catalogSeo': seo,
@@ -110,9 +111,9 @@ test('sitemap keeps real modification dates stable and omits unknown dates', asy
   assert.deepEqual(await sitemap.default(), first);
   assert.equal(first.find((p) => p.url.endsWith('/CC001')).lastModified, products[0].updatedAt);
   assert.equal(first.find((p) => p.url.endsWith('/DD001')).lastModified, undefined);
-  assert.equal(first.find((p) => p.url.endsWith('/CC001')).images[0], 'https://www.aurafragancias.store/api/perfume-art/CC001?v=2&amp;notes=');
+  assert.equal(first.find((p) => p.url.endsWith('/CC001')).images[0], 'https://www.aurafragancias.store/api/perfume-art/CC001?v=3&amp;notes=');
   const xml = resolveSitemap(first);
-  assert.ok(xml.includes('<image:loc>https://www.aurafragancias.store/api/perfume-art/DD001?v=2&amp;notes=</image:loc>'));
+  assert.ok(xml.includes('<image:loc>https://www.aurafragancias.store/api/perfume-art/DD001?v=3&amp;notes=</image:loc>'));
   assert.equal(xml.includes('alt=media&token='), false);
   assert.equal(xml.includes('&amp;amp;'), false);
   assert.equal(first.find((p) => p.url.endsWith('/terminos-y-condiciones')).lastModified, undefined);

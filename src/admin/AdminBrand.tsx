@@ -5,7 +5,7 @@ import { Download, Tags } from 'lucide-react';
 const downloads = [
   {
     title: 'Plan y carruseles · octubre 2026',
-    detail: 'Edición botánica: diez carruseles, 50 imágenes con flores, frutas y sombras suaves, guía de campaña, calendario y copys.',
+    detail: 'Diez carruseles y 50 imágenes: fichas con tres notas visibles y sombras realistas, guía de campaña, calendario y copys.',
     href: '/brand/descargas/AURA-10-carruseles-octubre-2026.zip',
     meta: 'ZIP · 1080 × 1080 px · del 13 al 31 de octubre',
   },

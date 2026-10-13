@@ -11,8 +11,9 @@ function load(file, imports, globals = {}) {
   return exports;
 }
 const SITE = 'https://www.aurafragancias.store';
-const artwork = load('../src/lib/productArtwork.ts', {}, { URLSearchParams });
-const seo = load('../src/lib/catalogSeo.ts', { './site': { SITE }, './img': { cldn: (url) => url }, './productArtwork': artwork });
+const catalogNotes = load('../src/lib/catalogNotes.ts', {});
+const artwork = load('../src/lib/productArtwork.ts', { './catalogNotes': catalogNotes }, { URLSearchParams });
+const seo = load('../src/lib/catalogSeo.ts', { './site': { SITE }, './img': { cldn: (url) => url }, './productArtwork': artwork, './catalogNotes': catalogNotes });
 const perfume = { code: 'DD192', name: 'La Bomba', inspiration: 'Carolina Herrera', family: 'Floral', notes: ['Jazmín'], gender: 'Woman' };
 
 test('cada variante mantiene tamaño, precio, URL e identificador del catálogo; no promete delivery gratis universal', () => {

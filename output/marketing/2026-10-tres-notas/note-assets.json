@@ -1,0 +1,433 @@
+{
+  "mode": "built-in image_gen",
+  "basePrompt": "Use case: ads-marketing.\nAsset type: photorealistic isolated olfactory-note prop for a luxury Äura perfume product photograph.\nScene/backdrop: truly transparent background; the object rests on an invisible level studio tabletop.\nStyle/medium: exceptionally realistic macro product photography, natural irregularities and fine material texture, restrained refined styling. Front three-quarter angle at tabletop height, not flat lay.\nLighting: warm softbox daylight from upper left, believable directional shading, a clearly visible soft contact shadow falling toward the lower right; gentle ambient occlusion beneath the object. The object must look grounded, never floating.\nComposition: a single small low compact arrangement, centered, occupying about 75% of the image width, ample transparent padding. Natural scale and low perspective matching a perfume bottle standing beside it.\nConstraints: only the exact requested subject; no perfume bottle, no packaging, no text, no logos, no borders, no extra decorations. No colored background or large floor plane. Preserve real transparent alpha around the subject and its subtle shadow.\nSubject: ",
+  "subjects": [
+    {
+      "key": "pachuli",
+      "subject": "Two fresh patchouli leaves with softly wrinkled deep green surfaces and a short tiny stem."
+    },
+    {
+      "key": "jengibre",
+      "subject": "A small fresh ginger root with one clean cut slice showing pale fibrous flesh."
+    },
+    {
+      "key": "naranja",
+      "subject": "One juicy orange wedge and a small half orange with natural orange peel."
+    },
+    {
+      "key": "ambar",
+      "subject": "Three small warm honey-amber resin pieces, slightly translucent with realistic irregular edges. A visual evocation of an amber fragrance accord, no jewelry."
+    },
+    {
+      "key": "cuero",
+      "subject": "A small elegantly curled strip of supple cognac brown leather, realistic fine grain and soft rounded folds, no stitching."
+    },
+    {
+      "key": "ciruela",
+      "subject": "One small deep purple plum and a cut half revealing golden-red flesh and its natural stone."
+    },
+    {
+      "key": "menta",
+      "subject": "A tiny fresh sprig of mint with three recognizable serrated vivid green leaves."
+    },
+    {
+      "key": "pimienta-negra",
+      "subject": "A low compact pile of black peppercorns, with two tiny dark reddish Sichuan pepper husks beside it."
+    },
+    {
+      "key": "benjui",
+      "subject": "Two small natural benzoin resin chunks in soft honey-cream and light brown colors, realistic granular organic surfaces."
+    },
+    {
+      "key": "romero",
+      "subject": "Two short fresh rosemary sprigs laid low diagonally, recognizable fine needle leaves."
+    },
+    {
+      "key": "acuatico",
+      "subject": "A very low clear water ripple with a few crystal droplets and a thin sparkling water edge, transparent pure water, no container, no ocean or landscape."
+    },
+    {
+      "key": "almizcle",
+      "subject": "One small airy white cotton boll with a little pale cotton fiber, a restrained visual evocation of a soft clean musk accord, no fabric or container."
+    },
+    {
+      "key": "salvia",
+      "subject": "Two small fresh sage leaves, softly fuzzy muted sage-green surfaces, a tiny hidden stem."
+    },
+    {
+      "key": "canela",
+      "subject": "Two small cinnamon sticks with one tiny curled bark chip, warm brown textured bark."
+    },
+    {
+      "key": "caramelo",
+      "subject": "Two small glossy golden toffee caramel cubes, one with a softened rounded edge, no wrapper."
+    },
+    {
+      "key": "anis",
+      "subject": "Two natural whole star-anise pods with recognizable eight-point form, warm reddish brown."
+    },
+    {
+      "key": "casis",
+      "subject": "A small fresh cluster of shiny blackcurrants, a tiny short twig and one restrained dark green leaf."
+    },
+    {
+      "key": "pepino",
+      "subject": "Two fresh thin cucumber slices with pale green translucent flesh and dark green rind."
+    },
+    {
+      "key": "vetiver",
+      "subject": "One small elegant bundle of dry vetiver roots, natural fine tan-brown fibers loosely fanned, no tie or container."
+    },
+    {
+      "key": "enebro",
+      "subject": "A tiny low juniper twig with five dusty blue juniper berries and a few short fine green needles."
+    },
+    {
+      "key": "frutos-rojos",
+      "subject": "Three ripe raspberries and two small dark red-black boysenberries resting together, with one tiny green leaf."
+    },
+    {
+      "key": "cannabis",
+      "subject": "One small natural green cannabis fan leaf, recognizable slender serrated lobes, resting low, no buds, no smoking objects."
+    },
+    {
+      "key": "licor",
+      "subject": "One very small refined clear crystal lowball glass containing a little warm amber liquor, realistic highlights, no ice, no bottle, no labels."
+    },
+    {
+      "key": "incienso",
+      "subject": "Three small warm ivory and pale amber frankincense resin tears, natural irregular translucent details, no smoke, no incense holder."
+    },
+    {
+      "key": "pimienta-blanca",
+      "subject": "A small low cluster of ivory white peppercorns with natural fine textured surfaces."
+    },
+    {
+      "key": "tonka",
+      "subject": "Three small dried tonka beans, dark brown elongated wrinkled shells, naturally irregular."
+    },
+    {
+      "key": "pino",
+      "subject": "One short fresh pine sprig with soft fine deep green needles, low compact arrangement, no cone."
+    },
+    {
+      "key": "cilantro",
+      "subject": "Two fresh cilantro leaves with recognizable scalloped lobes and a very short hidden stem."
+    },
+    {
+      "key": "laurel",
+      "subject": "Two small fresh bay laurel leaves, elegant smooth dark green narrow oval shape, one gently curved."
+    },
+    {
+      "key": "verbena",
+      "subject": "One tiny lemon verbena sprig with three narrow slightly serrated fresh green leaves, low compact arrangement."
+    },
+    {
+      "key": "especias",
+      "subject": "A very restrained low arrangement of one tiny cinnamon curl, one star-anise pod and four dark peppercorns."
+    },
+    {
+      "key": "avellana",
+      "subject": "Two hazelnuts in warm brown shells and one peeled hazelnut half, realistic nut texture."
+    },
+    {
+      "key": "cafe",
+      "subject": "A small refined low arrangement of five rich dark roasted coffee beans with visible central grooves."
+    },
+    {
+      "key": "tabaco",
+      "subject": "A small elegantly curled dry tobacco leaf with warm brown veining, no cigarette, no cigar, no smoke."
+    },
+    {
+      "key": "champagne",
+      "subject": "One small delicate crystal champagne coupe holding a little very pale blush champagne, realistic tiny bubbles, low compact stem, no bottle or labels."
+    },
+    {
+      "key": "hojas-manzano",
+      "subject": "Two small fresh apple-tree leaves with recognizable oval gently serrated shapes, dark green top and one soft lighter underside."
+    },
+    {
+      "key": "magnolia",
+      "subject": "One small creamy white magnolia blossom resting slightly on its side, thick satin petals, hidden short stem."
+    },
+    {
+      "key": "fresia",
+      "subject": "A tiny short freesia flower sprig with two ivory flowers and one small soft yellow bud, low elegant arrangement."
+    },
+    {
+      "key": "durazno",
+      "subject": "One small ripe peach half and one delicate peach wedge showing softly golden flesh and muted rosy peach skin."
+    },
+    {
+      "key": "nardo",
+      "subject": "A very short low tuberose sprig with three small creamy white waxy tubular blossoms, natural delicate shapes."
+    },
+    {
+      "key": "sal",
+      "subject": "A small low scattering of translucent white sea-salt crystals, beautifully irregular coarse mineral texture, no bowl."
+    },
+    {
+      "key": "crema",
+      "subject": "One small elegant dollop of fresh whipped cream, ivory white soft peaks and realistic silky airy texture, no spoon, plate or food container."
+    },
+    {
+      "key": "praline",
+      "subject": "Two tiny refined hazelnut praline pieces with one cut face revealing a warm nut-brown filling, unwrapped, no plate."
+    },
+    {
+      "key": "te",
+      "subject": "A small elegant low cluster of dark curled Lapsang Souchong black tea leaves, natural dry textures, no cup or container."
+    },
+    {
+      "key": "lirio-valles",
+      "subject": "A very short softly curved lily-of-the-valley sprig with four tiny white bell-shaped flowers and one small green leaf."
+    },
+    {
+      "key": "notas-verdes",
+      "subject": "A tiny low arrangement of two fresh soft green leaves and one slender green grass blade, dewy natural surfaces, no flowers."
+    }
+  ],
+  "outputs": [
+    {
+      "key": "pachuli",
+      "subject": "Two fresh patchouli leaves with softly wrinkled deep green surfaces and a short tiny stem.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-b9576ce1-6e3f-4623-bc82-b078d8a5327b.png"
+    },
+    {
+      "key": "jengibre",
+      "subject": "A small fresh ginger root with one clean cut slice showing pale fibrous flesh.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-e88c3aea-26ac-403e-9700-807eb4c156a6.png"
+    },
+    {
+      "key": "naranja",
+      "subject": "One juicy orange wedge and a small half orange with natural orange peel.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-9d067770-f809-4b32-9c19-f437bd77fe00.png"
+    },
+    {
+      "key": "ambar",
+      "subject": "Three small warm honey-amber resin pieces, slightly translucent with realistic irregular edges. A visual evocation of an amber fragrance accord, no jewelry.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-50dd0b68-95a2-45ed-a34d-e3e363f2411a.png"
+    },
+    {
+      "key": "cuero",
+      "subject": "A small elegantly curled strip of supple cognac brown leather, realistic fine grain and soft rounded folds, no stitching.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-1c8a8405-d72d-449d-8b56-94412cf1d189.png"
+    },
+    {
+      "key": "ciruela",
+      "subject": "One small deep purple plum and a cut half revealing golden-red flesh and its natural stone.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-f9010e12-fd3f-42b1-8859-b00fdbb06667.png"
+    },
+    {
+      "key": "menta",
+      "subject": "A tiny fresh sprig of mint with three recognizable serrated vivid green leaves.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-a2566af8-7144-4d94-9517-bc445fc3aac3.png"
+    },
+    {
+      "key": "pimienta-negra",
+      "subject": "A low compact pile of black peppercorns, with two tiny dark reddish Sichuan pepper husks beside it.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-b3691353-eb27-456a-a5db-7c37250daefa.png"
+    },
+    {
+      "key": "benjui",
+      "subject": "Two small natural benzoin resin chunks in soft honey-cream and light brown colors, realistic granular organic surfaces.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-6f4697ad-da9b-47a3-b60c-4718c904f5f2.png"
+    },
+    {
+      "key": "romero",
+      "subject": "Two short fresh rosemary sprigs laid low diagonally, recognizable fine needle leaves.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-ff465e05-cf51-43c3-8693-3ead94fe75b1.png"
+    },
+    {
+      "key": "acuatico",
+      "subject": "A very low clear water ripple with a few crystal droplets and a thin sparkling water edge, transparent pure water, no container, no ocean or landscape.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-6791afc1-5730-484a-9123-e52fb6c175fe.png"
+    },
+    {
+      "key": "almizcle",
+      "subject": "One small airy white cotton boll with a little pale cotton fiber, a restrained visual evocation of a soft clean musk accord, no fabric or container.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-9021474a-3cdf-49cd-9320-7e121c6b454b.png"
+    },
+    {
+      "key": "salvia",
+      "subject": "Two small fresh sage leaves, softly fuzzy muted sage-green surfaces, a tiny hidden stem.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-d2126bd0-8eb6-4185-a4d7-b46d59fd86e2.png"
+    },
+    {
+      "key": "canela",
+      "subject": "Two small cinnamon sticks with one tiny curled bark chip, warm brown textured bark.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-bad3543f-92bb-4225-a149-81ff13dc3221.png"
+    },
+    {
+      "key": "caramelo",
+      "subject": "Two small glossy golden toffee caramel cubes, one with a softened rounded edge, no wrapper.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-c2829a00-da66-4d06-b4b3-fd47a1bfd31e.png"
+    },
+    {
+      "key": "anis",
+      "subject": "Two natural whole star-anise pods with recognizable eight-point form, warm reddish brown.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-3876851f-4d9e-4411-9b80-ed0e5d0bedc6.png"
+    },
+    {
+      "key": "casis",
+      "subject": "A small fresh cluster of shiny blackcurrants, a tiny short twig and one restrained dark green leaf.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-82a1b96b-baf6-400e-bb4a-fc80c82d0774.png"
+    },
+    {
+      "key": "pepino",
+      "subject": "Two fresh thin cucumber slices with pale green translucent flesh and dark green rind.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-b5b921ec-831c-4c4e-9b04-738717622e7f.png"
+    },
+    {
+      "key": "vetiver",
+      "subject": "One small elegant bundle of dry vetiver roots, natural fine tan-brown fibers loosely fanned, no tie or container.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-81e2a5e7-35e7-42b4-aafe-e769f4b78f01.png"
+    },
+    {
+      "key": "enebro",
+      "subject": "A tiny low juniper twig with five dusty blue juniper berries and a few short fine green needles.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-855bc283-39dd-4e49-b4cf-c06660efdeb6.png"
+    },
+    {
+      "key": "frutos-rojos",
+      "subject": "Three ripe raspberries and two small dark red-black boysenberries resting together, with one tiny green leaf.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-89e88c20-d07d-4218-bf40-1a45a7d95748.png"
+    },
+    {
+      "key": "cannabis",
+      "subject": "One small natural green cannabis fan leaf, recognizable slender serrated lobes, resting low, no buds, no smoking objects.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-fdc1f1a4-90e9-4079-ab48-64c2b88693ce.png"
+    },
+    {
+      "key": "licor",
+      "subject": "One very small refined clear crystal lowball glass containing a little warm amber liquor, realistic highlights, no ice, no bottle, no labels.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-0eac6a6b-b103-44cd-870b-0092d59c2e2f.png"
+    },
+    {
+      "key": "incienso",
+      "subject": "Three small warm ivory and pale amber frankincense resin tears, natural irregular translucent details, no smoke, no incense holder.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-375e58f1-eb2e-49a9-a082-5cf11c3b3ef1.png"
+    },
+    {
+      "key": "pimienta-blanca",
+      "subject": "A small low cluster of ivory white peppercorns with natural fine textured surfaces.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-c9baee55-0110-46f7-b0bf-bf39a6958b7a.png"
+    },
+    {
+      "key": "tonka",
+      "subject": "Three small dried tonka beans, dark brown elongated wrinkled shells, naturally irregular.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-a96ba5be-00cd-4717-bbbb-05d9f60f8668.png"
+    },
+    {
+      "key": "pino",
+      "subject": "One short fresh pine sprig with soft fine deep green needles, low compact arrangement, no cone.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-b3ab15ed-40eb-4768-b614-ce4c905a2ec5.png"
+    },
+    {
+      "key": "cilantro",
+      "subject": "Two fresh cilantro leaves with recognizable scalloped lobes and a very short hidden stem.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-224a6a75-3393-4d67-ad98-3e00cc94d9e8.png"
+    },
+    {
+      "key": "laurel",
+      "subject": "Two small fresh bay laurel leaves, elegant smooth dark green narrow oval shape, one gently curved.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-84ab991a-1cf7-4cee-b73b-75115c1348b6.png"
+    },
+    {
+      "key": "verbena",
+      "subject": "One tiny lemon verbena sprig with three narrow slightly serrated fresh green leaves, low compact arrangement.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-8029ee51-fbab-415e-87b6-be113c71e274.png"
+    },
+    {
+      "key": "especias",
+      "subject": "A very restrained low arrangement of one tiny cinnamon curl, one star-anise pod and four dark peppercorns.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-af586178-c505-429a-8219-9048ed0bdedf.png"
+    },
+    {
+      "key": "avellana",
+      "subject": "Two hazelnuts in warm brown shells and one peeled hazelnut half, realistic nut texture.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-a33f49a3-8323-4162-b118-39723d2637bf.png"
+    },
+    {
+      "key": "cafe",
+      "subject": "A small refined low arrangement of five rich dark roasted coffee beans with visible central grooves.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-54ab27e7-2f53-4bdc-9998-d331992ea16c.png"
+    },
+    {
+      "key": "tabaco",
+      "subject": "A small elegantly curled dry tobacco leaf with warm brown veining, no cigarette, no cigar, no smoke.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-07ef5b93-ee95-4c04-8912-48d8fabb0788.png"
+    },
+    {
+      "key": "champagne",
+      "subject": "One small delicate crystal champagne coupe holding a little very pale blush champagne, realistic tiny bubbles, low compact stem, no bottle or labels.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-6504e42d-6594-4c6e-a632-25077461edc7.png"
+    },
+    {
+      "key": "hojas-manzano",
+      "subject": "Two small fresh apple-tree leaves with recognizable oval gently serrated shapes, dark green top and one soft lighter underside.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-6d050e98-9448-4ea4-990c-7b869f8a26d0.png"
+    },
+    {
+      "key": "magnolia",
+      "subject": "One small creamy white magnolia blossom resting slightly on its side, thick satin petals, hidden short stem.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-d926e053-cdd1-406d-9a1f-cbba2304b36f.png"
+    },
+    {
+      "key": "fresia",
+      "subject": "A tiny short freesia flower sprig with two ivory flowers and one small soft yellow bud, low elegant arrangement.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-858118f8-a3cf-4f47-8e10-3a3d6f9a3edc.png"
+    },
+    {
+      "key": "durazno",
+      "subject": "One small ripe peach half and one delicate peach wedge showing softly golden flesh and muted rosy peach skin.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-eb5848f8-2f71-4f1a-961f-b51956bc075f.png"
+    },
+    {
+      "key": "nardo",
+      "subject": "A very short low tuberose sprig with three small creamy white waxy tubular blossoms, natural delicate shapes.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-bae368a0-60f4-40c0-9e53-9e034e86ba86.png"
+    },
+    {
+      "key": "sal",
+      "subject": "A small low scattering of translucent white sea-salt crystals, beautifully irregular coarse mineral texture, no bowl.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-9c5818e3-2f1e-49ab-bca4-a9f557fdfa67.png"
+    },
+    {
+      "key": "crema",
+      "subject": "One small elegant dollop of fresh whipped cream, ivory white soft peaks and realistic silky airy texture, no spoon, plate or food container.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-1cee868c-928e-4e55-bae3-7151b0cb62a4.png"
+    },
+    {
+      "key": "praline",
+      "subject": "Two tiny refined hazelnut praline pieces with one cut face revealing a warm nut-brown filling, unwrapped, no plate.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-dc513c58-8aca-4eb2-b9f6-7107ad1bb52c.png"
+    },
+    {
+      "key": "te",
+      "subject": "A small elegant low cluster of dark curled Lapsang Souchong black tea leaves, natural dry textures, no cup or container.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-fba82dcb-ed49-46fc-8bfd-cab99a5f718b.png"
+    },
+    {
+      "key": "lirio-valles",
+      "subject": "A very short softly curved lily-of-the-valley sprig with four tiny white bell-shaped flowers and one small green leaf.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-b7529f55-8bd4-4883-a41b-ab4edfae5252.png"
+    },
+    {
+      "key": "notas-verdes",
+      "subject": "A tiny low arrangement of two fresh soft green leaves and one slender green grass blade, dewy natural surfaces, no flowers.",
+      "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-68441781-f1a5-420b-b67d-b83c39641c19.png"
+    }
+  ],
+  "referenceAssets": "../2026-10-botanico/assets",
+  "sources": [
+    {
+      "code": "CC251",
+      "url": "https://www.yslbeauty.com/int/fragrance/masculine-fragrance/myslf/myslf-eau-de-parfum/3614273852821.html"
+    },
+    {
+      "code": "DD185",
+      "url": "https://www.valentino-beauty.com/int/fragrances/born-in-roma-donna-extradose/MPL02808.html"
+    }
+  ]
+}

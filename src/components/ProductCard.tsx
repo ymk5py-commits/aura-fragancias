@@ -9,6 +9,7 @@ import { Perfume } from '../types';
 import { useSettings } from '../context/SettingsContext';
 import { useCart } from '../context/CartContext';
 import smartImageLoader from '../lib/imageLoader';
+import { productArtworkUrl } from '../lib/productArtwork';
 import { productLink, sizeKey } from '../lib/catalogSeo';
 import { ShoppingBag, X, Eye, Plus, Minus, Truck, ArrowRight } from 'lucide-react';
 
@@ -20,6 +21,7 @@ interface Props {
 
 const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
   const { prices: PRICES } = useSettings();
+  const artworkUrl = productArtworkUrl(perfume);
   const { addToCart } = useCart();
   const [showDetails, setShowDetails] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>(PRICES[1].size); // 30ML default
@@ -107,14 +109,14 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
           onClick={() => setShowDetails(true)}
         >
           <div className="sm:col-span-7 relative aspect-[16/12] sm:aspect-auto sm:min-h-[420px] overflow-hidden">
-            {perfume.imageUrl && (
+            {artworkUrl && (
               <Image
-                src={perfume.imageUrl}
+                src={artworkUrl}
                 alt={`${perfume.name} — inspiración ${perfume.inspiration}`}
                 fill
                 sizes="(max-width: 640px) 100vw, 58vw"
                 loader={smartImageLoader}
-                className="object-cover transition-transform duration-[1.2s] group-hover:scale-105"
+                className="object-contain bg-[#f8f5f0] transition-transform duration-[1.2s] group-hover:scale-105"
               />
             )}
             <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-aura-gold text-aura-ink px-3 py-1 text-[8px] sm:text-[9px] font-bold tracking-[0.2em]">
@@ -172,9 +174,9 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
             <Eye size={16} strokeWidth={1.8} />
           </button>
 
-          {perfume.imageUrl ? (
+          {artworkUrl ? (
             <Image
-              src={perfume.imageUrl}
+              src={artworkUrl}
               alt={`${perfume.name} — inspiración ${perfume.inspiration}`}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -266,9 +268,9 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
             {/* Visual */}
             <div className="w-full md:w-5/12 bg-aura-ivory p-5 sm:p-10 flex items-center justify-center shrink-0 border-b md:border-b-0 md:border-r border-zinc-100">
               <div className="relative w-full max-w-[360px] aspect-[4/5] bg-white border border-zinc-100 shadow-2xl overflow-hidden">
-                {perfume.imageUrl ? (
+                {artworkUrl ? (
                   <Image
-                    src={perfume.imageUrl}
+                    src={artworkUrl}
                     alt={perfume.name}
                     fill
                     sizes="(max-width: 768px) 90vw, 360px"

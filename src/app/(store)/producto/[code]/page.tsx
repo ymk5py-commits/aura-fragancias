@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import ProductView from '../../../../components/ProductView';
 import { getProducts, getSettings } from '../../../../lib/serverData';
 import { cldn } from '../../../../lib/img';
+import { productArtworkUrl } from '../../../../lib/productArtwork';
 import { SITE } from '../../../../lib/site';
 import { buildProductDescription } from '../../../../lib/productCopy';
 import { Perfume } from '../../../../types';
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
   if (!perfume) return { title: 'Producto no encontrado | Äura Fragancias' };
   const title = `${perfume.name} — Inspiración ${perfume.inspiration} | Äura`;
   const description = `${perfume.name}, inspiración olfativa de ${perfume.inspiration}. ${perfume.family}. Extrait de Parfum 30% en 10, 30 y 50 ml. Envíos a Paraguay.`;
-  const image = new URL(cldn(perfume.imageUrl, 1000) || '/brand/aura-social-1200x630.png', SITE).href;
+  const image = new URL(cldn(productArtworkUrl(perfume), 1000) || '/brand/aura-social-1200x630.png', SITE).href;
   return {
     title,
     description,

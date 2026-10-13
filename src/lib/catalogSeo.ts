@@ -1,6 +1,7 @@
 import type { Perfume, SiteSettings } from '../types';
 import { SITE } from './site';
 import { cldn } from './img';
+import { productArtworkUrl } from './productArtwork';
 
 export const SIZE_KEYS = ['10', '30', '50'] as const;
 export type SizeKey = typeof SIZE_KEYS[number];
@@ -22,7 +23,7 @@ export function latestUpdate(...values: (string | undefined)[]): string | undefi
 }
 
 export function productGroup(p: Perfume, settings: SiteSettings, description: string) {
-  const image = cldn(p.imageUrl, 1000) || '/brand/aura-social-1200x630.png';
+  const image = cldn(productArtworkUrl(p), 1000) || '/brand/aura-social-1200x630.png';
   const imageUrl = new URL(image, SITE).href;
   return {
     '@context': 'https://schema.org', '@type': 'ProductGroup',

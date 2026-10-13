@@ -1,0 +1,267 @@
+{
+  "mode": "built-in image_gen",
+  "basePrompt": "Use case: ads-marketing. Asset type: isolated photographic botanical garnish for a minimalist luxury perfume flyer. A single coherent photo asset on a truly transparent background, no floor plane, no background color. Front three-quarter view, camera near the level of the object, not a flat lay, soft warm daylight from upper left, delicate realistic contact shadow, photographic material detail, refined restrained styling, muted natural colors. Subject occupies about 80% of the width with ample transparent padding, centered low compact horizontal arrangement. No bottle, no packaging, no text, no logo, no border, no collage, no decorative unrelated objects. Only the exact subject described.",
+  "assets": [
+    {
+      "key": "peonia",
+      "subject": "One soft blush pink peony flower in full bloom, viewed slightly from the side, with a very short hidden stem and two loose pale pink petals nearby. Delicate fresh natural petal texture, small compact arrangement.",
+      "output": "assets/peonia.png"
+    },
+    {
+      "key": "vainilla",
+      "subject": "Three dark brown cured vanilla pods resting in a graceful diagonal crossing, one opened pod revealing tiny seeds. Low horizontal arrangement, realistic slender natural pods, no flower or leaves.",
+      "output": "assets/vainilla.png"
+    },
+    {
+      "key": "bergamota",
+      "subject": "One small natural green-yellow bergamot citrus, cut in half, with the cut face tilted toward the camera and one short green leaf. Compact low arrangement. Distinctly bumpy natural peel and pale yellow-green citrus pulp.",
+      "output": "assets/bergamota.png"
+    },
+    {
+      "key": "cardamomo",
+      "subject": "Seven small green cardamom pods resting together, two split to show tiny dark seeds, one pod slightly forward. Low compact natural pile, delicate botanical macro detail, pale olive green.",
+      "output": "assets/cardamomo.png"
+    },
+    {
+      "key": "madera",
+      "subject": "Two short pieces of pale warm sandalwood and cedarwood, with one graceful curled wood shaving. Lying naturally in a low horizontal sculptural arrangement. Delicate dry grain, subtle warm beige tones. Only wood, no saw or tools.",
+      "output": "assets/madera.png"
+    },
+    {
+      "key": "lavanda",
+      "subject": "A small graceful spray of five natural lavender stems with dusty purple buds, resting diagonally in a low horizontal arrangement, tips slightly lifted. Refined delicate scale, no ribbon or pot.",
+      "output": "assets/lavanda.png"
+    },
+    {
+      "key": "manzana",
+      "subject": "One fresh small green apple and one thin crescent slice leaning against it, pale cream flesh, short natural brown stem. Compact natural arrangement, soft realistic skin texture. Only apple, no leaves.",
+      "output": "assets/manzana.png"
+    },
+    {
+      "key": "pera",
+      "subject": "One small elegant green-gold pear lying slightly tilted and a small slice alongside it, with a natural slender stem. Fresh creamy flesh, delicate muted skin. Compact low arrangement.",
+      "output": "assets/pera.png"
+    },
+    {
+      "key": "limon",
+      "subject": "One fresh Sicilian yellow lemon cut in half, one cut half with its face tilted toward the camera and one thin curved peel beside it. Natural textured pale yellow rind. Low compact arrangement.",
+      "output": "assets/limon.png"
+    },
+    {
+      "key": "mandarina",
+      "subject": "One small fresh orange mandarin with a short attached leaf and two peeled mandarin segments in front. Soft muted orange peel, translucent juicy segments. Compact low arrangement.",
+      "output": "assets/mandarina.png"
+    },
+    {
+      "key": "pina",
+      "subject": "One small fresh triangular pineapple wedge with natural rind and pale golden flesh, with a second slender wedge resting beside it. No full tall pineapple crown. A restrained compact low arrangement.",
+      "output": "assets/pina.png"
+    },
+    {
+      "key": "melon",
+      "subject": "One elegant short wedge of pale cantaloupe melon with beige rind and soft orange flesh, two subtle seeds visible at one end. Low compact arrangement, delicate natural coloration, no plate.",
+      "output": "assets/melon.png"
+    },
+    {
+      "key": "azahar",
+      "subject": "A graceful short sprig of fresh white orange blossom with five small five-petaled flowers, pale yellow centers, two small dark green leaves. Natural delicate appearance, low horizontal arrangement with a gently lifted tip, not a large bouquet.",
+      "output": "assets/azahar.png"
+    },
+    {
+      "key": "coco",
+      "subject": "One small half coconut angled toward the viewer, rich fibrous brown shell and clean white flesh, one small piece of white coconut beside it. Low compact natural arrangement, no milk splash.",
+      "output": "assets/coco.png"
+    },
+    {
+      "key": "cereza",
+      "subject": "Three glossy dark burgundy black cherries with delicate curved brown-green stems, one cherry cut open showing deep red flesh and its pit. Compact low elegant arrangement, natural realistic skin, no water droplets.",
+      "output": "assets/cereza.png"
+    },
+    {
+      "key": "pitahaya",
+      "subject": "One small half pink dragon fruit cut crosswise, lying tilted to reveal white flesh and tiny black seeds, vivid but soft natural magenta skin with short green scale tips. One slim slice next to it. Low compact elegant arrangement.",
+      "output": "assets/pitahaya.png"
+    },
+    {
+      "key": "rosa",
+      "subject": "One elegant deep dusty rose pink Turkish rose bloom, resting naturally with a short curved stem and one small green leaf, two loose rose petals beside it. True rose spiral layered petals, photographic fresh texture. Compact low horizontal arrangement, not a bouquet.",
+      "output": "assets/rosa.png"
+    }
+  ],
+  "mapping": {
+    "DD161": [
+      "peonia",
+      "vainilla",
+      "bergamota"
+    ],
+    "CC180": [
+      "cardamomo"
+    ],
+    "UU002": [
+      "madera",
+      "cardamomo"
+    ],
+    "CC016": [
+      "bergamota"
+    ],
+    "DD094": [
+      "vainilla"
+    ],
+    "UU049": [
+      "manzana",
+      "cardamomo"
+    ],
+    "CC104": [
+      "melon",
+      "mandarina"
+    ],
+    "DD089": [
+      "limon",
+      "manzana"
+    ],
+    "UU021": [
+      "limon",
+      "pina"
+    ],
+    "CC087": [
+      "limon"
+    ],
+    "DD013": [
+      "mandarina"
+    ],
+    "UU052": [
+      "limon"
+    ],
+    "CC009": [
+      "bergamota"
+    ],
+    "DD022": [
+      "pera",
+      "azahar"
+    ],
+    "UU013": [
+      "manzana",
+      "vainilla"
+    ],
+    "DD101": [
+      "azahar",
+      "bergamota"
+    ],
+    "CC034": [
+      "pina",
+      "bergamota"
+    ],
+    "UU048": [
+      "bergamota",
+      "limon"
+    ],
+    "DD197": [
+      "peonia"
+    ],
+    "CC116": [
+      "lavanda"
+    ],
+    "DD159": [
+      "coco"
+    ],
+    "CC122": [
+      "pera",
+      "vainilla"
+    ],
+    "UU036": [
+      "cereza",
+      "rosa"
+    ],
+    "CC189": [
+      "manzana",
+      "bergamota"
+    ],
+    "DD192": [
+      "pitahaya",
+      "vainilla"
+    ],
+    "UU041": [
+      "pina",
+      "vainilla"
+    ],
+    "DD096": [
+      "lavanda",
+      "mandarina"
+    ],
+    "CC157": [
+      "lavanda",
+      "vainilla"
+    ],
+    "UU019": [
+      "mandarina",
+      "vainilla"
+    ]
+  },
+  "bottleReference": "../2026-10-minimal/generation-minimal.json",
+  "composition": "Logo y texto del diseño nativo; frasco y etiqueta conservados. Elementos botánicos fotográficos con transparencia, alrededor de la base, en capas delante y detrás del frasco.",
+  "webAssets": {
+    "mode": "built-in image_gen",
+    "basePrompt": "Use case: ads-marketing. Asset type: isolated photographic botanical garnish for a minimalist luxury perfume flyer. A single coherent photo asset on a truly transparent background, no floor plane, no background color. Front three-quarter view, camera near the level of the object, not a flat lay, soft warm daylight from upper left, delicate realistic contact shadow, photographic material detail, refined restrained styling, muted natural colors. Subject occupies about 80% of the width with ample transparent padding, centered low compact horizontal arrangement. No bottle, no packaging, no text, no logo, no border, no collage, no decorative unrelated objects. Only the exact subject described.",
+    "subjects": [
+      {
+        "key": "toronja",
+        "subject": "One small pink grapefruit half and one thin pink grapefruit wedge, fresh pale coral flesh, softly muted yellow rind. Compact elegant arrangement, realistic fresh pulp.",
+        "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-d4d75508-8fe1-4b08-abf8-3d6903c65ce5.png",
+        "hint": "f48e245d/exec-d4d75508-8fe1-4b08-abf8-3d6903c65ce5.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+      },
+      {
+        "key": "mango",
+        "subject": "One small golden yellow mango cheek with a few delicate diced cuts and one whole small muted green-red mango behind it. Compact elegant arrangement, natural realistic fruit.",
+        "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-e4c3bd0f-b271-4a04-88d0-26c5b35b3edb.png",
+        "hint": "f48e245d/exec-e4c3bd0f-b271-4a04-88d0-26c5b35b3edb.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+      },
+      {
+        "key": "iris",
+        "subject": "One soft pale violet iris flower with gently curling elegant petals and a tiny hidden stem. Low compact natural arrangement, refined delicate photographic petals.",
+        "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-5383bc65-8667-4fb2-82ea-6c4588f1bc34.png",
+        "hint": "f48e245d/exec-5383bc65-8667-4fb2-82ea-6c4588f1bc34.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+      },
+      {
+        "key": "jazmin",
+        "subject": "Three small creamy white jasmine blossoms resting together with one tiny dark green jasmine leaf. Low compact elegant arrangement, real natural petals.",
+        "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-5bffacf6-df59-4ea9-9120-570f70c9c417.png",
+        "hint": "f48e245d/exec-5bffacf6-df59-4ea9-9120-570f70c9c417.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+      },
+      {
+        "key": "miel",
+        "subject": "One small piece of natural golden honeycomb with a delicate glossy drop of honey beside it. Low compact arrangement, beautiful amber translucent wax detail. No jar, no spoon, no bees.",
+        "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-008dacfe-d2e5-491c-b5b4-f2a5fba15e11.png",
+        "hint": "f48e245d/exec-008dacfe-d2e5-491c-b5b4-f2a5fba15e11.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+      },
+      {
+        "key": "maracuya",
+        "subject": "One small passion fruit cut in half showing golden seeds and one whole dark muted purple passion fruit beside it. Low compact elegant arrangement, realistic natural rind.",
+        "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-c99b9c60-c634-42d4-a79f-a3c9d38c9e0a.png",
+        "hint": "f48e245d/exec-c99b9c60-c634-42d4-a79f-a3c9d38c9e0a.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+      },
+      {
+        "key": "granada",
+        "subject": "One small ripe pomegranate half with a few ruby red seeds nearby. Muted burgundy rind, low compact elegant arrangement, realistic juicy seeds.",
+        "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-9d21c245-691b-43c3-9a1e-f58366610eb6.png",
+        "hint": "f48e245d/exec-9d21c245-691b-43c3-9a1e-f58366610eb6.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+      },
+      {
+        "key": "orquidea",
+        "subject": "One elegant very dark burgundy purple orchid bloom with softly folded petals and a tiny hidden stem, resting slightly on its side. Low compact natural arrangement, fine realistic petal texture.",
+        "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-a4381f9b-26b5-40f5-85eb-25400db05985.png",
+        "hint": "f48e245d/exec-a4381f9b-26b5-40f5-85eb-25400db05985.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+      },
+      {
+        "key": "pimienta-rosa",
+        "subject": "One very small delicate loose cluster of muted pink peppercorns on a short fine brown twig, with three tiny dusty pink peppercorns nearby. No flowers, no leaves, compact horizontal photographic arrangement.",
+        "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-c6c36842-506f-4380-a2a6-80979654bfde.png"
+      },
+      {
+        "key": "flor-durazno",
+        "subject": "One very short delicate peach blossom twig with two small soft blush pink peach flowers and one tiny bud, resting low horizontally. Five fine petals on each natural peach flower, no fruit, compact elegant arrangement.",
+        "path": "/home/croman/.codex/generated_images/01a107d8-5787-7fa0-829a-7d59f48e245d/exec-577a068f-01e2-4c5a-9413-aec7e1b95bce.png"
+      }
+    ],
+    "usage": "Fichas web automáticas según notas del catálogo."
+  }
+}

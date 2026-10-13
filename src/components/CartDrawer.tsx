@@ -7,6 +7,7 @@ import { X, Plus, Minus, Trash2, ShoppingBag, Truck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { isGiftCard } from '../lib/giftCards';
 import smartImageLoader from '../lib/imageLoader';
+import { productArtworkUrl } from '../lib/productArtwork';
 
 const FREE_SHIPPING = 300000;
 
@@ -91,8 +92,8 @@ const CartDrawer: React.FC = () => {
               {cart.map((item) => (
                 <div key={item.id} className="flex gap-4">
                   <div className="relative w-20 h-24 shrink-0 bg-aura-ivory border border-zinc-100 overflow-hidden">
-                    {item.perfume.imageUrl && (
-                      <Image src={item.perfume.imageUrl} alt={item.perfume.name} fill sizes="80px" loader={smartImageLoader} className="object-cover" />
+                    {productArtworkUrl(item.perfume) && (
+                      <Image src={productArtworkUrl(item.perfume)} alt={item.perfume.name} fill sizes="80px" loader={smartImageLoader} className="object-cover" />
                     )}
                   </div>
                   <div className="flex-grow min-w-0">

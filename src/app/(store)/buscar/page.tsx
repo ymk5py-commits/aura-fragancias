@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import CatalogImage from '../../../components/CatalogImage';
+import { productArtworkUrl } from '../../../lib/productArtwork';
 import { Search } from 'lucide-react';
 import { getVisibleProducts, getSettings } from '../../../lib/serverData';
 import { productLink, searchCatalog, sizeKey } from '../../../lib/catalogSeo';
@@ -22,7 +23,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     </form>
     <p role="status" className="mb-6 text-sm text-aura-ink/65">{results.length} {results.length === 1 ? 'fragancia' : 'fragancias'}{query ? ` para “${query}”` : ''}{size ? ` · ${size} ml` : ''}</p>
     {results.length ? <div className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">{results.map((p, i) => <Link key={p.code} href={productLink(p.code, size)} className="group">
-      <div className="relative aspect-[4/5] overflow-hidden bg-aura-sand">{p.imageUrl && <CatalogImage src={p.imageUrl} alt={`${p.name} — inspiración ${p.inspiration}`} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" priority={i < 2} className="object-cover transition-transform group-hover:scale-[1.03]" />}</div>
+      <div className="relative aspect-[4/5] overflow-hidden bg-aura-sand">{productArtworkUrl(p) && <CatalogImage src={productArtworkUrl(p)} alt={`${p.name} — inspiración ${p.inspiration}`} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" priority={i < 2} className="object-cover transition-transform group-hover:scale-[1.03]" />}</div>
       <p className="mt-3 text-[10px] uppercase tracking-wider text-aura-cognac">Inspiración {p.inspiration}</p><h2 className="mt-2 font-luxury text-lg font-semibold leading-tight sm:text-xl">{p.name}</h2><p className="mt-2 text-xs text-aura-ink/60">{p.code} · {p.family}</p><p className="mt-3 text-sm font-semibold">{size ? `${size} ml · ` : 'Desde '}Gs. {settings[size ? `price${size}` : 'price10'].toLocaleString('es-PY')}</p>
     </Link>)}</div> : <div className="border border-aura-ink/15 p-8"><p>No encontramos una fragancia con esa combinación. Probá con otra nota o inspiración.</p><Link href="/buscar" className="mt-4 inline-flex min-h-11 items-center text-aura-wine underline">Ver toda la colección</Link></div>}
   </div></main>;

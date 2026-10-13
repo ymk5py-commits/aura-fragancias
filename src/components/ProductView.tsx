@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useSettings } from '../context/SettingsContext';
 import { useCart } from '../context/CartContext';
 import smartImageLoader from '../lib/imageLoader';
+import { productArtworkUrl } from '../lib/productArtwork';
 import { trackEvent } from '../lib/pixel';
 import { newEventId } from '../lib/tracking';
 import { toItem, gaViewItem, gaRemarketing } from '../lib/gtag';
@@ -34,6 +35,7 @@ interface ProductViewProps {
 
 const ProductView: React.FC<ProductViewProps> = ({ perfume, initialSize = '30 ML', description, related = [], breadcrumb, reviews = [] }) => {
   const { prices: PRICES } = useSettings();
+  const artworkUrl = productArtworkUrl(perfume);
   const { addToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState<string>(initialSize);
   const [quantity, setQuantity] = useState(1);
@@ -77,9 +79,9 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, initialSize = '30 ML
         <div className="grid gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 xl:gap-24">
           <div className="w-full">
             <div className="relative mx-auto aspect-[4/5] w-full max-w-[610px] overflow-hidden bg-aura-sand">
-              {perfume.imageUrl ? (
+              {artworkUrl ? (
                 <Image
-                  src={perfume.imageUrl}
+                  src={artworkUrl}
                   alt={`${perfume.name} — inspiración ${perfume.inspiration}`}
                   fill
                   priority
@@ -217,9 +219,9 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, initialSize = '30 ML
               {related.map((p) => (
                 <Link key={p.code} href={`/producto/${p.code}`} className="group block">
                   <div className="relative aspect-[4/5] bg-aura-ivory overflow-hidden border border-zinc-100 group-hover:border-aura-gold/40 transition-all duration-500">
-                    {p.imageUrl && (
+                    {productArtworkUrl(p) && (
                       <Image
-                        src={p.imageUrl}
+                        src={productArtworkUrl(p)}
                         alt={`${p.name} — inspiración ${p.inspiration}`}
                         fill
                         sizes="(max-width: 1024px) 50vw, 25vw"

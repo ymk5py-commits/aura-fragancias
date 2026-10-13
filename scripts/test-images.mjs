@@ -13,10 +13,17 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { hasRemoteMatch } from 'next/dist/shared/lib/match-remote-pattern.js';
+import { hasLocalMatch } from 'next/dist/shared/lib/match-local-pattern.js';
 import nextConfig from '../next.config.mjs';
 
 const { remotePatterns = [], domains = [] } = nextConfig.images;
 const permitida = (url) => hasRemoteMatch(domains, remotePatterns, new URL(url));
+
+test('las fichas botánicas permiten sus parámetros sin habilitar otras rutas con consultas', () => {
+  assert.equal(hasLocalMatch(nextConfig.images.localPatterns, '/api/perfume-art/DD161?v=1&notes=peonia,vainilla'), true);
+  assert.equal(hasLocalMatch(nextConfig.images.localPatterns, '/products/DD161.png'), true);
+  assert.equal(hasLocalMatch(nextConfig.images.localPatterns, '/api/otra-ruta?url=https://example.com'), false);
+});
 
 test('foto de producto subida desde el panel (Firebase Storage) pasa por /_next/image', () => {
   assert.equal(

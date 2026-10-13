@@ -4,8 +4,15 @@ const nextConfig = {
   turbopack: {
     root: import.meta.dirname,
   },
+  outputFileTracingIncludes: {
+    '/api/perfume-art/*': ['./public/products/botanico/_assets/**', './public/brand/aura-wordmark-black.svg'],
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
+    localPatterns: [
+      { pathname: '**', search: '' },
+      { pathname: '/api/perfume-art/*' },
+    ],
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       // Fotos subidas desde el panel. Firebase Storage sirve las descargas desde

@@ -11,13 +11,14 @@ function load(file, imports, globals = {}) {
   return exports;
 }
 const SITE = 'https://www.aurafragancias.store';
-const seo = load('../src/lib/catalogSeo.ts', { './site': { SITE }, './img': { cldn: (url) => url } });
+const artwork = load('../src/lib/productArtwork.ts', {}, { URLSearchParams });
+const seo = load('../src/lib/catalogSeo.ts', { './site': { SITE }, './img': { cldn: (url) => url }, './productArtwork': artwork });
 const perfume = { code: 'DD192', name: 'La Bomba', inspiration: 'Carolina Herrera', family: 'Floral', notes: ['Jazmín'], gender: 'Woman' };
 
 test('cada variante mantiene tamaño, precio, URL e identificador del catálogo; no promete delivery gratis universal', () => {
   const group = seo.productGroup({ ...perfume, imageUrl: '/products/DD192.png' }, { price10: 30000, price30: 70000, price50: 120000 }, 'Descripción');
   assert.equal(group['@type'], 'ProductGroup');
-  assert.equal(group.image, `${SITE}/products/DD192.png`);
+  assert.equal(group.image, `${SITE}${artwork.productArtworkUrl({ ...perfume, imageUrl: '/products/DD192.png' })}`);
   for (const [i, size] of ['10', '30', '50'].entries()) {
     const variant = group.hasVariant[i];
     assert.equal(variant.sku, `DD192-${size}`);

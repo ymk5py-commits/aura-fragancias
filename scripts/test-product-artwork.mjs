@@ -34,7 +34,7 @@ test('las notas controlan la ambientación, incluidas tildes y errores conocidos
 
 test('nuevos códigos generan imagen sin alterar la foto de administración; la Gift Card conserva su arte', () => {
   const newProduct = { code: 'UU9999', notes: ['COCO'], imageUrl: '' };
-  assert.match(art.productArtworkUrl(newProduct), /\/api\/perfume-art\/UU9999\?v=1&notes=coco$/);
+  assert.match(art.productArtworkUrl(newProduct), /\/api\/perfume-art\/UU9999\?v=2&notes=coco$/);
   assert.equal(newProduct.imageUrl, '');
   assert.equal(products[0].imageUrl, 'original.jpg');
   assert.equal(art.productArtworkUrl({ code: 'GIFT-CARD', notes: [], imageUrl: '/gift.jpg' }), '/gift.jpg');
@@ -43,7 +43,7 @@ test('nuevos códigos generan imagen sin alterar la foto de administración; la 
 
 test('el endpoint rechaza inyección, claves ajenas y composiciones ilimitadas antes de renderizar', async () => {
   const actual = load('../src/lib/server/productArtwork.ts', {
-    'node:fs/promises': {}, 'node:path': { default: { join: () => '' } }, sharp: {}, '../productArtwork': art,
+    'node:fs/promises': {}, 'node:path': { default: { join: () => '' } }, sharp: {}, '../productArtwork': art, './labelGlyphs': {},
   });
   const calls = [];
   const route = load('../src/app/api/perfume-art/[code]/route.ts', {
@@ -52,7 +52,7 @@ test('el endpoint rechaza inyección, claves ajenas y composiciones ilimitadas a
       renderProductArtwork: async (code, keys) => { calls.push({ code, keys }); return new Uint8Array([255, 216, 255]); },
     },
   });
-  const request = (code, notes, version = '1') => route.GET(new Request(`https://example.com/api/perfume-art/x?v=${version}&notes=${encodeURIComponent(notes)}`), { params: Promise.resolve({ code }) });
+  const request = (code, notes, version = '2') => route.GET(new Request(`https://example.com/api/perfume-art/x?v=${version}&notes=${encodeURIComponent(notes)}`), { params: Promise.resolve({ code }) });
   for (const [code, notes, version] of [['<script>', 'rosa', '1'], ['DD161', '../../private', '1'], ['DD161', 'rosa,rosa', '1'], ['DD161', 'rosa,limon,pera,coco', '1'], ['DD161', 'rosa', '99']]) {
     assert.equal((await request(code, notes, version)).status, 400);
   }

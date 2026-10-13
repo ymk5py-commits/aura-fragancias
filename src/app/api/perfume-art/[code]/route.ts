@@ -6,7 +6,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ code
   const { code } = await params;
   const url = new URL(request.url);
   const keys = parseArtworkNotes(url.searchParams.get('notes') || '');
-  if (!/^(CC|DD|UU)\d{3,6}$/.test(code) || !keys || url.searchParams.get('v') !== '1') {
+  if (!/^(CC|DD|UU)\d{3,6}$/.test(code) || !keys || !['1', '2'].includes(url.searchParams.get('v') || '')) {
     return new Response('Imagen no disponible', { status: 400 });
   }
   try {

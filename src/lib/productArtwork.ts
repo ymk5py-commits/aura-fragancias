@@ -42,6 +42,6 @@ export function productBotanicals(notes: readonly string[] = []): BotanicalKey[]
 /** Solo presentación de la tienda: conserva la foto original en administración. */
 export function productArtworkUrl(product: Pick<Perfume, 'code' | 'notes' | 'imageUrl'>): string {
   if (!/^(CC|DD|UU)\d{3,6}$/i.test(product.code)) return product.imageUrl;
-  const params = new URLSearchParams({ v: '1', notes: productBotanicals(product.notes).join(',') });
+  const params = new URLSearchParams({ v: '2', notes: productBotanicals(product.notes).join(',') });
   return `/api/perfume-art/${encodeURIComponent(product.code.toUpperCase())}?${params}`;
 }

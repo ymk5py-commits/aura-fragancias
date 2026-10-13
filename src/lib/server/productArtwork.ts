@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import { BOTANICAL_KEYS, type BotanicalKey } from '../productArtwork';
+import { LABEL_GLYPHS } from './labelGlyphs';
 
 const wine = '#580c17';
 const assets = path.join(process.cwd(), 'public/products/botanico/_assets');
@@ -23,7 +24,17 @@ export async function renderProductArtwork(code: string, keys: BotanicalKey[]): 
   ]);
   const image = (bytes: Buffer, x: number, y: number, w: number, h: number) => `<image href="data:image/png;base64,${bytes.toString('base64')}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet"/>`;
   const traces = wordmark.slice(wordmark.indexOf('>') + 1, wordmark.lastIndexOf('</svg>')).replaceAll('#000000', wine);
-  const label = (y: number, text: string, size: number, spacing = 1) => `<text x="540" y="${y}" text-anchor="middle" font-family="sans-serif" font-size="${size}" letter-spacing="${spacing}" fill="${wine}">${text}</text>`;
+  const label = (y: number, text: string, size: number, spacing = 1) => {
+    const scale = size / LABEL_GLYPHS.unitsPerEm;
+    const glyphs = Array.from(text, char => LABEL_GLYPHS.glyphs[char as keyof typeof LABEL_GLYPHS.glyphs]);
+    const width = glyphs.reduce((total, glyph) => total + glyph.advance * scale, 0) + spacing * (glyphs.length - 1);
+    let x = 540 - width / 2;
+    return glyphs.map(glyph => {
+      const outline = `<path d="${glyph.path}" transform="translate(${x} ${y}) scale(${scale} ${-scale})" fill="${wine}"/>`;
+      x += glyph.advance * scale + spacing;
+      return outline;
+    }).join('');
+  };
   const garnish = keys.map((key, index) => {
     const flower = floral.has(key);
     if (index === 0) return image(props[index], flower ? 220 : 235, flower ? 657 : 723, flower ? 350 : 290, flower ? 263 : 218);

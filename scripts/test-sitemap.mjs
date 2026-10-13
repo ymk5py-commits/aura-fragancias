@@ -110,9 +110,9 @@ test('sitemap keeps real modification dates stable and omits unknown dates', asy
   assert.deepEqual(await sitemap.default(), first);
   assert.equal(first.find((p) => p.url.endsWith('/CC001')).lastModified, products[0].updatedAt);
   assert.equal(first.find((p) => p.url.endsWith('/DD001')).lastModified, undefined);
-  assert.equal(first.find((p) => p.url.endsWith('/CC001')).images[0], 'https://www.aurafragancias.store/api/perfume-art/CC001?v=1&amp;notes=');
+  assert.equal(first.find((p) => p.url.endsWith('/CC001')).images[0], 'https://www.aurafragancias.store/api/perfume-art/CC001?v=2&amp;notes=');
   const xml = resolveSitemap(first);
-  assert.ok(xml.includes('<image:loc>https://www.aurafragancias.store/api/perfume-art/DD001?v=1&amp;notes=</image:loc>'));
+  assert.ok(xml.includes('<image:loc>https://www.aurafragancias.store/api/perfume-art/DD001?v=2&amp;notes=</image:loc>'));
   assert.equal(xml.includes('alt=media&token='), false);
   assert.equal(xml.includes('&amp;amp;'), false);
   assert.equal(first.find((p) => p.url.endsWith('/terminos-y-condiciones')).lastModified, undefined);

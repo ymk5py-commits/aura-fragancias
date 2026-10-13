@@ -1,4 +1,9 @@
 {
+  "functions": [{
+    "source": "functions",
+    "codebase": "order-alerts",
+    "ignore": ["node_modules", "test", "*.log", ".env*", "README.md"]
+  }],
   "firestore": {
     "rules": "firestore.rules"
   },

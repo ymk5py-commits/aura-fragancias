@@ -1,0 +1,7 @@
+{
+  "tool": "built-in image_gen",
+  "prompt": "Use case: product studio photography / ads marketing. EDIT the referenced Äura perfume bottle photo into an isolated luxury ecommerce cutout. Preserve the exact bottle silhouette and proportions: a clear rectangular 50ml glass bottle, subtly curved sides, thick clear glass base, pale golden perfume, tall polished silver cylindrical cap. Front-facing and upright, perfectly vertical, symmetric photograph. Replace the existing printed paper label with a completely BLANK matte warm ivory rectangular label of the exact same size and position. No text, no numbers, no logo on the blank label; official vector artwork will be applied afterwards. Remove the burgundy background, rock, flower, vanilla pods and every prop. Only one bottle. Transparent background with clean cutout edges, believable glass, subtle warm daylight studio reflections, soft delicate lighting, no hard dramatic glare. The bottle should occupy 85% of image height with ample room around it, centered. Refined realistic editorial product photography, no original designer brand bottle, no other objects, no border, no frame, no gradients as background, no watermark. Preserve the physical bottle design, cap, liquid color and blank label for accurate later artwork.",
+  "reference": "public/editorial/hero-cc180.webp",
+  "output": "assets/frasco-aura-estudio.png",
+  "usage": "Mockup del frasco Äura de 50 ml; logo oficial y códigos aplicados en vector para las 29 fichas."
+}

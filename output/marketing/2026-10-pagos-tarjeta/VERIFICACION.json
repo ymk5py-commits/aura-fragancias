@@ -1,0 +1,44 @@
+[
+  {
+    "archivo": "AURA-01-tarjetas-marfil-1080.png",
+    "ancho": 1080,
+    "alto": 1080,
+    "espacio": "srgb",
+    "bytes": 1835365
+  },
+  {
+    "archivo": "AURA-01-tarjetas-marfil-1080.jpg",
+    "ancho": 1080,
+    "alto": 1080,
+    "espacio": "srgb",
+    "bytes": 419454
+  },
+  {
+    "archivo": "AURA-02-tarjetas-borgona-1080.png",
+    "ancho": 1080,
+    "alto": 1080,
+    "espacio": "srgb",
+    "bytes": 1938880
+  },
+  {
+    "archivo": "AURA-02-tarjetas-borgona-1080.jpg",
+    "ancho": 1080,
+    "alto": 1080,
+    "espacio": "srgb",
+    "bytes": 455834
+  },
+  {
+    "archivo": "AURA-03-compra-online-1080.png",
+    "ancho": 1080,
+    "alto": 1080,
+    "espacio": "srgb",
+    "bytes": 2219956
+  },
+  {
+    "archivo": "AURA-03-compra-online-1080.jpg",
+    "ancho": 1080,
+    "alto": 1080,
+    "espacio": "srgb",
+    "bytes": 456297
+  }
+]

@@ -35,3 +35,10 @@ output/marketing/2026-10-botanico/fonts/fonts.conf
 
 output/marketing/2026-10-tres-notas/fonts/*-static.ttf
 output/marketing/2026-10-tres-notas/fonts/fonts.conf
+
+# Local originals and duplicate exports for the card-payment campaign
+output/marketing/2026-10-pagos-tarjeta/originales/
+output/marketing/2026-10-pagos-tarjeta/referencias/
+output/marketing/2026-10-pagos-tarjeta/finales/
+output/marketing/2026-10-pagos-tarjeta/*.zip
+output/marketing/2026-10-pagos-tarjeta/VISTA-3-FLYERS.jpg

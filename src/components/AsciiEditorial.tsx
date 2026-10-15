@@ -2,10 +2,11 @@ import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import AsciiArt from './AsciiArt';
 import Reveal from './Reveal';
+import ScentTrail from './ScentTrail';
 
 export default function AsciiEditorial() {
   return (
-    <section aria-labelledby="ascii-title" className="relative isolate overflow-hidden bg-aura-ink py-20 text-aura-ivory sm:py-28">
+    <section id="experiencia-aura" aria-labelledby="ascii-title" className="relative isolate scroll-mt-24 overflow-hidden bg-aura-ink py-20 text-aura-ivory sm:py-28">
       <div className="absolute inset-0 aura-noise" aria-hidden="true" />
       <div className="section-shell relative">
         <div className="grid gap-10 border-t border-white/20 pt-8 lg:grid-cols-[1fr_0.8fr] lg:items-end lg:gap-20">
@@ -38,9 +39,9 @@ export default function AsciiEditorial() {
             </figure>
           </Reveal>
           <Reveal delay={110}>
-            <figure className="relative h-full min-h-[300px] overflow-hidden bg-black sm:min-h-[430px] lg:min-h-0">
-              <AsciiArt src="/ascii/escultura.mp4" poster="/ascii/escultura.webp" className="absolute inset-0 h-full w-full object-cover" />
-              <figcaption className="absolute bottom-0 left-0 right-0 flex items-end justify-between bg-gradient-to-t from-black/85 to-transparent px-5 pb-5 pt-16 sm:px-7 sm:pb-7">
+            <figure className="relative h-full min-h-[380px] overflow-hidden bg-aura-ink sm:min-h-[430px] lg:min-h-0">
+              <div className="absolute inset-0"><ScentTrail /></div>
+              <figcaption className="pointer-events-none absolute bottom-0 left-0 right-0 flex items-end justify-between bg-gradient-to-t from-aura-ink/85 to-transparent px-5 pb-5 pt-16 sm:px-7 sm:pb-7">
                 <span className="font-luxury text-2xl text-white sm:text-3xl">La estela</span>
                 <span className="text-[10px] font-bold tracking-[0.2em] text-white/70">02 / 02</span>
               </figcaption>

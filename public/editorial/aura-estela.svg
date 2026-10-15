@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="960" viewBox="0 0 640 960" fill="none">
+  <defs>
+    <linearGradient id="champagne" x1="161" y1="814" x2="478" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#896342" stop-opacity="0"/>
+      <stop offset=".22" stop-color="#c4a275" stop-opacity=".42"/>
+      <stop offset=".5" stop-color="#ead4b7" stop-opacity=".88"/>
+      <stop offset=".76" stop-color="#c4a275" stop-opacity=".48"/>
+      <stop offset="1" stop-color="#ead4b7" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="light" x1="223" y1="810" x2="415" y2="128" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ead4b7" stop-opacity="0"/>
+      <stop offset=".3" stop-color="#ead4b7" stop-opacity=".45"/>
+      <stop offset=".58" stop-color="#fff3e0" stop-opacity=".82"/>
+      <stop offset="1" stop-color="#ead4b7" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="haze" x="-80%" y="-30%" width="260%" height="160%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="15"/></filter>
+    <filter id="soft" x="-40%" y="-10%" width="180%" height="120%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="2.5"/></filter>
+  </defs>
+  <g stroke="url(#champagne)" stroke-linecap="round">
+    <path d="M175 852C352 770 497 741 422 603C352 476 132 500 198 355C241 262 421 272 448 108" stroke-width="55" opacity=".46" filter="url(#haze)"/>
+    <path d="M160 851C335 782 504 741 427 603C357 477 135 492 202 354C247 261 417 266 450 110" stroke-width="19" opacity=".72" filter="url(#soft)"/>
+    <path d="M175 852C351 775 489 726 416 598C347 480 160 480 215 355C257 263 414 263 445 112" stroke-width="3.5"/>
+    <path d="M190 848C374 758 467 720 405 605C339 484 184 478 228 355C261 262 408 253 439 122" stroke-width="1.8"/>
+    <path d="M150 839C316 791 490 748 443 625C390 486 139 478 189 347C235 225 409 285 463 117" stroke-width="1.4" opacity=".64"/>
+    <path d="M185 865C358 768 524 753 440 589C378 468 137 510 211 358C257 264 430 269 458 135" stroke-width="1.2" opacity=".55"/>
+    <path d="M168 818C282 725 448 747 422 641C395 534 221 515 219 432C214 310 414 320 463 171" stroke-width="6" opacity=".35" filter="url(#soft)"/>
+  </g>
+  <g stroke="url(#light)" stroke-linecap="round">
+    <path d="M164 851C347 773 483 736 414 604C348 478 155 492 215 355C255 267 412 267 447 114" stroke-width="1.3"/>
+    <path d="M200 853C366 755 463 708 397 599C333 493 181 467 234 351C275 263 413 253 438 132" stroke-width="2" opacity=".7"/>
+    <path d="M171 840C319 765 500 739 431 603C374 493 173 493 207 372C234 273 395 279 450 145" stroke-width=".8" opacity=".9"/>
+  </g>
+</svg>

@@ -1,8 +1,9 @@
 import { LOGO_AURA_TRAZOS, LOGO_AURA_VIEWBOX } from './logo-aura'
+import { FORMATO_ETIQUETA_INICIAL, validarFormatoEtiqueta, type FormatoEtiqueta } from './formato'
 
 export const DISENOS_AURA = [
   { id: 'silencio', nombre: 'Silencio', detalle: 'Logo amplio y mucho aire' },
-  { id: 'editorial', nombre: 'Editorial', detalle: 'Logo y código en una línea' },
+  { id: 'editorial', nombre: 'Editorial', detalle: 'Texto alineado y línea fina' },
   { id: 'sello', nombre: 'Firma', detalle: 'Logo protagonista y datos abajo' },
 ] as const
 
@@ -148,6 +149,60 @@ function componerNombre(nombre: string, diseno: DisenoAura, medir: MedirTexto): 
   ).join('\n')
 }
 
+/** Recompone el contenido para el rectángulo disponible sin deformar el logo ni las letras. */
+function componerRectangular(datos: DatosEtiquetaAura, diseno: DisenoAura, medir: MedirTexto, ancho: number, alto: number): string | null {
+  const horizontal = ancho > alto
+  const margen = Math.min(ancho, alto) * 0.075
+  const escala = Math.min(ancho / 200, alto / 200, 1.5)
+  const editorial = diseno === 'editorial'
+  const fuente = diseno === 'silencio' ? FUENTE_SERIF : FUENTE_SANS
+  const peso = diseno === 'silencio' ? 600 : 700
+  const logoAncho = horizontal ? Math.min(ancho * 0.48, alto * 0.9) : ancho - margen * 2
+  const logoY = margen
+  const logoAlto = Math.round(logoAncho * 631 / 1889)
+  const logoX = editorial || horizontal ? margen : (ancho - logoAncho) / 2
+  const codigoTam = 20 * escala
+  const codigoEspacio = 2 * escala
+  const codigo = datos.codigo.trim().toLocaleUpperCase('es-PY')
+  const codigoAncho = medir(codigo, codigoTam, FUENTE_SANS, 700) + Math.max(0, codigo.length - 1) * codigoEspacio
+  const espacioCodigo = horizontal ? ancho - logoAncho - margen * 3 : ancho - margen * 2
+  if (codigoAncho > espacioCodigo) return null
+  const codigoY = horizontal ? logoY + logoAlto * 0.72 : logoY + logoAlto + 35 * escala
+  const cabeceraFin = horizontal ? logoY + logoAlto + 8 * escala : codigoY + 18 * escala
+  const volumenTam = 23 * escala
+  const volumenY = alto - margen - volumenTam * 0.2
+  const nombreInicio = cabeceraFin + (horizontal ? 6 : 12) * escala
+  const nombreFin = volumenY - volumenTam - (horizontal ? 8 : 20) * escala
+  const espacioNombre = nombreFin - nombreInicio
+  const palabras = datos.nombre.trim().replace(/\s+/g, ' ').toLocaleUpperCase('es-PY').split(' ')
+  let nombreSvg: string | null = null
+
+  for (let tamanio = 28 * escala; tamanio >= 16 * escala && !nombreSvg; tamanio -= 2 * escala) {
+    const interlineado = tamanio * 1.22
+    for (let cantidad = 1; cantidad <= Math.min(4, palabras.length); cantidad++) {
+      const bloqueAlto = tamanio + (cantidad - 1) * interlineado
+      if (bloqueAlto > espacioNombre) break
+      const lineas = mejorParticion(palabras, Array(cantidad).fill(tamanio), fuente, peso, ancho - margen * 2, medir)
+      if (!lineas) continue
+      const primeraLinea = nombreInicio + (espacioNombre - bloqueAlto) / 2 + tamanio * 0.8
+      nombreSvg = lineas.map((linea, indice) =>
+        `<text x="${editorial ? margen : ancho / 2}" y="${primeraLinea + indice * interlineado}" fill="#000" font-family="${fuente}" font-size="${tamanio}" font-weight="${peso}"${editorial ? '' : ' text-anchor="middle"'}>${escaparXml(linea)}</text>`
+      ).join('\n')
+      break
+    }
+  }
+  if (!nombreSvg) return null
+  const ml = `${String(datos.volumenMl).replace('.', ',')} ML`
+  const volumenEspacio = 2 * escala
+  if (medir(ml, volumenTam, FUENTE_SANS, 600) + (ml.length - 1) * volumenEspacio > ancho - margen * 2) return null
+  return `${logoOficial(logoX, logoY, logoAncho)}
+<text x="${horizontal || editorial ? ancho - margen : ancho / 2}" y="${codigoY}" fill="#000" font-family="${FUENTE_SANS}" font-size="${codigoTam}" font-weight="700" text-anchor="${horizontal || editorial ? 'end' : 'middle'}" letter-spacing="${codigoEspacio}">${escaparXml(codigo)}</text>
+${editorial ? `<path d="M${margen} ${cabeceraFin}h${ancho - margen * 2}" stroke="#000" stroke-width="${escala}"/>` : ''}
+${nombreSvg}
+${diseno === 'silencio' ? `<path d="M${ancho / 2 - 20 * escala} ${volumenY - volumenTam - 7 * escala}h${40 * escala}" stroke="#000" stroke-width="${escala}"/>` : ''}
+<text x="${editorial ? ancho - margen : ancho / 2}" y="${volumenY}" fill="#000" font-family="${FUENTE_SANS}" font-size="${volumenTam}" font-weight="${diseno === 'sello' ? 700 : 600}" text-anchor="${editorial ? 'end' : 'middle'}" letter-spacing="${volumenEspacio}">${ml}</text>`
+}
+
 /** Estimador conservador para tests y entornos sin Canvas. En la UI se mide con Canvas. */
 export const medirTextoAproximado: MedirTexto = (texto, tamanio) => {
   const unidades = [...texto].reduce((suma, letra) =>
@@ -158,7 +213,8 @@ export const medirTextoAproximado: MedirTexto = (texto, tamanio) => {
 export function crearSvgEtiquetaAura(
   datos: DatosEtiquetaAura,
   diseno: DisenoAura,
-  medir: MedirTexto = medirTextoAproximado
+  medir: MedirTexto = medirTextoAproximado,
+  formato: FormatoEtiqueta = FORMATO_ETIQUETA_INICIAL
 ): { svg: string; error?: never } | { svg?: never; error: string } {
   const codigo = datos.codigo.trim().toLocaleUpperCase('es-PY')
   const nombre = datos.nombre.trim()
@@ -167,6 +223,16 @@ export function crearSvgEtiquetaAura(
     return { error: 'Elegí una presentación con volumen en ml.' }
   }
   if (!DISENOS_AURA.some(opcion => opcion.id === diseno)) return { error: 'Diseño desconocido.' }
+  const errorFormato = validarFormatoEtiqueta(formato)
+  if (errorFormato) return { error: errorFormato }
+
+  if (formato.anchoMm !== formato.altoMm) {
+    const ancho = formato.anchoMm * 10
+    const alto = formato.altoMm * 10
+    const contenido = componerRectangular(datos, diseno, medir, ancho, alto)
+    if (!contenido) return { error: 'El texto no entra en estas medidas. Acortá el nombre o aumentá el tamaño de la etiqueta.' }
+    return { svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${formato.anchoMm}mm" height="${formato.altoMm}mm" viewBox="0 0 ${ancho} ${alto}" role="img" aria-label="Etiqueta Äura ${escaparXml(codigo)} ${escaparXml(nombre)}"><title>Etiqueta Äura ${escaparXml(codigo)}</title><rect width="${ancho}" height="${alto}" fill="#fff"/>${contenido}</svg>` }
+  }
 
   const codigoAncho = diseno === 'editorial' ? 132 : diseno === 'sello' ? 120 : 170
   const codigoTam = diseno === 'editorial' ? 24 : diseno === 'sello' ? 25 : 26
@@ -175,7 +241,7 @@ export function crearSvgEtiquetaAura(
   }
 
   const nombreSvg = componerNombre(nombre, diseno, medir)
-  if (!nombreSvg) return { error: 'El nombre no entra en 40 mm. Escribí una versión más corta para imprimir.' }
+  if (!nombreSvg) return { error: 'El nombre no entra en la etiqueta. Escribí una versión más corta para imprimir.' }
   const ml = `${String(datos.volumenMl).replace('.', ',')} ML`
   const limpio = escaparXml(codigo)
 
@@ -200,6 +266,6 @@ ${nombreSvg}
   }[diseno]
 
   return {
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="40mm" height="40mm" viewBox="0 0 400 400" role="img" aria-label="Etiqueta Äura ${limpio} ${escaparXml(nombre)} ${ml}"><title>Etiqueta Äura ${limpio}</title><rect width="400" height="400" fill="#fff"/>${comunes}</svg>`,
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${formato.anchoMm}mm" height="${formato.altoMm}mm" viewBox="0 0 400 400" role="img" aria-label="Etiqueta Äura ${limpio} ${escaparXml(nombre)} ${ml}"><title>Etiqueta Äura ${limpio}</title><rect width="400" height="400" fill="#fff"/>${comunes}</svg>`,
   }
 }

@@ -13,7 +13,8 @@ function load(file, imports = {}) {
 }
 const gift = load('../src/lib/giftCards.ts');
 const logo = load('../src/lib/labels/logo-aura.ts');
-const labels = load('../src/lib/labels/aura.ts', { './logo-aura': logo });
+const format = load('../src/lib/labels/formato.ts');
+const labels = load('../src/lib/labels/aura.ts', { './logo-aura': logo, './formato': format });
 const validation = load('../src/lib/validation.ts');
 const voucher = load('../src/lib/giftCardVoucher.ts', { './labels/logo-aura': logo, './validation': validation });
 let gatewayCalls = [];
@@ -66,7 +67,7 @@ test('the three print designs use the exact current official logo at 40 × 40 mm
   const paths = original.slice(original.indexOf('>') + 1, original.lastIndexOf('</svg>')).trim();
   assert.equal(logo.LOGO_AURA_TRAZOS, paths);
   for (const design of labels.DISENOS_AURA) for (const ml of [10, 30, 50]) {
-    const result = labels.crearSvgEtiquetaAura({ codigo: 'CC180', nombre: 'ACQUA DI PI PROFONDO', volumenMl: ml }, design.id);
+    const result = labels.crearSvgEtiquetaAura({ codigo: 'CC180', nombre: 'ACQUA DI PI PROFONDO', volumenMl: ml }, design.id, undefined, { anchoMm: 40, altoMm: 40 });
     assert.ok(result.svg); assert.ok(result.svg.includes('width="40mm" height="40mm"'));
     assert.ok(result.svg.includes(paths)); assert.ok(result.svg.includes('CC180')); assert.ok(result.svg.includes(`${ml} ML`));
   }

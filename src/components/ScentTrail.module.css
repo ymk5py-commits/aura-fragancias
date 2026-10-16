@@ -1,6 +1,5 @@
 .root { isolation: isolate; }
 .stage { position: absolute; inset: 0 0 64px; }
-.root[data-variant="product"] .stage { bottom: 22%; }
 .poster, .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .poster { object-fit: contain; transition: opacity 240ms ease; }
 .stage canvas { opacity: 0; transition: opacity 240ms ease; }

@@ -21,7 +21,7 @@ class Events {
   get count() { return [...this.listeners.values()].reduce((n, set) => n + set.size, 0); }
 }
 
-function mount({ reduced = false, saveData = false, memory = 8, mobile = false, unsupported = false, imageError = false, props } = {}) {
+function mount({ reduced = false, saveData = false, memory = 8, mobile = false, unsupported = false, imageError = false } = {}) {
   const stage = Object.assign(new Events(), {
     clientWidth: 352, clientHeight: 316, children: [],
     appendChild(canvas) { this.children.push(canvas); },
@@ -87,7 +87,7 @@ function mount({ reduced = false, saveData = false, memory = 8, mobile = false, 
       throw new Error(`Unexpected import: ${name}`);
     },
   });
-  function render() { refIndex = stateIndex = 0; tree = exports.default(props); return tree; }
+  function render() { refIndex = stateIndex = 0; tree = exports.default(); return tree; }
   render();
   cleanup = effect();
   const buttons = () => tree.props.children[1]?.props.children || [];
@@ -110,19 +110,6 @@ test('no GPU is loaded offscreen or with motion/data-saving restrictions', async
     assert.equal(app.stage.children.length, 0);
     app.unmount();
   }
-});
-
-test('product trails use their own artwork and animate gently on mobile', async () => {
-  const source = 'data:image/svg+xml,test-product';
-  const app = mount({ mobile: true, props: { source, variant: 'product', speed: 0.51 } });
-  await app.intersect(true);
-  const engine = app.engines[0];
-  assert.equal(app.ready, true);
-  assert.equal(engine.options.ambient, true);
-  assert.equal(engine.options.ambientIntensity, 0.15);
-  assert.equal(engine.options.speed, 0.51);
-  assert.equal(app.render().props.children[0].props.children.props.src, source);
-  app.unmount();
 });
 
 test('visibility, pause and cleanup stop the engine and pending touch releases', async () => {

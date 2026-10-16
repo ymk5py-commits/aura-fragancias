@@ -5,7 +5,7 @@ const nextConfig = {
     root: import.meta.dirname,
   },
   outputFileTracingIncludes: {
-    '/api/perfume-art/*': ['./public/products/botanico-v3/_assets/**', './public/brand/aura-wordmark-black.svg'],
+    '/api/perfume-art/*': ['./public/products/botanico-v3/_assets/**', './public/products/botanico-v4/_assets/**', './public/brand/aura-wordmark-black.svg'],
   },
   images: {
     formats: ['image/avif', 'image/webp'],

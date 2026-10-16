@@ -13,6 +13,7 @@
     "test:gift-cards": "node --test scripts/test-gift-cards.mjs",
     "test:labels": "node --test scripts/test-labels.mjs",
     "test:images": "node --test scripts/test-images.mjs",
+    "test:artwork": "node --test scripts/test-product-artwork.mjs",
     "test:compress": "node --test scripts/test-compress.mjs",
     "test:scent-trail": "node --test scripts/test-scent-trail.mjs",
     "test:rules": "firebase emulators:exec --only firestore --project demo-aura-rules \"node scripts/test-rules.mjs\"",

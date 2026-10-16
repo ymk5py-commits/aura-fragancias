@@ -7,11 +7,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ code
   const url = new URL(request.url);
   const keys = parseArtworkNotes(url.searchParams.get('notes') || '');
   const view = url.searchParams.get('view') || '';
-  if (!/^(CC|DD|UU)\d{3,6}$/.test(code) || !keys || !['1', '2', '3'].includes(url.searchParams.get('v') || '') || !['', 'cutout'].includes(view)) {
+  const version = url.searchParams.get('v') || '';
+  if (!/^(CC|DD|UU)\d{3,6}$/.test(code) || !keys || !['1', '2', '3', '4'].includes(version) || !['', 'cutout'].includes(view)) {
     return new Response('Imagen no disponible', { status: 400 });
   }
   try {
-    const image = await (view === 'cutout' ? renderProductCutout(code, keys) : renderProductArtwork(code, keys));
+    const style = version === '4' ? 'expressive' : 'classic';
+    const image = await (view === 'cutout' ? renderProductCutout(code, keys, style) : renderProductArtwork(code, keys, style));
     return new Response(new Uint8Array(image), {
       headers: {
         'Content-Type': view === 'cutout' ? 'image/png' : 'image/jpeg',

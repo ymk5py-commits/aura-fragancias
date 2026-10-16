@@ -97,7 +97,7 @@ export function productBotanicals(notes: readonly string[] = []): BotanicalKey[]
 /** Solo presentación de la tienda: conserva la foto original en administración. */
 export function productArtworkUrl(product: Pick<Perfume, 'code' | 'notes' | 'imageUrl'>, view: 'catalog' | 'cutout' = 'catalog'): string {
   if (!/^(CC|DD|UU)\d{3,6}$/i.test(product.code)) return product.imageUrl;
-  const params = new URLSearchParams({ v: '3', notes: productBotanicals(catalogOlfactoryNotes(product)).join(',') });
+  const params = new URLSearchParams({ v: '4', notes: productBotanicals(catalogOlfactoryNotes(product)).join(',') });
   if (view === 'cutout') params.set('view', 'cutout');
   return `/api/perfume-art/${encodeURIComponent(product.code.toUpperCase())}?${params}`;
 }

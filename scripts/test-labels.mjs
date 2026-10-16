@@ -54,12 +54,31 @@ test('custom decimal dimensions reach both SVG and paper in either orientation',
   }
 });
 
-test('every catalog perfume fits the new stock in both orientations and all designs', () => {
+test('every catalog perfume fits the new stock in both orientations, alignments and all designs', () => {
   for (const product of PERFUMES) for (const design of labels.DISENOS_AURA) {
-    for (const size of [{ anchoMm: 20, altoMm: 40 }, { anchoMm: 40, altoMm: 20 }]) {
-      const result = labels.crearSvgEtiquetaAura({ codigo: product.code, nombre: product.name, volumenMl: 30 }, design.id, undefined, size);
+    for (const size of [{ anchoMm: 20, altoMm: 40 }, { anchoMm: 40, altoMm: 20 }]) for (const alignment of ['centrada', 'izquierda']) {
+      const result = labels.crearSvgEtiquetaAura({ codigo: product.code, nombre: product.name, volumenMl: 30 }, design.id, undefined, size, { alineacion: alignment });
       assert.ok(result.svg, `${product.code} / ${design.id} / ${size.anchoMm} × ${size.altoMm}: ${result.error}`);
     }
+  }
+});
+
+test('the requested modern layout keeps 212 HEROES MEN in at most two lines with discreet secondary details', () => {
+  const result = labels.crearSvgEtiquetaAura({ codigo: 'CC007', nombre: '212 HEROES MEN', volumenMl: 30 }, 'silencio');
+  assert.ok(result.svg, result.error);
+  const lines = [...result.svg.matchAll(/<text data-label-part="name"[^>]*>(.*?)<\/text>/g)];
+  assert.ok(lines.length <= 2);
+  assert.equal(lines.map(line => line[1]).join(' '), '212 HEROES MEN');
+  assert.ok(result.svg.includes('CC007 · 30 ML'));
+});
+
+test('the longest published perfume name stays complete on square labels in every design', () => {
+  const name = 'VALENTINO DONNA BORN IN ROMA GREEN STRAVAGANZ';
+  for (const design of labels.DISENOS_AURA) {
+    const result = labels.crearSvgEtiquetaAura({ codigo: 'DD161', nombre: name, volumenMl: 30 }, design.id, undefined, { anchoMm: 40, altoMm: 40 });
+    assert.ok(result.svg, `${design.id}: ${result.error}`);
+    const lines = [...result.svg.matchAll(/<text data-label-part="name"[^>]*>(.*?)<\/text>/g)];
+    assert.equal(lines.map(line => line[1]).join(' '), name);
   }
 });
 

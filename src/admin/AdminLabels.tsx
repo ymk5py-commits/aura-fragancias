@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import { Download, MessageCircle, Printer, Search } from 'lucide-react';
+import { AlignCenter, AlignLeft, Download, MessageCircle, Printer, Search } from 'lucide-react';
 import { useProducts } from '../context/ProductsContext';
 import {
   crearSvgEtiquetaAura,
@@ -9,6 +9,7 @@ import {
   medirTextoAproximado,
   type DisenoAura,
   type MedirTexto,
+  type AlineacionEtiquetaAura,
 } from '../lib/labels/aura';
 import {
   crearHtmlImpresionEtiqueta,
@@ -24,6 +25,7 @@ import {
 const inputClass = 'w-full min-h-11 border border-zinc-200 bg-white px-3 py-2.5 text-sm text-aura-ink outline-none transition-colors focus:border-aura-wine';
 const labelClass = 'mb-2 block text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500';
 const noSubscription = () => () => {};
+const styleStorageKey = 'aura-etiquetas-diseno-v1';
 let measureContext: CanvasRenderingContext2D | null = null;
 
 const measureInBrowser: MedirTexto = (text, size, font, weight) => {
@@ -82,6 +84,7 @@ export default function AdminLabels() {
   const [nameEdited, setNameEdited] = useState(false);
   const [volume, setVolume] = useState(30);
   const [design, setDesign] = useState<DisenoAura>('silencio');
+  const [alignment, setAlignment] = useState<AlineacionEtiquetaAura>('centrada');
   const [copies, setCopies] = useState(1);
   const [format, setFormat] = useState<FormatoEtiqueta>(FORMATO_ETIQUETA_INICIAL);
   const [formatLoaded, setFormatLoaded] = useState(false);
@@ -100,6 +103,13 @@ export default function AdminLabels() {
         if (!validarFormatoEtiqueta(parsed)) setFormat({ anchoMm: parsed.anchoMm, altoMm: parsed.altoMm });
       }
     } catch { /* Las etiquetas también funcionan si el almacenamiento no está disponible. */ }
+    try {
+      const saved = JSON.parse(localStorage.getItem(styleStorageKey) ?? 'null');
+      if (saved && DISENOS_AURA.some(option => option.id === saved.design) && ['centrada', 'izquierda'].includes(saved.alignment)) {
+        setDesign(saved.design);
+        setAlignment(saved.alignment);
+      }
+    } catch { /* Usar el diseño minimalista centrado si no hay una preferencia válida. */ }
     setFormatLoaded(true);
   }, []);
 
@@ -107,6 +117,11 @@ export default function AdminLabels() {
     if (!formatLoaded || formatError) return;
     try { localStorage.setItem(FORMATO_ETIQUETA_STORAGE_KEY, JSON.stringify(format)); } catch { /* Sin persistencia en este navegador. */ }
   }, [format, formatLoaded, formatError]);
+
+  useEffect(() => {
+    if (!formatLoaded) return;
+    try { localStorage.setItem(styleStorageKey, JSON.stringify({ design, alignment })); } catch { /* Sin persistencia en este navegador. */ }
+  }, [design, alignment, formatLoaded]);
 
   const selected = sorted.find(product => product.code === code);
   const matches = useMemo(() => {
@@ -129,10 +144,16 @@ export default function AdminLabels() {
 
   const result = useMemo(() => {
     if (!mounted || !formatLoaded || !selected) return null;
-    return crearSvgEtiquetaAura({ codigo: selected.code, nombre: name, volumenMl: volume }, design, measureInBrowser, format);
-  }, [mounted, formatLoaded, selected, name, volume, design, format]);
+    return crearSvgEtiquetaAura({ codigo: selected.code, nombre: name, volumenMl: volume }, design, measureInBrowser, format, { alineacion: alignment });
+  }, [mounted, formatLoaded, selected, name, volume, design, format, alignment]);
   const svg = result?.svg ?? null;
   const png = pngResult?.svg === svg ? pngResult.blob : null;
+  const designPreviews = useMemo(() => {
+    if (!mounted || !formatLoaded || !selected) return {} as Partial<Record<DisenoAura, string>>;
+    return Object.fromEntries(DISENOS_AURA.map(option => [option.id,
+      crearSvgEtiquetaAura({ codigo: selected.code, nombre: name, volumenMl: volume }, option.id, measureInBrowser, format, { alineacion: alignment }).svg,
+    ])) as Partial<Record<DisenoAura, string>>;
+  }, [mounted, formatLoaded, selected, name, volume, format, alignment]);
 
   useEffect(() => {
     if (!svg) {
@@ -148,7 +169,7 @@ export default function AdminLabels() {
     return () => { active = false; };
   }, [svg, format]);
 
-  const filename = `AURA-${(selected?.code ?? 'etiqueta').toUpperCase().replace(/[^A-Z0-9-]+/g, '-')}-${String(volume).replace('.', '-')}ML-${design}-${format.anchoMm}x${format.altoMm}mm-${orientation}`;
+  const filename = `AURA-${(selected?.code ?? 'etiqueta').toUpperCase().replace(/[^A-Z0-9-]+/g, '-')}-${String(volume).replace('.', '-')}ML-${design}-${format.anchoMm}x${format.altoMm}mm-${orientation}-${alignment}`;
 
   function changeFormat(next: FormatoEtiqueta) {
     setFormat(next);
@@ -300,14 +321,27 @@ export default function AdminLabels() {
 
           <fieldset>
             <legend className={labelClass}>Diseño</legend>
-            <div className="grid gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2">
               {DISENOS_AURA.map(option => (
-                <button key={option.id} type="button" aria-pressed={design === option.id} onClick={() => { setDesign(option.id); setNotice(''); }} className={`min-h-20 border px-3 py-3 text-left transition-colors ${design === option.id ? 'border-aura-wine bg-aura-ivory' : 'border-zinc-200 hover:border-aura-ink/40'}`}>
-                  <span className="block text-sm font-semibold text-aura-ink">{option.nombre}</span>
-                  <span className="mt-1 block text-xs leading-snug text-zinc-500">{option.detalle}</span>
+                <button key={option.id} type="button" aria-label={option.nombre} aria-pressed={design === option.id} onClick={() => { setDesign(option.id); setNotice(''); }} className={`flex min-w-0 flex-col items-center border px-2 py-4 text-center transition-colors ${design === option.id ? 'border-aura-wine bg-aura-ivory' : 'border-zinc-200 hover:border-aura-ink/40'}`}>
+                  <span aria-hidden="true" className="flex h-28 w-full items-center justify-center">
+                    {designPreviews[option.id] && !formatError ? <span style={{ aspectRatio: `${format.anchoMm} / ${format.altoMm}`, width: `${Math.min(80, 110 * format.anchoMm / format.altoMm)}px` }} className="block max-w-full bg-white shadow-sm [&>svg]:block [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: designPreviews[option.id] }} /> : <span className="text-[10px] text-zinc-400">Sin vista previa</span>}
+                  </span>
+                  <span className="mt-3 block text-sm font-semibold text-aura-ink">{option.nombre}</span>
+                  <span className="mt-1 block text-[11px] leading-snug text-zinc-500">{option.detalle}</span>
                 </button>
               ))}
             </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className={labelClass}>Alineación del contenido</legend>
+            <div className="grid grid-cols-2 gap-2">
+              {([{ id: 'centrada', name: 'Centrada', Icon: AlignCenter }, { id: 'izquierda', name: 'Izquierda', Icon: AlignLeft }] as const).map(option => (
+                <button key={option.id} type="button" aria-pressed={alignment === option.id} onClick={() => { setAlignment(option.id); setNotice(''); }} className="inline-flex min-h-11 items-center justify-center gap-2 border border-zinc-200 px-3 text-sm hover:border-aura-wine aria-pressed:border-aura-wine aria-pressed:bg-aura-ivory"><option.Icon size={16} />{option.name}</button>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-zinc-500">Logo, nombre y datos se alinean juntos. Se recuerda tu diseño y alineación en este navegador.</p>
           </fieldset>
 
           <label className="block">
@@ -332,7 +366,7 @@ export default function AdminLabels() {
           </div>
           <div style={{ aspectRatio: formatError ? '1' : `${format.anchoMm} / ${format.altoMm}`, width: formatError ? '100%' : `${Math.min(320, 400 * format.anchoMm / format.altoMm)}px`, maxWidth: '100%' }} className="mx-auto mt-6 flex items-center justify-center bg-white shadow-[0_15px_35px_rgba(32,24,24,0.1)]">
             {svg ? (
-              <div className="h-full w-full [&>svg]:block [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: svg }} />
+              <div data-label-preview className="h-full w-full [&>svg]:block [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: svg }} />
             ) : (
               <p className="px-6 text-center text-sm text-zinc-500">{result?.error ?? 'Elegí un perfume para ver la etiqueta.'}</p>
             )}

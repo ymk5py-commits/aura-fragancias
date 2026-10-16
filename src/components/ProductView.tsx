@@ -15,6 +15,7 @@ import { Perfume, Review } from '../types';
 import { ProductReviews, Stars } from './Reviews';
 import StickyBuyBar from './StickyBuyBar';
 import { summarize } from '../lib/reviewsService';
+import ProductVisual from './ProductVisual';
 
 const IntensityBar = ({ level }: { level: number }) => (
   <div className="flex gap-1.5 justify-start">
@@ -35,7 +36,6 @@ interface ProductViewProps {
 
 const ProductView: React.FC<ProductViewProps> = ({ perfume, initialSize = '30 ML', description, related = [], breadcrumb, reviews = [] }) => {
   const { prices: PRICES } = useSettings();
-  const artworkUrl = productArtworkUrl(perfume);
   const { addToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState<string>(initialSize);
   const [quantity, setQuantity] = useState(1);
@@ -79,22 +79,7 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, initialSize = '30 ML
         <div className="grid gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-16 xl:gap-24">
           <div className="w-full">
             <div className="relative mx-auto aspect-[4/5] w-full max-w-[610px] overflow-hidden bg-aura-sand">
-              {artworkUrl ? (
-                <Image
-                  src={artworkUrl}
-                  alt={`${perfume.name} — inspiración ${perfume.inspiration}`}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 500px"
-                  loader={smartImageLoader}
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex flex-col p-10 sm:p-16 justify-center items-center text-center">
-                  <h3 className="text-7xl sm:text-9xl font-luxury font-light text-zinc-900">{perfume.code}</h3>
-                  <h4 className="text-3xl sm:text-5xl font-luxury font-bold text-zinc-900 mt-4">{perfume.name}</h4>
-                </div>
-              )}
+              <ProductVisual perfume={perfume} priority sizes="(max-width: 1024px) 100vw, 500px" />
             </div>
           </div>
 

@@ -12,6 +12,7 @@ import smartImageLoader from '../lib/imageLoader';
 import { productArtworkUrl } from '../lib/productArtwork';
 import { productLink, sizeKey } from '../lib/catalogSeo';
 import { ShoppingBag, X, Eye, Plus, Minus, Truck, ArrowRight } from 'lucide-react';
+import ProductVisual from './ProductVisual';
 
 interface Props {
   perfume: Perfume;
@@ -268,21 +269,7 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
             {/* Visual */}
             <div className="w-full md:w-1/2 p-4 sm:p-5 md:p-3 flex items-center justify-center shrink-0">
               <div className="relative w-full max-w-[520px] aspect-[6/5] md:aspect-[4/5]">
-                {artworkUrl ? (
-                  <Image
-                    src={productArtworkUrl(perfume, 'cutout')}
-                    alt={perfume.name}
-                    fill
-                    sizes="(max-width: 768px) 95vw, 500px"
-                    loader={smartImageLoader}
-                    className="object-contain"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col justify-center items-center p-8 text-center">
-                    <h3 className="text-6xl font-luxury font-light text-aura-ink">{perfume.code}</h3>
-                    <h4 className="text-2xl font-luxury font-semibold text-aura-ink mt-4">{perfume.name}</h4>
-                  </div>
-                )}
+                <ProductVisual perfume={perfume} view="cutout" sizes="(max-width: 768px) 95vw, 500px" />
               </div>
             </div>
 

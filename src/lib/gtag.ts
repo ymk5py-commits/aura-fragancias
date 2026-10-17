@@ -1,6 +1,6 @@
 'use client';
 
-import { sendGAEvent } from '@next/third-parties/google';
+import { sendGoogleEvent } from './marketing';
 import { Perfume } from '../types';
 
 const ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
@@ -31,11 +31,7 @@ export function toItem(p: Perfume, price: number, size?: string, quantity = 1): 
 }
 
 function ga(name: string, params: Record<string, unknown>) {
-  try {
-    sendGAEvent('event', name, params);
-  } catch {
-    /* gtag aún no cargó o sin consentimiento */
-  }
+  sendGoogleEvent(name, params);
 }
 
 // GA4 e-commerce (moneda PYG, valores enteros: guaraní es zero-decimal)
@@ -69,14 +65,15 @@ export const gaGenerateLead = (items: GaItem[], value: number, transactionId: st
 export const gaPurchase = (items: GaItem[], value: number, transactionId: string) =>
   ga('purchase', { currency: 'PYG', value, items, transaction_id: transactionId });
 
-/** Remarketing dinámico de Google Ads: el prodid DEBE ser el code (= g:id del feed). */
+/** Google retail IDs match the feed's item_group_id (= perfume code). */
 export const gaRemarketing = (
   pagetype: 'home' | 'category' | 'product' | 'cart' | 'purchase',
   prodids: string[],
   value: number
 ) => {
   if (!ADS_ID) return;
-  ga('page_view', {
+  const event = { home: 'page_view', category: 'view_item_list', product: 'view_item', cart: 'view_cart', purchase: 'purchase' }[pagetype];
+  ga(event, {
     send_to: ADS_ID,
     ecomm_pagetype: pagetype,
     ecomm_prodid: prodids,

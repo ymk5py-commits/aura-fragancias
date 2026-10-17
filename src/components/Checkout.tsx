@@ -2,7 +2,7 @@
 import { isGiftCard, GIFT_CARD_DAYS, validateGiftCardAmount } from '../lib/giftCards';
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, Info, MessageCircle, Truck, Wallet, Plus, Minus, Trash2, ShieldCheck, Copy, Check, Upload, Loader2, Landmark, FileText, X, CreditCard, Lock } from 'lucide-react';
 import { CartItem, Order } from '../types';
 import { useSettings } from '../context/SettingsContext';
@@ -61,6 +61,7 @@ const CopyRow: React.FC<{ label: string; value: string; big?: boolean }> = ({ la
 
 const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveItem, initialDiscount = 0, onBack }) => {
   const { settings } = useSettings();
+  const checkoutTracked = useRef(false);
   const [step, setStep] = useState<'datos' | 'pago'>('datos');
   const [orderId, setOrderId] = useState('');
   const [formData, setFormData] = useState({
@@ -129,6 +130,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
   };
 
   useEffect(() => {
+    if (checkoutTracked.current) return;
+    checkoutTracked.current = true;
     const eventID = newEventId();
     const contents = cart.map((item) => ({ id: item.perfume.code, quantity: item.quantity, item_price: item.price }));
     trackEvent('InitiateCheckout', {

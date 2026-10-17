@@ -2,49 +2,28 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
-const STORAGE_KEY = 'aura_consent_v1';
-
-function updateConsent(granted: boolean) {
-  if (typeof window === 'undefined') return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const gtag = (window as any).gtag;
-  if (!gtag) return;
-  const v = granted ? 'granted' : 'denied';
-  gtag('consent', 'update', {
-    ad_storage: v,
-    ad_user_data: v,
-    ad_personalization: v,
-    analytics_storage: v,
-  });
-}
+import { chooseMarketingConsent, marketingConsent } from '../lib/marketingConsent';
+import { usePathname } from 'next/navigation';
 
 /**
- * Banner de consentimiento (Consent Mode v2). El default es DENIED (seteado en
- * el layout antes de cargar gtag.js) — requerido por la Ley 7593/2025 de PY y
- * por EU/UK. Al aceptar, se actualiza el consentimiento a granted.
+ * One stored choice controls all advertising and analytics SDKs.
  */
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === 'granted') {
-      updateConsent(true);
-      return;
-    }
-    if (saved === 'denied') return;
+    if (pathname.startsWith('/admin') || marketingConsent()) return;
     const t = setTimeout(() => setVisible(true), 1500);
     return () => clearTimeout(t);
-  }, []);
+  }, [pathname]);
 
   const choose = (granted: boolean) => {
-    localStorage.setItem(STORAGE_KEY, granted ? 'granted' : 'denied');
-    updateConsent(granted);
+    chooseMarketingConsent(granted);
     setVisible(false);
   };
 
-  if (!visible) return null;
+  if (!visible || pathname.startsWith('/admin')) return null;
 
   return (
     <div className="fixed bottom-0 inset-x-0 z-[400] p-4 sm:p-5 animate-slide-up">

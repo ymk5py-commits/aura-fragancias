@@ -29,16 +29,8 @@ export function getFirebaseApp(): Promise<FirebaseApp> {
   if (!appPromise) {
     appPromise = import('firebase/app').then(({ initializeApp, getApps }) => {
       const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-      // Analytics opcional, solo en navegador compatible.
-      if (firebaseConfig.measurementId && typeof window !== 'undefined') {
-        import('firebase/analytics')
-          .then(({ getAnalytics, isSupported }) =>
-            isSupported().then((ok) => {
-              if (ok) getAnalytics(app);
-            })
-          )
-          .catch(() => {/* analytics no disponible */});
-      }
+      // MarketingTags owns GA4 initialization and consent. Starting Analytics
+      // again when Auth/Firestore load would add a second automatic page view.
       return app;
     });
   }

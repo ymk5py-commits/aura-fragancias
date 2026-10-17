@@ -7,9 +7,7 @@ import { useSettings } from '../context/SettingsContext';
 import { useCart } from '../context/CartContext';
 import smartImageLoader from '../lib/imageLoader';
 import { productArtworkUrl } from '../lib/productArtwork';
-import { trackEvent } from '../lib/pixel';
-import { newEventId } from '../lib/tracking';
-import { toItem, gaViewItem, gaRemarketing } from '../lib/gtag';
+import { trackProductView } from '../lib/productEvents';
 import { ShoppingBag, Truck, Minus, Plus, ChevronRight } from 'lucide-react';
 import { Perfume, Review } from '../types';
 import { ProductReviews, Stars } from './Reviews';
@@ -41,25 +39,17 @@ const ProductView: React.FC<ProductViewProps> = ({ perfume, initialSize = '30 ML
   const [quantity, setQuantity] = useState(1);
   const [copied, setCopied] = useState(false);
   const buyRef = useRef<HTMLButtonElement | null>(null);
+  const trackedView = useRef('');
   const rating = summarize(reviews);
   const selectedPrice = PRICES.find((p) => p.size === selectedSize)?.price || PRICES[1].price;
 
   // ViewContent (Meta, pool de retargeting DPA) + view_item (GA4) + remarketing.
   useEffect(() => {
-    const refPrice = selectedPrice;
-    const category = perfume.gender === 'Man' ? 'Hombre' : perfume.gender === 'Woman' ? 'Mujer' : 'Unisex';
-    trackEvent('ViewContent', {
-      content_name: perfume.name,
-      content_ids: [perfume.code],
-      content_type: 'product',
-      content_category: category,
-      value: refPrice,
-      currency: 'PYG',
-    }, newEventId());
-    gaViewItem(toItem(perfume, refPrice, selectedSize));
-    gaRemarketing('product', [perfume.code], refPrice);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [perfume.code, selectedSize, selectedPrice]);
+    const key = `${perfume.code}:${selectedSize}:${selectedPrice}`;
+    if (trackedView.current === key) return;
+    trackedView.current = key;
+    trackProductView(perfume, selectedPrice, selectedSize);
+  }, [perfume, selectedSize, selectedPrice]);
 
   return (
     <main className="min-h-screen flex-grow bg-aura-ivory pb-20 pt-32 sm:pt-36">

@@ -16,6 +16,7 @@
     "test:artwork": "node --test scripts/test-product-artwork.mjs",
     "test:compress": "node --test scripts/test-compress.mjs",
     "test:scent-trail": "node --test scripts/test-scent-trail.mjs",
+    "test:marketing": "node --test scripts/test-marketing.mjs",
     "test:rules": "firebase emulators:exec --only firestore --project demo-aura-rules \"node scripts/test-rules.mjs\"",
     "rules:deploy": "firebase deploy --only firestore:rules --project aura-fragancias",
     "test:import": "node --test scripts/test-import.mjs",

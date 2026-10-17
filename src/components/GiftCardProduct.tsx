@@ -1,14 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { ArrowUpRight, Gift, Check, CalendarDays, MessageCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { GIFT_CARD_IMAGE, GIFT_CARD_MIN, GIFT_CARD_MAX, GIFT_CARD_DAYS, validateGiftCardAmount } from '../lib/giftCards';
+import { GIFT_CARD_PRODUCT, GIFT_CARD_IMAGE, GIFT_CARD_MIN, GIFT_CARD_MAX, GIFT_CARD_DAYS, validateGiftCardAmount } from '../lib/giftCards';
 import smartImageLoader from '../lib/imageLoader';
+import { trackProductView } from '../lib/productEvents';
 
 export default function GiftCardProduct() {
   const { addGiftCard } = useCart();
+  const trackedView = useRef(false);
+  useEffect(() => {
+    if (trackedView.current) return;
+    trackedView.current = true;
+    trackProductView(GIFT_CARD_PRODUCT, GIFT_CARD_MIN, 'Digital');
+  }, []);
   const [amount, setAmount] = useState('100000');
   const [recipient, setRecipient] = useState('');
   const [sender, setSender] = useState('');

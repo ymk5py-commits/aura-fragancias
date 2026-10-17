@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -12,6 +12,7 @@ import smartImageLoader from '../lib/imageLoader';
 import { productArtworkUrl } from '../lib/productArtwork';
 import { productLink, sizeKey } from '../lib/catalogSeo';
 import { ShoppingBag, X, Eye, Plus, Minus, Truck, ArrowRight } from 'lucide-react';
+import { trackProductView } from '../lib/productEvents';
 
 interface Props {
   perfume: Perfume;
@@ -28,6 +29,16 @@ const ProductCard: React.FC<Props> = ({ perfume, rank, featured }) => {
   const [quantity, setQuantity] = useState(1);
   const [copied, setCopied] = useState(false);
   const pathname = usePathname();
+  const trackedView = useRef('');
+  const selectedPrice = PRICES.find(p => p.size === selectedSize)?.price || 0;
+
+  useEffect(() => {
+    if (!showDetails) { trackedView.current = ''; return; }
+    const key = `${perfume.code}:${selectedSize}:${selectedPrice}`;
+    if (trackedView.current === key) return;
+    trackedView.current = key;
+    trackProductView(perfume, selectedPrice, selectedSize);
+  }, [showDetails, perfume, selectedSize, selectedPrice]);
 
   useEffect(() => {
     setShowDetails(false);

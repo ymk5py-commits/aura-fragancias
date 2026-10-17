@@ -1,4 +1,5 @@
 'use client';
+import { marketingConsent } from './marketingConsent';
 
 // Utilidades de tracking compartidas por Pixel (cliente) y CAPI (servidor).
 // El mismo eventId se usa en ambos canales para que Meta deduplique.
@@ -45,7 +46,7 @@ export interface CapiOptions {
  * a WhatsApp). Los cookies _fbp/_fbc solo existen si el Pixel ya arrancó.
  */
 export function capiTrack(opts: CapiOptions): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || marketingConsent() !== 'granted') return;
   const body = {
     ...opts,
     eventSourceUrl: window.location.href,

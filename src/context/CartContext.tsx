@@ -99,13 +99,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addToCart = (perfume: Perfume, size: string, quantity = 1) => {
     const selectedPrice = prices.find((p) => p.size === size)?.price || 0;
+    trackEvent('AddToCart', {
+      content_name: perfume.name,
+      content_ids: [perfume.code],
+      content_type: 'product',
+      contents: [{ id: perfume.code, quantity, item_price: selectedPrice }],
+      value: selectedPrice * quantity,
+      currency: 'PYG',
+    }, newEventId());
+    gaAddToCart(toItem(perfume, selectedPrice, size, quantity));
     setCart((prev) => {
       const idx = prev.findIndex((item) => item.perfume.code === perfume.code && item.size === size);
       if (idx !== -1) {
-        const updated = [...prev];
-        updated[idx].quantity += quantity;
-        showNotification(`Se actualizó la cantidad de ${perfume.name}`);
-        return updated;
+        return prev.map((item, index) => index === idx ? { ...item, quantity: item.quantity + quantity } : item);
       }
       const newItem: CartItem = {
         id: `${perfume.code}-${size}-${Date.now()}`,
@@ -114,19 +120,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         price: selectedPrice,
         quantity,
       };
-      const eventID = newEventId();
-      trackEvent('AddToCart', {
-        content_name: perfume.name,
-        content_ids: [perfume.code],
-        content_type: 'product',
-        contents: [{ id: perfume.code, quantity, item_price: selectedPrice }],
-        value: selectedPrice * quantity,
-        currency: 'PYG',
-      }, eventID);
-      gaAddToCart(toItem(perfume, selectedPrice, size, quantity));
-      showNotification(`Se agregó ${perfume.name} al carrito`);
       return [...prev, newItem];
     });
+    showNotification(`Se agregó ${perfume.name} al carrito`);
     setIsDrawerOpen(true);
   };
 

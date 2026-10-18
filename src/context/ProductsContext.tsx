@@ -6,6 +6,7 @@ import { isSupabaseConfigured, watch } from '../lib/supabase';
 import { productFromRow, type Row } from '../lib/supabaseMap';
 import { PERFUMES } from '../constants';
 import { Perfume } from '../types';
+import { isAdminUser, useAuth } from './AuthContext';
 
 interface ProductsContextValue {
   /** Todos los productos (incluye ocultos) — para el admin. */
@@ -35,15 +36,20 @@ export const ProductsProvider: React.FC<{
 }> = ({ children, initial, initialSource }) => {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin') ?? false;
+  const { user } = useAuth();
+  const adminId = isAdminUser(user) ? user!.id : null;
   const [products, setProducts] = useState<Perfume[]>(initial && initial.length ? initial : PERFUMES);
   const [loading, setLoading] = useState(false);
   const [source, setSource] = useState<'remote' | 'local'>(initialSource || 'local');
 
   useEffect(() => {
-    if (!isAdmin || !isSupabaseConfigured) {
+    if (!isAdmin || !isSupabaseConfigured || !adminId) {
+      setProducts(initial && initial.length ? initial : PERFUMES);
+      setSource(initialSource || 'local');
       setLoading(false);
       return;
     }
+    setLoading(true);
     let unsub: (() => void) | undefined;
     let cancelled = false;
     (async () => {
@@ -51,6 +57,7 @@ export const ProductsProvider: React.FC<{
         ['products'],
         (sb) => sb.from('products').select('*'),
         (rows) => {
+          if (cancelled) return;
           if (!rows.length) {
             // Tabla aún sin productos: mostrar el catálogo incluido.
             setProducts(PERFUMES);
@@ -62,6 +69,7 @@ export const ProductsProvider: React.FC<{
           setLoading(false);
         },
         (err) => {
+          if (cancelled) return;
           console.warn('[Äura] Error leyendo productos, usando catálogo local:', err);
           setProducts(PERFUMES);
           setSource('local');
@@ -70,12 +78,12 @@ export const ProductsProvider: React.FC<{
       );
       if (cancelled) stop();
       else unsub = stop;
-    })().catch(() => setLoading(false));
+    })().catch(() => { if (!cancelled) setLoading(false); });
     return () => {
       cancelled = true;
       unsub?.();
     };
-  }, [isAdmin]);
+  }, [isAdmin, adminId, initial, initialSource]);
 
   const visibleProducts = products.filter((p) => p.visible !== false);
 

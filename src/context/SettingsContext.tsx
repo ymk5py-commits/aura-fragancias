@@ -6,6 +6,7 @@ import { isSupabaseConfigured, watch } from '../lib/supabase';
 import type { Row } from '../lib/supabaseMap';
 import { DEFAULT_SETTINGS } from '../constants';
 import { SiteSettings } from '../types';
+import { isAdminUser, useAuth } from './AuthContext';
 
 export interface PriceTier {
   size: string;
@@ -45,14 +46,18 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode; initial?: S
 }) => {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin') ?? false;
+  const { user } = useAuth();
+  const adminId = isAdminUser(user) ? user!.id : null;
   const [settings, setSettings] = useState<SiteSettings>(initial || DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!isAdmin || !isSupabaseConfigured) {
+    if (!isAdmin || !isSupabaseConfigured || !adminId) {
+      setSettings(initial || DEFAULT_SETTINGS);
       setLoading(false);
       return;
     }
+    setLoading(true);
     let unsub: (() => void) | undefined;
     let cancelled = false;
     (async () => {
@@ -60,11 +65,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode; initial?: S
         ['settings'],
         (sb) => sb.from('settings').select('data').eq('id', 'site').maybeSingle(),
         (row) => {
+          if (cancelled) return;
           // Merge: defaults + lo guardado (campos faltantes usan el default).
           setSettings(row ? { ...DEFAULT_SETTINGS, ...(row.data as Partial<SiteSettings>) } : DEFAULT_SETTINGS);
           setLoading(false);
         },
         (err) => {
+          if (cancelled) return;
           console.warn('[Äura] Error leyendo settings, usando valores por defecto:', err);
           setSettings(DEFAULT_SETTINGS);
           setLoading(false);
@@ -72,12 +79,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode; initial?: S
       );
       if (cancelled) stop();
       else unsub = stop;
-    })().catch(() => setLoading(false));
+    })().catch(() => { if (!cancelled) setLoading(false); });
     return () => {
       cancelled = true;
       unsub?.();
     };
-  }, [isAdmin]);
+  }, [isAdmin, adminId, initial]);
 
   return (
     <SettingsContext.Provider value={{ settings, prices: buildPrices(settings), loading }}>

@@ -1,13 +1,13 @@
 /* ============================================================
-   Precios vigentes de la tienda, leídos del Firestore público
-   (settings/site) para no confiar en los montos que manda el
+   Precios vigentes de la tienda, leídos de la configuración pública
+   (tabla settings, fila 'site') para no confiar en los montos que manda el
    navegador al iniciar un pago con tarjeta.
    ============================================================ */
 
 import { DEFAULT_SETTINGS } from '../../constants';
 
-const PROJECT = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-const KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+const URL_BASE = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export interface Pricing {
   bySize: Record<string, number>;
@@ -15,7 +15,7 @@ export interface Pricing {
 }
 
 function num(v: unknown, fallback: number): number {
-  const n = Number((v as { integerValue?: string; doubleValue?: number })?.integerValue ?? (v as { doubleValue?: number })?.doubleValue);
+  const n = Number(v);
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
@@ -24,14 +24,14 @@ export async function currentPricing(): Promise<Pricing> {
     bySize: { '10 ML': DEFAULT_SETTINGS.price10, '30 ML': DEFAULT_SETTINGS.price30, '50 ML': DEFAULT_SETTINGS.price50 },
     welcomePercent: DEFAULT_SETTINGS.welcomePercent,
   };
-  if (!PROJECT || !KEY) return base;
+  if (!URL_BASE || !KEY) return base;
   try {
-    const res = await fetch(
-      `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents/settings/site?key=${KEY}`,
-      { cache: 'no-store' }
-    );
+    const res = await fetch(`${URL_BASE}/rest/v1/settings?select=data&id=eq.site`, {
+      headers: { apikey: KEY, Authorization: `Bearer ${KEY}` },
+      cache: 'no-store',
+    });
     if (!res.ok) return base;
-    const f = ((await res.json()) as { fields?: Record<string, unknown> }).fields || {};
+    const f = ((await res.json()) as Array<{ data?: Record<string, unknown> }>)[0]?.data || {};
     return {
       bySize: {
         '10 ML': num(f.price10, base.bySize['10 ML']),

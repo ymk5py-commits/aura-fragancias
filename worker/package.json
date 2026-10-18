@@ -1,0 +1,18 @@
+{
+  "name": "aura-whatsapp-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Avisos de pedidos de Äura por WhatsApp (YCloud) contra el Supabase propio. Reemplaza las Cloud Functions de Firebase.",
+  "main": "src/main.js",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/main.js",
+    "cli": "node src/cli.js",
+    "test": "node --test test/alerts.test.js test/config.test.js",
+    "test:integration": "node --test --test-concurrency=1 test/integration.test.mjs test/main.test.mjs test/rol.test.mjs"
+  },
+  "dependencies": {
+    "pg": "8.13.1"
+  }
+}

@@ -1,4 +1,5 @@
-import { getFirebaseDb, isFirebaseConfigured } from './firebase';
+import { getSupabase, isSupabaseConfigured, toError, watch } from './supabase';
+import { camelizeRow, type Row } from './supabaseMap';
 import type { Incident, IncidentSource } from '../types';
 
 /* ============================================================
@@ -7,14 +8,15 @@ import type { Incident, IncidentSource } from '../types';
    Hasta ahora, cuando fallaba guardar el pedido, abrir el pago con
    tarjeta o subir el comprobante, el error quedaba en la consola del
    navegador del cliente y nadie se enteraba. Cada falla se guarda
-   ahora en la colección `incidents` y aparece en /admin → Alertas.
+   ahora en la tabla `incidents` y aparece en /admin → Alertas.
 
-   Äura no tiene usuario de servicio en Firebase, así que escribe el
-   navegador: las reglas permiten crear (validado) y nada más. Avisar
-   nunca puede romper nada: reportIncident no lanza ni espera.
+   Äura no tiene usuario de servicio en el navegador, así que escribe
+   el visitante: la política de la tabla permite crear (validado) y
+   nada más. Avisar nunca puede romper nada: reportIncident no lanza
+   ni espera.
    ============================================================ */
 
-const COLLECTION = 'incidents';
+const TABLE = 'incidents';
 const MAX = { message: 500, detail: 2000, short: 120, phone: 40, page: 200, userAgent: 300 };
 
 export interface IncidentReport {
@@ -42,7 +44,7 @@ export function errorText(err: unknown, fallback: string): string {
   return fallback;
 }
 
-/** Nombre y código del error (FirebaseError trae `code`, p. ej. permission-denied). */
+/** Nombre y código del error (los de base de datos traen `code`, p. ej. 42501 = permiso denegado). */
 export function errorDetail(err: unknown): string | undefined {
   if (!(err instanceof Error) || err.name === 'Error') return undefined;
   const code = (err as { code?: string }).code;
@@ -51,31 +53,32 @@ export function errorDetail(err: unknown): string | undefined {
 
 /** Guarda la alerta sin bloquear la interfaz. Nunca lanza. */
 export function reportIncident(report: IncidentReport): void {
-  if (!isFirebaseConfigured) return;
+  if (!isSupabaseConfigured) return;
   void (async () => {
     try {
-      const [db, { collection, addDoc }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-      const doc: Record<string, unknown> = {
+      const sb = await getSupabase();
+      const row: Record<string, unknown> = {
         source: clip(report.source, 40),
         message: clip(report.message, MAX.message) || 'Error sin mensaje',
-        createdAt: Date.now(),
+        created_at: Date.now(),
         seen: false,
       };
       const detail = clip(report.detail, MAX.detail);
-      if (detail) doc.detail = detail;
+      if (detail) row.detail = detail;
       const orderId = clip(report.orderId, MAX.short);
-      if (orderId) doc.orderId = orderId;
+      if (orderId) row.order_id = orderId;
       const paymentMethod = clip(report.paymentMethod, 40);
-      if (paymentMethod) doc.paymentMethod = paymentMethod;
+      if (paymentMethod) row.payment_method = paymentMethod;
       const customerName = clip(report.customerName, MAX.short);
-      if (customerName) doc.customerName = customerName;
+      if (customerName) row.customer_name = customerName;
       const customerPhone = clip(report.customerPhone, MAX.phone);
-      if (customerPhone) doc.customerPhone = customerPhone;
+      if (customerPhone) row.customer_phone = customerPhone;
       const total = Math.round(Number(report.total));
-      if (Number.isFinite(total) && total >= 0) doc.total = total;
-      if (typeof location !== 'undefined') doc.page = clip(location.pathname, MAX.page);
-      if (typeof navigator !== 'undefined') doc.userAgent = clip(navigator.userAgent, MAX.userAgent);
-      await addDoc(collection(db, COLLECTION), doc);
+      if (Number.isFinite(total) && total >= 0) row.total = total;
+      if (typeof location !== 'undefined') row.page = clip(location.pathname, MAX.page);
+      if (typeof navigator !== 'undefined') row.user_agent = clip(navigator.userAgent, MAX.userAgent);
+      const { error } = await sb.from(TABLE).insert(row);
+      if (error) throw toError(error);
     } catch (err) {
       console.warn('[Äura] No se pudo registrar la alerta:', err);
     }
@@ -84,10 +87,11 @@ export function reportIncident(report: IncidentReport): void {
 
 /* ---------- panel ---------- */
 
-function fromDoc(id: string, data: Record<string, unknown>): Incident {
+function fromRow(row: Row): Incident {
+  const data = camelizeRow(row);
   const str = (key: string) => (data[key] ? String(data[key]) : undefined);
   return {
-    id,
+    id: String(row.id),
     source: (String(data.source || 'pedido-no-guardado') as IncidentSource),
     message: String(data.message || ''),
     detail: str('detail'),
@@ -106,41 +110,38 @@ function fromDoc(id: string, data: Record<string, unknown>): Incident {
 
 /** Escucha las alertas en tiempo real (solo /admin), más recientes primero. */
 export async function subscribeIncidents(cb: (incidents: Incident[]) => void): Promise<() => void> {
-  if (!isFirebaseConfigured) return () => {};
-  const [db, { collection, onSnapshot, orderBy, query, limit }] = await Promise.all([
-    getFirebaseDb(),
-    import('firebase/firestore'),
-  ]);
-  const q = query(collection(db, COLLECTION), orderBy('createdAt', 'desc'), limit(300));
-  return onSnapshot(
-    q,
-    (snap) => cb(snap.docs.map((d) => fromDoc(d.id, d.data() as Record<string, unknown>))),
+  if (!isSupabaseConfigured) return () => {};
+  return watch<Row[]>(
+    [TABLE],
+    (sb) => sb.from(TABLE).select('*').order('created_at', { ascending: false }).limit(300),
+    (rows) => cb(rows.map(fromRow)),
     (err) => {
       console.warn('[Äura] No se pudieron leer las alertas:', err);
       cb([]);
-    }
+    },
   );
 }
 
 export async function setIncidentSeen(id: string, seen: boolean): Promise<void> {
-  const [db, { doc, updateDoc, deleteField }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  await updateDoc(doc(db, COLLECTION, id), seen ? { seen: true, seenAt: Date.now() } : { seen: false, seenAt: deleteField() });
+  const sb = await getSupabase();
+  const { error } = await sb.from(TABLE).update(seen ? { seen: true, seen_at: Date.now() } : { seen: false, seen_at: null }).eq('id', id);
+  if (error) throw toError(error);
 }
 
-/** Marca varias de una vez (Firestore admite hasta 500 escrituras por lote). */
+/** Marca varias de una vez. */
 export async function markIncidentsSeen(ids: string[]): Promise<void> {
-  const [db, { doc, writeBatch }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
+  const sb = await getSupabase();
   const now = Date.now();
   for (let i = 0; i < ids.length; i += 400) {
-    const batch = writeBatch(db);
-    ids.slice(i, i + 400).forEach((id) => batch.update(doc(db, COLLECTION, id), { seen: true, seenAt: now }));
-    await batch.commit();
+    const { error } = await sb.from(TABLE).update({ seen: true, seen_at: now }).in('id', ids.slice(i, i + 400));
+    if (error) throw toError(error);
   }
 }
 
 export async function deleteIncident(id: string): Promise<void> {
-  const [db, { doc, deleteDoc }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  await deleteDoc(doc(db, COLLECTION, id));
+  const sb = await getSupabase();
+  const { error } = await sb.from(TABLE).delete().eq('id', id);
+  if (error) throw toError(error);
 }
 
 /* ---------- etiquetas ---------- */

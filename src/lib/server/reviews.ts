@@ -1,69 +1,40 @@
 /* ============================================================
-   Reseñas aprobadas por SSR/ISR (Firestore REST público).
+   Reseñas aprobadas por SSR/ISR (PostgREST público).
    Como los productos: si falla, la página sale sin reseñas.
    ============================================================ */
 
 import type { Review } from '../../types';
 
-const PROJECT = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-const KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+const URL_BASE = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-type FsValue = Record<string, unknown>;
-function decode(v: FsValue | undefined): unknown {
-  if (!v) return null;
-  if ('stringValue' in v) return v.stringValue;
-  if ('integerValue' in v) return Number(v.integerValue);
-  if ('doubleValue' in v) return Number(v.doubleValue);
-  if ('booleanValue' in v) return v.booleanValue;
-  return null;
-}
-
-function toReview(id: string, f: Record<string, FsValue>): Review {
-  const rating = Math.min(5, Math.max(1, Math.round(Number(decode(f.rating)) || 5))) as Review['rating'];
+function toReview(row: Record<string, unknown>): Review {
+  const rating = Math.min(5, Math.max(1, Math.round(Number(row.rating) || 5))) as Review['rating'];
   return {
-    id,
-    productId: String(decode(f.productId) ?? ''),
-    productName: decode(f.productName) ? String(decode(f.productName)) : undefined,
-    name: String(decode(f.name) ?? ''),
-    city: decode(f.city) ? String(decode(f.city)) : undefined,
+    id: String(row.id ?? ''),
+    productId: String(row.product_id ?? ''),
+    productName: row.product_name ? String(row.product_name) : undefined,
+    name: String(row.name ?? ''),
+    city: row.city ? String(row.city) : undefined,
     rating,
-    text: String(decode(f.text) ?? ''),
-    approved: decode(f.approved) === true,
-    createdAt: Number(decode(f.createdAt)) || 0,
+    text: String(row.text ?? ''),
+    approved: row.approved === true,
+    createdAt: Number(row.created_at) || 0,
   };
 }
 
 /** Reseñas aprobadas; de un producto si se pasa el código. Revalida cada 5 min. */
 export async function getApprovedReviews(productId?: string, max = 60): Promise<Review[]> {
-  if (!PROJECT || !KEY) return [];
-  const filters: unknown[] = [
-    { fieldFilter: { field: { fieldPath: 'approved' }, op: 'EQUAL', value: { booleanValue: true } } },
-  ];
-  if (productId) {
-    filters.push({ fieldFilter: { field: { fieldPath: 'productId' }, op: 'EQUAL', value: { stringValue: productId } } });
-  }
+  if (!URL_BASE || !KEY) return [];
+  const params = new URLSearchParams({ select: '*', approved: 'eq.true', order: 'created_at.desc', limit: String(max) });
+  if (productId) params.set('product_id', `eq.${productId}`);
   try {
-    const res = await fetch(
-      `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents:runQuery?key=${KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          structuredQuery: {
-            from: [{ collectionId: 'reviews' }],
-            where: filters.length === 1 ? filters[0] : { compositeFilter: { op: 'AND', filters } },
-            limit: max,
-          },
-        }),
-        next: { revalidate: 300 },
-      }
-    );
+    const res = await fetch(`${URL_BASE}/rest/v1/reviews?${params}`, {
+      headers: { apikey: KEY, Authorization: `Bearer ${KEY}` },
+      next: { revalidate: 300 },
+    });
     if (!res.ok) return [];
-    const rows = (await res.json()) as Array<{ document?: { name: string; fields?: Record<string, FsValue> } }>;
-    return rows
-      .filter((r) => r.document?.fields)
-      .map((r) => toReview(r.document!.name.split('/').pop() || '', r.document!.fields || {}))
-      .sort((a, b) => b.createdAt - a.createdAt);
+    return ((await res.json()) as Record<string, unknown>[]).map(toReview).sort((a, b) => b.createdAt - a.createdAt);
   } catch {
     return [];
   }

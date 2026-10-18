@@ -5,7 +5,7 @@ export type Badge = 'Bestseller' | 'Recommended' | 'New';
 
 export interface Perfume {
   updatedAt?: string;   // Fecha real de modificación, serializada por el servidor.
-  id?: string;          // Firestore document id (optional for bundled catalog)
+  id?: string;          // id de la fila (opcional en el catálogo incluido)
   code: string;
   name: string;
   inspiration: string;
@@ -85,7 +85,7 @@ export interface OrderItem {
 }
 
 export interface Order {
-  id?: string;           // id del documento en Firestore
+  id?: string;           // id de la fila en la base de datos
   orderId: string;       // código legible: AURA-XXXX
   createdAt?: unknown;    // serverTimestamp
   status: OrderStatus;
@@ -128,7 +128,7 @@ export interface Order {
 /* ---------- alertas (compras que no se pudieron completar) ---------- */
 
 export type IncidentSource =
-  | 'pedido-no-guardado' // el pedido no se pudo guardar en Firestore
+  | 'pedido-no-guardado' // el pedido no se pudo guardar
   | 'pago-tarjeta' // no se consiguió el link de pago (hub / Pagopar)
   | 'comprobante' // el comprobante de transferencia no se pudo subir
   | 'verificacion-pago'; // la página /pago no pudo consultar el estado

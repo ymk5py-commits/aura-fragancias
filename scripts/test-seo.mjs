@@ -3,11 +3,12 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
 import ts from 'typescript';
+import { SignJWT } from 'jose';
 
 function load(file, imports, globals = {}) {
   const { outputText } = ts.transpileModule(readFileSync(new URL(file, import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } });
   const exports = {};
-  vm.runInNewContext(outputText, { exports, URL, Response, Request, AbortSignal, process: { env: { NEXT_PUBLIC_FIREBASE_API_KEY: 'test' } }, console, require: (name) => { assert.ok(name in imports, name); return imports[name]; }, ...globals });
+  vm.runInNewContext(outputText, { exports, URL, Response, Request, AbortSignal, process: { env: { NEXT_PUBLIC_SUPABASE_URL: 'https://db.example.test', NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test' } }, console, TextEncoder, require: (name) => { assert.ok(name in imports, name); return imports[name]; }, ...globals });
   return exports;
 }
 const SITE = 'https://www.aurafragancias.store';
@@ -54,26 +55,39 @@ test('el aviso automático solo usa URLs del dominio y sus variantes', () => {
   assert.equal(urls.filter((url) => url.includes('/producto/')).length, 4);
   assert.ok(urls.every((url) => new URL(url).origin === SITE));
 });
-test('el endpoint rechaza sesiones inválidas y códigos externos antes de avisar', async () => {
+const JWT_SECRET = 'test-secret-test-secret-test-secret-12345';
+const sign = (claims, secret = JWT_SECRET, expires = '1h') => new SignJWT(claims).setProtectedHeader({ alg: 'HS256' }).setSubject('user-1').setExpirationTime(expires).sign(new TextEncoder().encode(secret));
+test('el endpoint exige un admin de Supabase y rechaza códigos externos antes de avisar', async () => {
   const scheduled = []; const notified = []; const refreshed = [];
+  const adminAuth = load('../src/lib/server/adminAuth.ts', { jose: await import('jose') }, { process: { env: { SUPABASE_JWT_SECRET: JWT_SECRET } } });
   const route = load('../src/app/api/search-index/route.ts', {
     'next/server': { after: (fn) => scheduled.push(fn) },
     'next/cache': { revalidateTag: (tag) => refreshed.push(tag), revalidatePath: () => {} },
     '../../../lib/serverData': { getProducts: async () => ({ products: [perfume] }) },
     '../../../lib/server/indexNow': { sendIndexNow: async (codes) => notified.push(Array.from(codes)) },
-  }, { fetch: async (_, options) => JSON.parse(options.body).idToken === 'valid-admin' ? { ok: true, json: async () => ({ users: [{ localId: 'other-admin' }] }) } : { ok: false } });
+    '../../../lib/server/adminAuth': adminAuth,
+  });
+  const admin = await sign({ role: 'authenticated', app_metadata: { aura_role: 'admin' } });
+  const notAdmin = await sign({ role: 'authenticated', app_metadata: {} });
+  const forged = await sign({ role: 'authenticated', app_metadata: { aura_role: 'admin' } }, 'otro-secreto-otro-secreto-otro-secreto-1');
+  const expired = await sign({ role: 'authenticated', app_metadata: { aura_role: 'admin' } }, JWT_SECRET, '-1h');
+  const anon = await sign({ role: 'anon' });
   const request = (data, token) => new Request(`${SITE}/api/search-index`, { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: JSON.stringify(data) });
   assert.equal((await route.POST(request({ code: 'DD192' }))).status, 401);
   assert.equal((await route.POST(request({ code: 'DD192' }, 'forged'))).status, 401);
-  assert.equal((await route.POST(request({ code: 'https://other.com' }, 'valid-admin'))).status, 400);
-  assert.equal((await route.POST(request(null, 'valid-admin'))).status, 400);
-  assert.equal((await route.POST(new Request(`${SITE}/api/search-index`, { method: 'POST', headers: { Authorization: 'Bearer valid-admin' }, body: '{' }))).status, 400);
+  assert.equal((await route.POST(request({ code: 'DD192' }, forged))).status, 401);
+  assert.equal((await route.POST(request({ code: 'DD192' }, expired))).status, 401);
+  assert.equal((await route.POST(request({ code: 'DD192' }, notAdmin))).status, 403);
+  assert.equal((await route.POST(request({ code: 'DD192' }, anon))).status, 403);
+  assert.equal((await route.POST(request({ code: 'https://other.com' }, admin))).status, 400);
+  assert.equal((await route.POST(request(null, admin))).status, 400);
+  assert.equal((await route.POST(new Request(`${SITE}/api/search-index`, { method: 'POST', headers: { Authorization: `Bearer ${admin}` }, body: '{' }))).status, 400);
   assert.equal(scheduled.length, 0);
-  assert.equal((await route.POST(request({ code: 'DD192' }, 'valid-admin'))).status, 202);
+  assert.equal((await route.POST(request({ code: 'DD192' }, admin))).status, 202);
   assert.ok(refreshed.includes('catalog'));
   await scheduled.pop()();
   assert.deepEqual(notified, [['DD192']]);
-  assert.equal((await route.POST(request({ catalog: true }, 'valid-admin'))).status, 202);
+  assert.equal((await route.POST(request({ catalog: true }, admin))).status, 202);
   await scheduled.pop()();
   assert.deepEqual(notified[1], ['DD192']);
 });

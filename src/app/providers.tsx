@@ -16,7 +16,7 @@ export default function Providers({
   children: React.ReactNode;
   settings: SiteSettings;
   products: Perfume[];
-  source: 'firebase' | 'local';
+  source: 'remote' | 'local';
 }) {
   return (
     <AuthProvider>

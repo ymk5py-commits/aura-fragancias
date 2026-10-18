@@ -68,7 +68,7 @@ const ProductForm: React.FC<Props> = ({ product, onClose, onSaved }) => {
       const url = await uploadProductImage(file, form.code);
       set('imageUrl', url);
     } catch (err) {
-      setError('No se pudo subir la imagen. Revisá las reglas de Storage en Firebase.');
+      setError('No se pudo subir la imagen. Revisá tu conexión y que tu cuenta sea de administrador.');
       console.error(err);
     } finally {
       setUploading(false);
@@ -90,7 +90,7 @@ const ProductForm: React.FC<Props> = ({ product, onClose, onSaved }) => {
       });
       onSaved();
     } catch (err) {
-      setError('No se pudo guardar. Revisá tu conexión y las reglas de Firestore.');
+      setError('No se pudo guardar. Revisá tu conexión y que tu cuenta sea de administrador.');
       console.error(err);
     } finally {
       setSaving(false);

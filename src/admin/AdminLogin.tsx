@@ -19,9 +19,11 @@ const AdminLogin: React.FC = () => {
       await login(email.trim(), password);
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code || '';
-      if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) {
+      if (code.includes('invalid_credentials') || code.includes('AuthApiError')) {
         setError('Email o contraseña incorrectos.');
-      } else if (code.includes('too-many-requests')) {
+      } else if (code.includes('not_admin')) {
+        setError('Esta cuenta no tiene acceso al panel.');
+      } else if (code.includes('over_request_rate_limit') || code.includes('too_many')) {
         setError('Demasiados intentos. Esperá unos minutos.');
       } else {
         setError('No se pudo iniciar sesión. Revisá tu conexión.');

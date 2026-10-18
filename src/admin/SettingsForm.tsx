@@ -75,7 +75,7 @@ const SettingsForm: React.FC = () => {
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       console.error(err);
-      alert('No se pudo guardar. Revisá las reglas de Firestore (debe incluir /settings).');
+      alert('No se pudo guardar. Revisá tu conexión y que tu cuenta sea de administrador.');
     } finally {
       setSaving(false);
     }

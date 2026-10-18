@@ -9,18 +9,23 @@ const defaultRecipe = { alcoholRate: 10 };
 
 function harness() {
   const listeners = [];
-  const sdk = {
-    doc: (_db, collection, id) => `${collection}/${id}`,
-    onSnapshot: (path, callback, onError) => {
-      const listener = { path, callback, onError, closed: false };
-      listeners.push(listener);
-      return () => { listener.closed = true; };
-    },
+  const watch = async (tables, load, callback, onError) => {
+    const listener = { path: '', select: '', tables: [...tables], callback, onError, closed: false };
+    // Ejecuta la consulta para comprobar que una sola lectura trae ambos campos.
+    load({ from: (table) => ({ select: (fields) => {
+      listener.select = fields;
+      return { eq: (key, id) => {
+        assert.equal(key, 'id');
+        listener.path = `${table}/${id}`;
+        return { maybeSingle: () => Promise.resolve({ data: null, error: null }) };
+      } };
+    } }) });
+    listeners.push(listener);
+    return () => { listener.closed = true; };
   };
   const imports = {
-    './firebase': { getFirebaseDb: async () => ({}) },
-    'firebase/firestore': sdk,
-    './giftCardsService': {}, './giftCards': {},
+    './adminApi': {}, './supabaseMap': {},
+    './supabase': { watch },
     './sales': { INITIAL_COSTS: defaults },
     './erp': { INITIAL_RECIPE: defaultRecipe },
   };
@@ -39,9 +44,11 @@ test('Caja reads costs and recipe with a single subscription', async () => {
   const results = [];
   const stop = await service.subscribeSaleConfiguration((config) => results.push(config), assert.fail);
   assert.equal(listeners.length, 1);
-  assert.equal(listeners[0].path, 'salesConfig/costs');
+  assert.equal(listeners[0].path, 'sales_config/costs');
+  assert.equal(listeners[0].select, 'costs,recipe');
+  assert.deepEqual(listeners[0].tables, ['sales_config']);
   const recipe = { alcoholRate: 25 };
-  listeners[0].callback({ data: () => ({ costs: { '30 ML': 18000 }, recipe }) });
+  listeners[0].callback({ costs: { '30 ML': 18000 }, recipe });
   assert.deepEqual({ ...results[0].costs }, { ...defaults, '30 ML': 18000 });
   assert.equal(results[0].recipe, recipe);
   stop();
@@ -52,7 +59,7 @@ test('missing configuration keeps the existing default costs and recipe', async 
   const { service, listeners } = harness();
   let result;
   await service.subscribeSaleConfiguration((config) => { result = config; }, assert.fail);
-  listeners[0].callback({ data: () => undefined });
+  listeners[0].callback(null);
   assert.deepEqual({ ...result.costs }, defaults);
   assert.equal(result.recipe, defaultRecipe);
 });
@@ -61,8 +68,8 @@ test('live cost updates update both values without opening another listener', as
   const { service, listeners } = harness();
   const results = [];
   await service.subscribeSaleConfiguration((config) => results.push(config), assert.fail);
-  listeners[0].callback({ data: () => ({ costs: { '50 ML': 26000 }, recipe: { alcoholRate: 11 } }) });
-  listeners[0].callback({ data: () => ({ costs: { '50 ML': 28000 }, recipe: { alcoholRate: 12 } }) });
+  listeners[0].callback({ costs: { '50 ML': 26000 }, recipe: { alcoholRate: 11 } });
+  listeners[0].callback({ costs: { '50 ML': 28000 }, recipe: { alcoholRate: 12 } });
   assert.equal(listeners.length, 1);
   assert.equal(results.length, 2);
   assert.equal(results[1].costs['50 ML'], 28000);

@@ -6,7 +6,7 @@ import { GUIDES } from '../lib/guides';
 import { cldn } from '../lib/img';
 import { productArtworkUrl } from '../lib/productArtwork';
 
-// La ruta de metadata debe regenerarse junto con el catálogo de Firestore.
+// La ruta de metadata debe regenerarse junto con el catálogo de la base de datos.
 // Así las altas, bajas y cambios de visibilidad llegan también al sitemap.
 export const revalidate = 120;
 
@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((p) => p.visible !== false)
     .map((p) => {
       const updated = latestUpdate(p.updatedAt, settings.updatedAt);
-      // Next concatena image:loc sin escapar XML; las URLs de Firebase llevan &token.
+      // Next concatena image:loc sin escapar XML; las URLs de imágenes pueden llevar parámetros con &.
       const artwork = productArtworkUrl(p);
       const image = artwork ? new URL(cldn(artwork, 1000), SITE).href.replace(/&/g, '&amp;') : undefined;
       return { url: `${SITE}/producto/${p.code}`, ...(updated ? { lastModified: updated } : {}), ...(image ? { images: [image] } : {}), changeFrequency: 'monthly' as const, priority: 0.7 };

@@ -1,15 +1,16 @@
-import { giftCardEntries, newGiftCard } from './giftCardsService';
-import { isGiftCard, orderAmounts } from './giftCards';
-import { getFirebaseDb } from './firebase';
+import { adminCall } from './adminApi';
+import { getSupabase, toError, watch } from './supabase';
+import { expenseFromRow, saleFromRow, type Row } from './supabaseMap';
 import type { Order } from '../types';
-import { INITIAL_COSTS, SALE_SIZES, saleTotals, orderToSale, validateSale, enforceSaleCosts, type Sale, type SaleSize } from './sales';
-import { INITIAL_RECIPE, recipeCost, validateRecipe, validateExpense, type CostRecipe, type Expense } from './erp';
+import { INITIAL_COSTS, validateSale, type Sale, type SaleSize } from './sales';
+import { INITIAL_RECIPE, validateRecipe, validateExpense, type CostRecipe, type Expense } from './erp';
 import type { ImportRow } from './erpImport';
 
 export async function loadImportSnapshot() {
-  const [db, sdk, { parseSnapshot }] = await Promise.all([getFirebaseDb(), import('firebase/firestore'), import('./erpImport')]);
-  const snapshot = await sdk.getDoc(sdk.doc(db, 'erpImports', 'aura-caja'));
-  return snapshot.exists() ? parseSnapshot(snapshot.data().contents) : null;
+  const [sb, { parseSnapshot }] = await Promise.all([getSupabase(), import('./erpImport')]);
+  const { data, error } = await sb.from('erp_imports').select('contents').eq('id', 'aura-caja').maybeSingle();
+  if (error) throw toError(error);
+  return data ? parseSnapshot(String(data.contents)) : null;
 }
 
 /** Importación reanudable: crea solamente IDs de origen nuevos y nunca pisa una venta editada. */
@@ -22,32 +23,26 @@ export async function importLedger(rows: ImportRow[], onProgress?: (done: number
     const error = row.kind === 'sale' ? validateSale(row.record as Sale) : validateExpense(row.record as Expense);
     if (error) throw new Error(error);
   }
-  const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  let created = 0; let skipped = 0;
-  for (let start = 0; start < rows.length; start += 20) {
-    const chunk = rows.slice(start, start + 20);
-    const result = await sdk.runTransaction(db, async transaction => {
-      const refs = chunk.map(row => sdk.doc(db, row.kind === 'sale' ? 'sales' : 'expenses', row.key));
-      const snapshots = await Promise.all(refs.map(ref => transaction.get(ref)));
-      let count = 0;
-      chunk.forEach((row, i) => {
-        if (snapshots[i].exists()) return;
-        const { id, createdAt, updatedAt, ...fields } = row.record!;
-        transaction.set(refs[i], { ...fields, createdAt: sdk.serverTimestamp(), updatedAt: sdk.serverTimestamp() });
-        count++;
-      });
-      return count;
-    });
-    created += result; skipped += chunk.length - result;
+  let created = 0;
+  let skipped = 0;
+  const CHUNK = 100;
+  for (let start = 0; start < rows.length; start += CHUNK) {
+    const chunk = rows.slice(start, start + CHUNK);
+    const result = await adminCall<{ created: number; skipped: number }>('import-ledger', { rows: chunk });
+    created += result.created;
+    skipped += result.skipped;
     onProgress?.(Math.min(start + chunk.length, rows.length));
   }
   return { created, skipped };
 }
 
 export async function subscribeSales(from: string, to: string, callback: (sales: Sale[]) => void, onError: (error: Error) => void) {
-  const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  const q = sdk.query(sdk.collection(db, 'sales'), sdk.where('date', '>=', from), sdk.where('date', '<=', to), sdk.orderBy('date', 'desc'));
-  return sdk.onSnapshot(q, (snapshot) => callback(snapshot.docs.map((d) => ({ ...d.data(), id: d.id } as Sale))), onError);
+  return watch<Row[]>(
+    ['sales'],
+    (sb) => sb.from('sales').select('*').gte('date', from).lte('date', to).order('date', { ascending: false }),
+    (rows) => callback(rows.map(saleFromRow)),
+    onError,
+  );
 }
 
 /** Costos y receta viven en el mismo documento: una sola lectura y suscripción. */
@@ -55,127 +50,50 @@ export async function subscribeSaleConfiguration(
   callback: (config: { costs: Record<SaleSize, number>; recipe: CostRecipe }) => void,
   onError: (error: Error) => void,
 ) {
-  const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  return sdk.onSnapshot(sdk.doc(db, 'salesConfig', 'costs'), (snapshot) => {
-    const data = snapshot.data();
-    callback({ costs: { ...INITIAL_COSTS, ...data?.costs }, recipe: data?.recipe || INITIAL_RECIPE });
-  }, onError);
+  return watch<Row | null>(
+    ['sales_config'],
+    (sb) => sb.from('sales_config').select('costs,recipe').eq('id', 'costs').maybeSingle(),
+    (row) => callback({
+      costs: { ...INITIAL_COSTS, ...((row?.costs as Partial<Record<SaleSize, number>>) || {}) },
+      recipe: (row?.recipe as CostRecipe) || INITIAL_RECIPE,
+    }),
+    onError,
+  );
 }
 
 export async function saveCostRecipe(recipe: CostRecipe) {
   const error = validateRecipe(recipe);
   if (error) throw new Error(error);
-  const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  const costs = Object.fromEntries(SALE_SIZES.map((size) => [size, recipeCost(recipe, size).total]));
-  await sdk.setDoc(sdk.doc(db, 'salesConfig', 'costs'), { costs, recipe, updatedAt: sdk.serverTimestamp() });
+  await adminCall('cost-recipe', { recipe });
 }
 
 export async function subscribeExpenses(from: string, to: string, callback: (expenses: Expense[]) => void, onError: (error: Error) => void) {
-  const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  const q = sdk.query(sdk.collection(db, 'expenses'), sdk.where('date', '>=', from), sdk.where('date', '<=', to), sdk.orderBy('date', 'desc'));
-  return sdk.onSnapshot(q, (snapshot) => callback(snapshot.docs.map((d) => ({ ...d.data(), id: d.id } as Expense))), onError);
+  return watch<Row[]>(
+    ['expenses'],
+    (sb) => sb.from('expenses').select('*').gte('date', from).lte('date', to).order('date', { ascending: false }),
+    (rows) => callback(rows.map(expenseFromRow)),
+    onError,
+  );
 }
 
 export async function saveExpense(expense: Expense) {
   const error = validateExpense(expense);
   if (error) throw new Error(error);
-  const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  const ref = sdk.doc(db, 'expenses', expense.id);
-  await sdk.runTransaction(db, async (transaction) => {
-    const previous = await transaction.get(ref);
-    if (previous.exists() && !sameTimestamp(previous.data().updatedAt, expense.updatedAt)) throw new Error('El gasto cambió en otra ventana. Volvé a abrirlo para editar.');
-    const { id, createdAt, updatedAt, ...fields } = expense;
-    transaction.set(ref, { ...fields, createdAt: previous.exists() ? previous.data().createdAt : sdk.serverTimestamp(), updatedAt: sdk.serverTimestamp() });
-  });
-}
-
-function sameTimestamp(a: unknown, b: unknown) {
-  return JSON.stringify(a) === JSON.stringify(b);
+  await adminCall('save-expense', { expense });
 }
 
 export async function saveSale(sale: Sale) {
   const error = validateSale(sale);
   if (error) throw new Error(error);
-  const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  const ref = sdk.doc(db, 'sales', sale.id);
-  await sdk.runTransaction(db, async (transaction) => {
-    const [previous, config] = await Promise.all([transaction.get(ref), transaction.get(sdk.doc(db, 'salesConfig', 'costs'))]);
-    if (previous.exists() && !sameTimestamp(previous.data().updatedAt, sale.updatedAt)) {
-      throw new Error('Esta venta cambió en otra ventana. Cerrá el formulario y volvé a abrirla para editar.');
-    }
-    if (!previous.exists() && sale.sourceOrderId) throw new Error('Registrá el pedido web desde la bandeja de pedidos confirmados.');
-    const protectedSale = enforceSaleCosts(sale, previous.exists() ? { ...previous.data(), id: previous.id } as Sale : null, { ...INITIAL_COSTS, ...config.data()?.costs });
-    const { id, createdAt, updatedAt, ...fields } = protectedSale;
-    if (previous.exists() && previous.data().sourceOrderId !== sale.sourceOrderId) throw new Error('No se puede cambiar el pedido vinculado.');
-    transaction.set(ref, {
-      ...fields,
-      createdAt: previous.exists() ? previous.data().createdAt : sdk.serverTimestamp(),
-      updatedAt: sdk.serverTimestamp(),
-    });
-  });
+  await adminCall('save-sale', { sale });
 }
 
-/** Confirma y registra en una sola transacción. El ID del pedido evita duplicados. */
+/** Confirma y registra en una sola transacción (en el servidor). El ID del pedido evita duplicados. */
 export async function confirmOrderAndRecordSale(orderId: string, paymentFields: Partial<Order> = {}, requireConfirmed = false) {
-  const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  return sdk.runTransaction(db, async (transaction) => {
-    const orderRef = sdk.doc(db, 'orders', orderId);
-    const saleRef = sdk.doc(db, 'sales', `web_${orderId}`);
-    const [orderSnapshot, saleSnapshot, config] = await Promise.all([
-      transaction.get(orderRef), transaction.get(saleRef), transaction.get(sdk.doc(db, 'salesConfig', 'costs')),
-    ]);
-    if (!orderSnapshot.exists()) throw new Error('El pedido ya no existe.');
-    const order = { ...orderSnapshot.data(), ...paymentFields, id: orderId } as Order;
-    if (requireConfirmed && order.status !== 'confirmado') throw new Error('El pedido debe estar confirmado antes de registrarlo.');
-    if (order.status === 'cancelado' && !requireConfirmed) throw new Error('Reabrí el pedido antes de confirmar la venta.');
-    const entries = giftCardEntries(order);
-    const cardRefs = entries.map(entry => sdk.doc(db, 'giftCards', entry.id));
-    const cards = await Promise.all(cardRefs.map(ref => transaction.get(ref)));
-    const claimRef = sdk.doc(db, 'giftCardPayments', order.orderId);
-    const claim = entries.length ? await transaction.get(claimRef) : null;
-    if (claim?.exists() && claim.data().orderId !== orderId) throw new Error('Este pago ya tiene Gift Cards emitidas en otro registro.');
-    if (entries.length) {
-      const amounts = orderAmounts(order.items, order.discountPercent || 0);
-      if (amounts.total !== order.total || amounts.discountAmount !== order.discountAmount || amounts.subtotal !== order.subtotal) throw new Error('El importe del pedido no coincide. Revisalo antes de emitir la Gift Card.');
-    }
-    const hasMerchandise = order.items.some(item => !isGiftCard(item));
-    if (hasMerchandise && !saleSnapshot.exists()) {
-      const sale = orderToSale(order, { ...INITIAL_COSTS, ...config.data()?.costs });
-      const error = validateSale(sale);
-      if (error) throw new Error(error);
-      const { id, ...fields } = sale;
-      transaction.set(saleRef, { ...fields, createdAt: sdk.serverTimestamp(), updatedAt: sdk.serverTimestamp() });
-    }
-    if (saleSnapshot.exists() && saleSnapshot.data().status === 'anulada') {
-      if (requireConfirmed) throw new Error('La venta de este pedido está anulada. Revisala en Caja antes de volver a registrarla.');
-      const existing = { ...saleSnapshot.data(), id: saleRef.id } as Sale;
-      transaction.update(saleRef, { status: 'pagada', collected: saleTotals(existing).total, updatedAt: sdk.serverTimestamp() });
-    }
-    const activatedAt = Date.now();
-    if (entries.length && !claim?.exists()) transaction.set(claimRef, { orderId, orderCode: order.orderId, amount: order.total, activatedAt });
-    entries.forEach((entry, index) => {
-      if (!cards[index].exists()) transaction.set(cardRefs[index], newGiftCard(order, entry, activatedAt));
-      else if (cards[index].data().status === 'anulada') throw new Error('Este pedido tiene una Gift Card anulada. No se puede reactivar desde Pedidos.');
-    });
-    if (!requireConfirmed) transaction.update(orderRef, { ...paymentFields, status: 'confirmado' });
-    return hasMerchandise ? !saleSnapshot.exists() : cards.some(card => !card.exists());
-  });
+  return adminCall<boolean>('confirm-order', { orderId, paymentFields, requireConfirmed });
 }
 
 /** Conserva la venta en el historial cuando se cancela el pedido. */
 export async function cancelOrderAndSale(orderId: string) {
-  const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  await sdk.runTransaction(db, async (transaction) => {
-    const saleRef = sdk.doc(db, 'sales', `web_${orderId}`);
-    const orderRef = sdk.doc(db, 'orders', orderId);
-    const [sale, snapshot] = await Promise.all([transaction.get(saleRef), transaction.get(orderRef)]);
-    if (!snapshot.exists()) throw new Error('El pedido no existe.');
-    const order = { ...snapshot.data(), id: orderId } as Order;
-    const refs = giftCardEntries(order).map(entry => sdk.doc(db, 'giftCards', entry.id));
-    const cards = await Promise.all(refs.map(ref => transaction.get(ref)));
-    if (cards.some(card => card.exists() && card.data().balance !== card.data().amount)) throw new Error('Una Gift Card ya fue utilizada. Revisá el canje antes de anular el pedido.');
-    cards.forEach((card, index) => { if (card.exists()) transaction.update(refs[index], { status: 'anulada' }); });
-    transaction.update(orderRef, { status: 'cancelado' });
-    if (sale.exists()) transaction.update(saleRef, { status: 'anulada', updatedAt: sdk.serverTimestamp() });
-  });
+  await adminCall('cancel-order', { orderId });
 }

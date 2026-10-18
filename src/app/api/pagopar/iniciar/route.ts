@@ -3,7 +3,7 @@
    El checkout manda los datos del pedido; acá se validan los precios
    contra la configuración vigente, se pide al hub de ALBA que cree la
    transacción en Pagopar y se devuelve el hash y el link de pago.
-   El navegador guarda el pedido en Firestore con ese hash.
+   El navegador guarda el pedido en la base de datos con ese hash.
    ============================================================ */
 
 import { NextRequest, NextResponse } from 'next/server';

@@ -1,0 +1,36 @@
+# Despliegue del trabajador en el servidor GMKtec (carpeta ~/aura-worker).
+#   Encender/apagar los avisos: editar WHATSAPP_ALERTS_ENABLED en el archivo .env de esta carpeta y correr
+#   `docker compose up -d` (recrea el contenedor). Ver LEEME.md.
+# Los secretos NO están acá: DATABASE_URL viene de ~/.aura-secrets/aura-worker.env y la clave de YCloud
+# se monta como archivo de solo lectura desde ~/.aura-secrets/ycloud-api-key.
+services:
+  aura-worker:
+    build: .
+    image: aura-worker:local
+    container_name: aura-worker
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 35s   # deja terminar el envío en curso antes de apagar
+    env_file:
+      - ${AURA_SECRETS:-/home/novum/.aura-secrets}/aura-worker.env
+    environment:
+      WHATSAPP_ALERTS_ENABLED: ${WHATSAPP_ALERTS_ENABLED:-false}
+      WHATSAPP_ALERTS_STARTED_AT: ${WHATSAPP_ALERTS_STARTED_AT:-2026-10-13T23:21:51Z}
+      WHATSAPP_ALERTS_DAILY_LIMIT: ${WHATSAPP_ALERTS_DAILY_LIMIT:-100}
+      YCLOUD_API_KEY_FILE: /run/secrets/ycloud-api-key
+    volumes:
+      - ${AURA_SECRETS:-/home/novum/.aura-secrets}/ycloud-api-key:/run/secrets/ycloud-api-key:ro
+    networks: [supabase]
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options: { max-size: 10m, max-file: "3" }
+
+networks:
+  supabase:
+    external: true
+    name: 9yus3novbjqin3vcs5mpkj1b

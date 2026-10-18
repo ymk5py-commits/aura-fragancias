@@ -6,7 +6,7 @@
 
 import { DEFAULT_SETTINGS } from '../../constants';
 
-const URL_BASE = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const URL_BASE = process.env.SUPABASE_INTERNAL_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export interface Pricing {

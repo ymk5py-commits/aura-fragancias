@@ -5,7 +5,7 @@
 
 import type { Review } from '../../types';
 
-const URL_BASE = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const URL_BASE = process.env.SUPABASE_INTERNAL_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 function toReview(row: Record<string, unknown>): Review {

@@ -3,7 +3,7 @@ import { Perfume, SiteSettings } from '../types';
 import { cleanCatalogProduct } from './catalogSeo';
 import { productFromRow, type Row } from './supabaseMap';
 
-const URL_BASE = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const URL_BASE = process.env.SUPABASE_INTERNAL_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 /** Consulta PostgREST con la clave pública (la seguridad por fila decide qué se ve). */

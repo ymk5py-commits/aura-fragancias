@@ -146,7 +146,7 @@ export function crearSvgEtiquetaAura(
     ? `<path data-label-part="rule" d="M${centrada ? ancho / 2 - 14 * escala : margen} ${datosInicio - separacionDatos / 2}h${28 * escala}" stroke="#000" stroke-width="${0.8 * escala}"/>` : ''
 
   return {
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${formato.anchoMm}mm" height="${formato.altoMm}mm" viewBox="0 0 ${ancho} ${alto}" role="img" aria-label="Etiqueta Äura ${escaparXml(codigo)} ${escaparXml(nombre)} ${ml}" data-label-design="${diseno}" data-label-alignment="${alineacion}"><title>Etiqueta Äura ${escaparXml(codigo)}</title><rect width="${ancho}" height="${alto}" fill="#fff"/>
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${formato.anchoMm}mm" height="${formato.altoMm}mm" viewBox="0 0 ${ancho} ${alto}" role="img" aria-label="Etiqueta Äura ${escaparXml(codigo)} ${escaparXml(nombre)} ${ml}" data-label-design="${diseno}" data-label-alignment="${alineacion}"><title>Etiqueta Äura ${escaparXml(codigo)}</title>
 <svg x="${centrada ? (ancho - logoAncho) / 2 : margen}" y="${inicio}" width="${logoAncho}" height="${logoAlto}" viewBox="${LOGO_AURA_VIEWBOX}" data-brand-logo="aura-oficial" aria-hidden="true">${LOGO_AURA_TRAZOS}</svg>
 ${nombreSvg}${linea}
 <text data-label-part="details" x="${x}" y="${datosInicio + datosTam * 0.8}" fill="#000" font-family="${FUENTE_SANS}" font-size="${datosTam}" font-weight="400" text-anchor="${anclaje}" letter-spacing="${datosEspacio}">${escaparXml(detalle)}</text></svg>`,

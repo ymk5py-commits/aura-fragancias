@@ -61,7 +61,7 @@ export function crearHtmlImpresionEtiqueta(svg: string, copias: number, formato:
   ).join('')
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Etiquetas Äura</title><style>
     @page { size: ${anchoMm}mm ${altoMm}mm; margin: 0; }
-    html, body { margin: 0; padding: 0; background: #fff; }
+    html, body { margin: 0; padding: 0; background: transparent; }
     .page { width: ${anchoMm}mm; height: ${altoMm}mm; overflow: hidden; break-after: page; page-break-after: always; }
     .page.last { break-after: auto; page-break-after: auto; }
     svg { display: block; width: ${anchoMm}mm; height: ${altoMm}mm; }

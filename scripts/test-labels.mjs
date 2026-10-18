@@ -28,6 +28,33 @@ test('new bottle labels start upright at 2 cm wide and 4 cm high in all three de
   }
 });
 
+test('labels keep the background transparent and print only black artwork in every design and orientation', async () => {
+  for (const design of labels.DISENOS_AURA) {
+    for (const size of [{ anchoMm: 20, altoMm: 40 }, { anchoMm: 40, altoMm: 20 }]) {
+      const result = labels.crearSvgEtiquetaAura(data, design.id, undefined, size);
+      const { data: pixels, info } = await sharp(Buffer.from(result.svg), { density: 300 }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      assert.equal(info.channels, 4);
+      for (const offset of [0, info.width - 1, (info.height - 1) * info.width, info.width * info.height - 1]) {
+        assert.equal(pixels[offset * 4 + 3], 0, `${design.id}: label corners must be transparent`);
+      }
+      let ink = 0;
+      for (let offset = 0; offset < pixels.length; offset += 4) {
+        if (pixels[offset + 3] === 0) continue;
+        assert.equal(pixels[offset] + pixels[offset + 1] + pixels[offset + 2], 0, `${design.id}: no white or colored ink`);
+        ink++;
+      }
+      assert.ok(ink > 0, `${design.id}: logo and text must remain visible`);
+      const png = await format.pngConResolucionImpresion(new Blob([await sharp(Buffer.from(result.svg), { density: 300 }).png().toBuffer()], { type: 'image/png' }));
+      const bytes = Buffer.from(await png.arrayBuffer());
+      assert.equal((await sharp(bytes).metadata()).density, 300);
+      assert.deepEqual(await sharp(bytes).ensureAlpha().raw().toBuffer(), pixels);
+      const html = format.crearHtmlImpresionEtiqueta(result.svg, 1, size);
+      assert.match(html, /html, body \{[^}]*background: transparent;/);
+      assert.ok(!html.includes('repeating-conic-gradient'), 'the transparency grid is never sent to the printer');
+    }
+  }
+});
+
 test('orientation swaps the actual paper dimensions and keeps print pages consistent', () => {
   for (const orientation of ['vertical', 'horizontal']) {
     const size = format.orientarEtiqueta({ anchoMm: 20, altoMm: 40 }, orientation);

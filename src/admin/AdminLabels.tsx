@@ -26,6 +26,10 @@ const inputClass = 'w-full min-h-11 border border-zinc-200 bg-white px-3 py-2.5 
 const labelClass = 'mb-2 block text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500';
 const noSubscription = () => () => {};
 const styleStorageKey = 'aura-etiquetas-diseno-v1';
+const transparencyPreview = {
+  backgroundImage: 'repeating-conic-gradient(#e4e4e7 0% 25%, #fff 0% 50%)',
+  backgroundSize: '12px 12px',
+};
 let measureContext: CanvasRenderingContext2D | null = null;
 
 const measureInBrowser: MedirTexto = (text, size, font, weight) => {
@@ -51,8 +55,6 @@ async function svgToPng(svg: string, format: FormatoEtiqueta): Promise<Blob> {
     canvas.height = alto;
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Este navegador no permite crear el PNG.');
-    context.fillStyle = '#fff';
-    context.fillRect(0, 0, ancho, alto);
     context.drawImage(image, 0, 0, ancho, alto);
     const png = await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('No se pudo crear el PNG.')), 'image/png');
@@ -205,13 +207,13 @@ export default function AdminLabels() {
   function downloadPng() {
     if (!png) return;
     downloadFile(png, `${filename}.png`);
-    setNotice(`PNG descargado. Para imprimirlo fuera del panel, configurá el papel en ${dimensions} y escala 100%.`);
+    setNotice(`PNG transparente descargado. Para imprimirlo fuera del panel, configurá el papel en ${dimensions} y escala 100%.`);
   }
 
   function downloadSvg() {
     if (!svg) return;
     downloadFile(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), `${filename}.svg`);
-    setNotice(`SVG descargado con medida física de ${dimensions}.`);
+    setNotice(`SVG sin fondo descargado con medida física de ${dimensions}.`);
   }
 
   async function shareLabel() {
@@ -246,13 +248,13 @@ export default function AdminLabels() {
         <div>
           <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-aura-wine">Atelier Äura / impresión</p>
           <h2 className="font-luxury text-3xl font-semibold tracking-tight text-aura-ink sm:text-4xl">Etiquetas de perfume</h2>
-          <p className="mt-2 max-w-2xl text-sm text-zinc-600">Elegí un perfume del catálogo, ajustá el nombre y prepará su etiqueta térmica con el logo oficial.</p>
+          <p className="mt-2 max-w-2xl text-sm text-zinc-600">Elegí un perfume del catálogo, ajustá el nombre y prepará su etiqueta sin fondo con el logo oficial.</p>
         </div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">{dimensions} · {orientation} · negro sobre blanco</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">{dimensions} · {orientation} · fondo transparente</p>
       </div>
 
       {source === 'local' && (
-        <p className="border-l-2 border-amber-500 bg-amber-50 px-4 py-3 text-sm text-amber-900">Se muestra el catálogo incluido. Cuando Firebase termine de cargar, aparecerán todos tus perfumes.</p>
+        <p className="border-l-2 border-amber-500 bg-amber-50 px-4 py-3 text-sm text-amber-900">Se muestra el catálogo incluido. Cuando termine de cargar el catálogo completo, aparecerán todos tus perfumes.</p>
       )}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,410px)]">
@@ -325,7 +327,7 @@ export default function AdminLabels() {
               {DISENOS_AURA.map(option => (
                 <button key={option.id} type="button" aria-label={option.nombre} aria-pressed={design === option.id} onClick={() => { setDesign(option.id); setNotice(''); }} className={`flex min-w-0 flex-col items-center border px-2 py-4 text-center transition-colors ${design === option.id ? 'border-aura-wine bg-aura-ivory' : 'border-zinc-200 hover:border-aura-ink/40'}`}>
                   <span aria-hidden="true" className="flex h-28 w-full items-center justify-center">
-                    {designPreviews[option.id] && !formatError ? <span style={{ aspectRatio: `${format.anchoMm} / ${format.altoMm}`, width: `${Math.min(80, 110 * format.anchoMm / format.altoMm)}px` }} className="block max-w-full bg-white shadow-sm [&>svg]:block [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: designPreviews[option.id] }} /> : <span className="text-[10px] text-zinc-400">Sin vista previa</span>}
+                    {designPreviews[option.id] && !formatError ? <span style={{ ...transparencyPreview, aspectRatio: `${format.anchoMm} / ${format.altoMm}`, width: `${Math.min(80, 110 * format.anchoMm / format.altoMm)}px` }} className="block max-w-full shadow-sm [&>svg]:block [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: designPreviews[option.id] }} /> : <span className="text-[10px] text-zinc-400">Sin vista previa</span>}
                   </span>
                   <span className="mt-3 block text-sm font-semibold text-aura-ink">{option.nombre}</span>
                   <span className="mt-1 block text-[11px] leading-snug text-zinc-500">{option.detalle}</span>
@@ -364,14 +366,14 @@ export default function AdminLabels() {
             <h3 className="font-luxury text-xl font-semibold text-aura-ink">Vista previa</h3>
             <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">{dimensions}</span>
           </div>
-          <div style={{ aspectRatio: formatError ? '1' : `${format.anchoMm} / ${format.altoMm}`, width: formatError ? '100%' : `${Math.min(320, 400 * format.anchoMm / format.altoMm)}px`, maxWidth: '100%' }} className="mx-auto mt-6 flex items-center justify-center bg-white shadow-[0_15px_35px_rgba(32,24,24,0.1)]">
+          <div style={{ ...transparencyPreview, aspectRatio: formatError ? '1' : `${format.anchoMm} / ${format.altoMm}`, width: formatError ? '100%' : `${Math.min(320, 400 * format.anchoMm / format.altoMm)}px`, maxWidth: '100%' }} className="mx-auto mt-6 flex items-center justify-center shadow-[0_15px_35px_rgba(32,24,24,0.1)]">
             {svg ? (
               <div data-label-preview className="h-full w-full [&>svg]:block [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: svg }} />
             ) : (
               <p className="px-6 text-center text-sm text-zinc-500">{result?.error ?? 'Elegí un perfume para ver la etiqueta.'}</p>
             )}
           </div>
-          <p className="mt-5 text-center text-xs text-zinc-500">Vista ampliada. La impresión usa la medida real.</p>
+          <p className="mt-5 text-center text-xs text-zinc-500">El cuadriculado indica transparencia y no se imprime. La impresión usa la medida real.</p>
         </div>
       </div>
     </div>

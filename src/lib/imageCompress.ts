@@ -1,5 +1,5 @@
 /**
- * Compresión de fotos en el navegador antes de subirlas a Firebase Storage.
+ * Compresión de fotos en el navegador antes de subirlas al almacenamiento.
  *
  * Las fotos del panel llegaban como PNG de 1080x1350 y ~2 MB; el optimizador
  * de Next las servía bien, pero cada primera carga en frío tardaba 5-8 s y

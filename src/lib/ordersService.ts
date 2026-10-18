@@ -1,7 +1,6 @@
-import { getFirebaseDb, getFirebaseStorage, isFirebaseConfigured } from './firebase';
+import { getSupabase, isSupabaseConfigured, newRowId, randomHex, toError, watch } from './supabase';
+import { orderFromRow, orderToRow, type Row } from './supabaseMap';
 import { Order, OrderStatus } from '../types';
-
-const COLLECTION = 'orders';
 
 /** Genera un código de pedido legible: AURA-XXXXXX */
 export function newOrderId(): string {
@@ -19,56 +18,52 @@ export function validateReceipt(file: File): string | null {
   return null;
 }
 
-/** Sube el comprobante a Storage y devuelve su URL de descarga. */
+/**
+ * Sube el comprobante y devuelve su URL pública. El nombre lleva 128 bits aleatorios: la URL no se
+ * puede adivinar (hace el papel del token de las URLs de descarga de Firebase) y la política del
+ * bucket exige un nombre de al menos 20 caracteres.
+ */
 export async function uploadReceipt(file: File, orderId: string): Promise<string> {
-  const [storage, { ref, uploadBytes, getDownloadURL }] = await Promise.all([
-    getFirebaseStorage(),
-    import('firebase/storage'),
-  ]);
+  const sb = await getSupabase();
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-60);
-  const path = `comprobantes/${orderId}-${Date.now()}-${safeName}`;
-  await uploadBytes(ref(storage, path), file, { contentType: file.type });
-  return getDownloadURL(ref(storage, path));
+  const path = `${orderId}-${Date.now()}-${randomHex(16)}-${safeName}`;
+  const { error } = await sb.storage.from('comprobantes').upload(path, file, { contentType: file.type, upsert: false });
+  if (error) throw toError(error, 'No se pudo subir el comprobante');
+  return sb.storage.from('comprobantes').getPublicUrl(path).data.publicUrl;
 }
 
-/** Guarda el pedido en Firestore. Devuelve el id del documento. */
+/** Guarda el pedido. Devuelve el id de la fila (lo genera el navegador: el visitante no puede leer pedidos). */
 export async function saveOrder(order: Order): Promise<string> {
-  const [db, { collection, addDoc, serverTimestamp }] = await Promise.all([
-    getFirebaseDb(),
-    import('firebase/firestore'),
-  ]);
-  const ref = await addDoc(collection(db, COLLECTION), {
-    ...order,
-    createdAt: serverTimestamp(),
-  });
-  return ref.id;
+  const sb = await getSupabase();
+  const id = newRowId();
+  const { error } = await sb.from('orders').insert({ id, ...orderToRow(order) });
+  if (error) throw toError(error);
+  return id;
 }
 
 /** Escucha los pedidos en tiempo real (solo /admin). */
 export async function subscribeOrders(cb: (orders: Order[]) => void): Promise<() => void> {
-  if (!isFirebaseConfigured) return () => {};
-  const [db, { collection, onSnapshot, orderBy, query, limit }] = await Promise.all([
-    getFirebaseDb(),
-    import('firebase/firestore'),
-  ]);
-  const q = query(collection(db, COLLECTION), orderBy('createdAt', 'desc'), limit(200));
-  return onSnapshot(
-    q,
-    (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Order, 'id'>) }))),
+  if (!isSupabaseConfigured) return () => {};
+  return watch<Row[]>(
+    ['orders'],
+    (sb) => sb.from('orders').select('*').order('created_at', { ascending: false }).limit(200),
+    (rows) => cb(rows.map(orderFromRow)),
     (err) => {
       console.warn('[Äura] No se pudieron leer los pedidos:', err);
       cb([]);
-    }
+    },
   );
 }
 
 export async function setOrderStatus(id: string, status: OrderStatus): Promise<void> {
-  const [db, { doc, updateDoc }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  await updateDoc(doc(db, COLLECTION, id), { status });
+  const sb = await getSupabase();
+  const { error } = await sb.from('orders').update({ status }).eq('id', id);
+  if (error) throw toError(error);
 }
 
 /** Actualiza campos sueltos de un pedido (solo /admin). */
 export async function updateOrderFields(id: string, fields: Partial<Order>): Promise<void> {
-  const [db, { doc, updateDoc }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  await updateDoc(doc(db, COLLECTION, id), { ...fields });
+  const sb = await getSupabase();
+  const { error } = await sb.from('orders').update(orderToRow(fields)).eq('id', id);
+  if (error) throw toError(error);
 }

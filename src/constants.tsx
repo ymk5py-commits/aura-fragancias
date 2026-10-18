@@ -27,7 +27,7 @@ export const PRICES = [
 
 // ============================================================
 //  CONFIGURACIÓN DEL SITIO (editable desde /admin → Configuración)
-//  Estos son los valores por defecto; si hay datos en Firebase, mandan esos.
+//  Estos son los valores por defecto; si hay datos en la base de datos, mandan esos.
 // ============================================================
 export const DEFAULT_SETTINGS: SiteSettings = {
   heroTitle: 'ÄURA',

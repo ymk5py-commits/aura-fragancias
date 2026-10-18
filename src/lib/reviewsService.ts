@@ -1,4 +1,5 @@
-import { getFirebaseDb, isFirebaseConfigured } from './firebase';
+import { getSupabase, isSupabaseConfigured, toError } from './supabase';
+import { camelizeRow, type Row } from './supabaseMap';
 import type { Review } from '../types';
 
 /* ============================================================
@@ -8,7 +9,7 @@ import type { Review } from '../types';
    públicas leen las aprobadas por SSR (ver server/reviews.ts).
    ============================================================ */
 
-const COLLECTION = 'reviews';
+const TABLE = 'reviews';
 
 export interface NewReview {
   productId: string;
@@ -21,34 +22,37 @@ export interface NewReview {
 
 function clean(input: NewReview, approved: boolean) {
   return {
-    productId: input.productId,
-    productName: input.productName.slice(0, 120),
+    product_id: input.productId,
+    product_name: input.productName.slice(0, 120),
     name: input.name.trim().slice(0, 60),
     city: (input.city || '').trim().slice(0, 60),
     rating: Math.min(5, Math.max(1, Math.round(input.rating))),
     text: input.text.trim().slice(0, 600),
     approved,
-    createdAt: Date.now(),
+    created_at: Date.now(),
   };
 }
 
 /** Desde la tienda: queda pendiente de aprobación. */
 export async function submitReview(input: NewReview): Promise<void> {
-  if (!isFirebaseConfigured) throw new Error('Las reseñas no están disponibles por el momento.');
-  const [db, { collection, addDoc }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  await addDoc(collection(db, COLLECTION), clean(input, false));
+  if (!isSupabaseConfigured) throw new Error('Las reseñas no están disponibles por el momento.');
+  const sb = await getSupabase();
+  const { error } = await sb.from(TABLE).insert(clean(input, false));
+  if (error) throw toError(error);
 }
 
 /** Desde el panel (por ejemplo, una reseña que llegó por WhatsApp). */
 export async function createReviewAsAdmin(input: NewReview): Promise<void> {
-  const [db, { collection, addDoc }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  await addDoc(collection(db, COLLECTION), clean(input, true));
+  const sb = await getSupabase();
+  const { error } = await sb.from(TABLE).insert(clean(input, true));
+  if (error) throw toError(error);
 }
 
-function fromDoc(id: string, data: Record<string, unknown>): Review {
+function fromRow(row: Row): Review {
+  const data = camelizeRow(row);
   const rating = Math.min(5, Math.max(1, Math.round(Number(data.rating) || 5))) as Review['rating'];
   return {
-    id,
+    id: String(row.id),
     productId: String(data.productId ?? ''),
     productName: data.productName ? String(data.productName) : undefined,
     name: String(data.name ?? ''),
@@ -62,21 +66,24 @@ function fromDoc(id: string, data: Record<string, unknown>): Review {
 
 /** Todas las reseñas (solo admin), pendientes primero. */
 export async function fetchAllReviews(): Promise<Review[]> {
-  const [db, { collection, getDocs, query, orderBy, limit }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  const snap = await getDocs(query(collection(db, COLLECTION), orderBy('createdAt', 'desc'), limit(300)));
-  return snap.docs
-    .map((d) => fromDoc(d.id, d.data() as Record<string, unknown>))
+  const sb = await getSupabase();
+  const { data, error } = await sb.from(TABLE).select('*').order('created_at', { ascending: false }).limit(300);
+  if (error) throw toError(error);
+  return (data as Row[])
+    .map(fromRow)
     .sort((a, b) => Number(a.approved) - Number(b.approved) || b.createdAt - a.createdAt);
 }
 
 export async function setReviewApproved(id: string, approved: boolean): Promise<void> {
-  const [db, { doc, updateDoc }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  await updateDoc(doc(db, COLLECTION, id), { approved });
+  const sb = await getSupabase();
+  const { error } = await sb.from(TABLE).update({ approved }).eq('id', id);
+  if (error) throw toError(error);
 }
 
 export async function deleteReview(id: string): Promise<void> {
-  const [db, { doc, deleteDoc }] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  await deleteDoc(doc(db, COLLECTION, id));
+  const sb = await getSupabase();
+  const { error } = await sb.from(TABLE).delete().eq('id', id);
+  if (error) throw toError(error);
 }
 
 export function summarize(reviews: Pick<Review, 'rating'>[]): { average: number; count: number } {

@@ -1,11 +1,11 @@
-import { getFirebaseAuth } from './firebase';
+import { getSupabase } from './supabase';
 
 /** Avisar después del guardado: una falla del buscador no revierte el producto. */
 export async function notifySearch(code?: string) {
   try {
-    const user = (await getFirebaseAuth()).currentUser;
-    if (!user) return;
-    const token = await user.getIdToken();
+    const sb = await getSupabase();
+    const token = (await sb.auth.getSession()).data.session?.access_token;
+    if (!token) return;
     const result = await fetch('/api/search-index', {
       method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(code ? { code } : { catalog: true }), signal: AbortSignal.timeout(12000), keepalive: true,

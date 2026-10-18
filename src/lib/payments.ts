@@ -7,7 +7,7 @@
    /api/pagopar/iniciar; el servidor valida los precios contra la
    configuración de la tienda y le pide al hub de ALBA (que tiene los
    tokens de Pagopar) que cree la transacción. Devuelve el hash y el
-   link de pago; el pedido se guarda en Firestore con ese hash.
+   link de pago; el pedido se guarda en la base de datos con ese hash.
 
    Se activa con NEXT_PUBLIC_PAGOPAR_ENABLED=true (y PAGOPAR_HUB_SECRET
    en el servidor).

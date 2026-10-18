@@ -21,7 +21,7 @@ function toSentenceList(items: string[]): string {
 
 /**
  * Prosa de ficha de producto. Si el producto trae `description` cargada
- * (Firestore/admin), manda esa; si no, se redacta una única a partir de
+ * (base de datos/admin), manda esa; si no, se redacta una única a partir de
  * los datos reales del perfume (notas, familia, fijación, precios).
  */
 export function buildProductDescription(perfume: Perfume, settings: SiteSettings): string {

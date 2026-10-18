@@ -226,7 +226,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
         setCardStart(start);
       }
 
-      // 2) Pedido en Firestore, con el hash para que el panel pueda verificar el pago.
+      // 2) Pedido en la base de datos, con el hash para que el panel pueda verificar el pago.
       const order: Order = {
         orderId,
         status: 'pendiente',
@@ -330,7 +330,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, onUpdateQuantity, onRemoveIte
       }
     }
 
-    // 2) Pedido en Firestore (para verlo en /admin). Tampoco bloquea la venta.
+    // 2) Pedido en la base de datos (para verlo en /admin). Tampoco bloquea la venta.
     const order: Order = {
       orderId,
       status: 'pendiente',

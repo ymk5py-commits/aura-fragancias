@@ -18,6 +18,7 @@ import AdminLabels from './AdminLabels';
 import AdminBrand from './AdminBrand';
 import AdminReviews from './AdminReviews';
 import AdminAlertas from './AdminAlertas';
+import ChangePassword from './ChangePassword';
 import { subscribeIncidents, INCIDENT_LABELS } from '../lib/incidentsService';
 import type { Incident } from '../types';
 
@@ -29,6 +30,7 @@ const tabHashes: Record<AdminTab, string> = {
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
   const { products, source } = useProducts();
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Perfume | null>(null);
@@ -90,7 +92,7 @@ const AdminDashboard: React.FC = () => {
     try {
       await toggleVisible(docId(p), p.visible === false);
     } catch {
-      notify('No se pudo cambiar. ¿Importaste el catálogo a Firebase?');
+      notify('No se pudo cambiar. ¿Importaste el catálogo a la base de datos?');
     } finally {
       setBusyId(null);
     }
@@ -110,11 +112,11 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleSeed = async () => {
-    if (!confirm('Esto importará el catálogo incluido (47 productos) a Firebase. ¿Continuar?')) return;
+    if (!confirm('Esto importará el catálogo incluido (47 productos) a la base de datos. ¿Continuar?')) return;
     setSeeding(true);
     try {
       const n = await seedCatalog();
-      notify(`✓ ${n} productos importados a Firebase.`);
+      notify(`✓ ${n} productos importados.`);
     } catch (err) {
       notify((err as Error).message || 'No se pudo importar.');
     } finally {
@@ -141,6 +143,9 @@ const AdminDashboard: React.FC = () => {
               <ExternalLink size={13} /> Ver tienda
             </a>
             <span className="hidden md:block text-[11px] text-white/50">{user?.email}</span>
+            <button onClick={() => setShowPassword(true)} className="hidden sm:flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-white/70 hover:text-white transition-colors">
+              Contraseña
+            </button>
             <button onClick={() => logout()} className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.15em] transition-colors">
               <LogOut size={13} /> Salir
             </button>
@@ -218,7 +223,7 @@ const AdminDashboard: React.FC = () => {
               <PackageOpen size={20} className="text-amber-600 shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-semibold text-amber-900">Estás viendo el catálogo incluido (no editable)</p>
-                <p className="text-[12px] text-amber-700 mt-0.5">Importá los 47 productos a Firebase para poder crear, editar y ocultar.</p>
+                <p className="text-[12px] text-amber-700 mt-0.5">Importá los 47 productos a la base de datos para poder crear, editar y ocultar.</p>
               </div>
             </div>
             <button onClick={handleSeed} disabled={seeding} className="shrink-0 inline-flex items-center gap-2 bg-amber-600 text-white px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-amber-700 transition-colors disabled:opacity-60">
@@ -242,7 +247,7 @@ const AdminDashboard: React.FC = () => {
             <button
               onClick={() => { setEditing(null); setShowForm(true); }}
               disabled={source === 'local'}
-              title={source === 'local' ? 'Primero importá el catálogo a Firebase' : ''}
+              title={source === 'local' ? 'Primero importá el catálogo a la base de datos' : ''}
               className="inline-flex items-center gap-2 bg-aura-ink text-white px-4 sm:px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.15em] hover:bg-aura-gold transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
             >
               <Plus size={15} /> Nuevo
@@ -340,6 +345,7 @@ const AdminDashboard: React.FC = () => {
           {toast}
         </div>
       )}
+      {showPassword && <ChangePassword onClose={() => setShowPassword(false)} />}
     </div>
   );
 };

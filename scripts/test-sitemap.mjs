@@ -25,49 +25,53 @@ function load(file, imports, globals = {}) {
 const catalogNotes = load('../src/lib/catalogNotes.ts', {});
 const artwork = load('../src/lib/productArtwork.ts', { './catalogNotes': catalogNotes });
 const seo = load('../src/lib/catalogSeo.ts', { './site': { SITE: 'https://www.aurafragancias.store' }, './img': { cldn: (url) => url }, './productArtwork': artwork, './catalogNotes': catalogNotes });
+const supabaseMap = load('../src/lib/supabaseMap.ts', {});
 function serverData(fetch) {
   return load('../src/lib/serverData.ts', {
     './catalogSeo': seo,
+    './supabaseMap': supabaseMap,
     '../constants': { PERFUMES: [{ code: 'FALLBACK' }], DEFAULT_SETTINGS: {} },
   }, {
-    process: { env: { NEXT_PUBLIC_FIREBASE_PROJECT_ID: 'test', NEXT_PUBLIC_FIREBASE_API_KEY: 'test' } },
+    process: { env: { NEXT_PUBLIC_SUPABASE_URL: 'https://db.example.test', NEXT_PUBLIC_SUPABASE_ANON_KEY: 'anon-key' } },
     fetch,
   });
 }
 
-function document(code, gender) {
-  return {
-    name: `projects/test/databases/(default)/documents/products/${code}`,
-    fields: { code: { stringValue: code }, gender: { stringValue: gender } },
-  };
+function row(code, gender) {
+  return { id: code, code, gender, notes: [], image_url: '', visible: true };
 }
 
-test('reads every Firestore page, including an empty page with a continuation token', async () => {
-  const pages = [
-    { documents: [document('CC001', 'Man')], nextPageToken: 'next/+=' },
-    { documents: [], nextPageToken: 'last' },
-    { documents: [document('DD001', 'Woman'), document('UU001', 'Unisex')] },
-  ];
-  const tokens = [];
+test('reads the catalog from PostgREST with the public key and a 2 minute cache', async () => {
+  const calls = [];
   const api = serverData(async (url, options) => {
-    tokens.push(new URL(url).searchParams.get('pageToken'));
-    assert.equal(options.next.revalidate, 120);
-    return { ok: true, json: async () => pages.shift() };
+    calls.push({ url: String(url), options });
+    return { ok: true, json: async () => [row('CC001', 'Man'), row('DD001', 'Woman'), row('UU001', 'Unisex')] };
   });
   const result = await api.getProducts();
-  assert.equal(result.source, 'firebase');
+  assert.equal(result.source, 'remote');
   assert.deepEqual(Array.from(result.products, (p) => p.code), ['CC001', 'DD001', 'UU001']);
-  assert.deepEqual(tokens, [null, 'next/+=', 'last']);
+  assert.equal(calls.length, 1);
+  assert.ok(calls[0].url.startsWith('https://db.example.test/rest/v1/products?'));
+  assert.equal(calls[0].options.next.revalidate, 120);
+  assert.equal(calls[0].options.headers.apikey, 'anon-key');
+  assert.equal(calls[0].options.headers.Authorization, 'Bearer anon-key');
 });
 
-test('does not return a partial catalog when a later page fails', async () => {
-  let requests = 0;
-  const api = serverData(async () => ++requests === 1
-    ? { ok: true, json: async () => ({ documents: [document('CC001', 'Man')], nextPageToken: 'next' }) }
-    : { ok: false });
-  const result = await api.getProducts();
-  assert.equal(result.source, 'local');
-  assert.equal(result.products[0].code, 'FALLBACK');
+test('maps snake_case columns to the product fields the storefront uses', async () => {
+  const api = serverData(async () => ({ ok: true, json: async () => [{ ...row('CC001', 'Man'), image_url: '/products/CC001.png', sales_score: 7, updated_at: '2026-09-20T12:00:00+00:00' }] }));
+  const [product] = (await api.getProducts()).products;
+  assert.equal(product.imageUrl, '/products/CC001.png');
+  assert.equal(product.salesScore, 7);
+  assert.equal(product.updatedAt, '2026-09-20T12:00:00+00:00');
+});
+
+test('falls back to the bundled catalog when the request fails or the table is empty', async () => {
+  const failing = serverData(async () => ({ ok: false }));
+  const failed = await failing.getProducts();
+  assert.equal(failed.source, 'local');
+  assert.equal(failed.products[0].code, 'FALLBACK');
+  const empty = serverData(async () => ({ ok: true, json: async () => [] }));
+  assert.equal((await empty.getProducts()).source, 'local');
 });
 
 test('sitemap refreshes all genders and removes hidden or deleted products', async () => {
@@ -97,7 +101,7 @@ test('sitemap keeps real modification dates stable and omits unknown dates', asy
   let settings = {};
   const products = [
     { code: 'CC001', updatedAt: '2026-09-20T12:00:00Z', imageUrl: '/products/CC001.png' },
-    { code: 'DD001', imageUrl: 'https://firebasestorage.googleapis.com/example?alt=media&token=public-image' },
+    { code: 'DD001', imageUrl: 'https://db.aurafragancias.store/storage/v1/object/public/products/example.png?a=1&b=2' },
   ];
   const sitemap = load('../src/app/sitemap.ts', {
     '../lib/serverData': { getProducts: async () => ({ products }), getSettings: async () => settings },

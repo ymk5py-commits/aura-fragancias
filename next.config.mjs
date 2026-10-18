@@ -15,7 +15,9 @@ const nextConfig = {
     ],
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
-      // Fotos subidas desde el panel. Firebase Storage sirve las descargas desde
+      // Fotos subidas desde el panel: almacenamiento del Supabase propio.
+      { protocol: 'https', hostname: 'db.aurafragancias.store', pathname: '/storage/v1/object/public/**' },
+      // Fotos antiguas (Firebase Storage): sirve las descargas desde
       // firebasestorage.googleapis.com con el bucket en la ruta, no como host.
       {
         protocol: 'https',

@@ -1,4 +1,4 @@
-import type { GiftCardDetails, Perfume, OrderItem } from '../types';
+import type { GiftCardDetails, Perfume, OrderItem, Order } from '../types';
 
 export const GIFT_CARD_CODE = 'GIFT-CARD';
 export const GIFT_CARD_MIN = 100000;
@@ -62,4 +62,27 @@ export function orderAmounts(items: OrderItem[], percent: number) {
   const merchandise = items.filter(item => !isGiftCard(item)).reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discountAmount = Math.round(merchandise * percent / 100);
   return { subtotal, merchandise, discountAmount, total: subtotal - discountAmount };
+}
+
+/* ---------- emisión (lo usa la transacción del servidor al confirmar un pedido) ---------- */
+
+export function giftCardEntries(order: Order) {
+  const entries: { id: string; lineIndex: number; copyIndex: number; amount: number }[] = [];
+  order.items.forEach((item, lineIndex) => {
+    if (!isGiftCard(item)) return;
+    const error = validateGiftCardAmount(item.price);
+    if (error) throw new Error(error);
+    if (!Number.isSafeInteger(item.quantity) || item.quantity < 1 || item.quantity > 50) throw new Error('Cantidad de Gift Cards inválida.');
+    for (let copyIndex = 0; copyIndex < item.quantity; copyIndex++) entries.push({ id: `${order.id}_${lineIndex}_${copyIndex}`, lineIndex, copyIndex, amount: item.price });
+  });
+  if (entries.length > 50) throw new Error('El máximo por pedido es de 50 Gift Cards.');
+  return entries;
+}
+
+export function newGiftCard(order: Order, entry: ReturnType<typeof giftCardEntries>[number], activatedAt: number): Omit<GiftCard, 'id'> & { lineIndex: number; copyIndex: number } {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  const code = `AURA-${Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+  return { ...normalizeGiftCardDetails(order.items[entry.lineIndex].giftCard), code, orderId: order.id!, orderCode: order.orderId,
+    customer: order.name, phone: order.phone, amount: entry.amount, balance: entry.amount,
+    activatedAt, expiresAt: giftCardExpiry(activatedAt), status: 'activa', lineIndex: entry.lineIndex, copyIndex: entry.copyIndex };
 }

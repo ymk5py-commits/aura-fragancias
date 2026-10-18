@@ -5,9 +5,11 @@ contra el Supabase de Aura. Manda los mismos avisos (plantillas `aura_pedido_web
 mismo emisor y mismo destino fijos en `src/alerts.js`) con la misma lógica: **`src/alerts.js` es una copia exacta, sin cambios**, de
 `functions/src/alerts.js`.
 
-> **Estado (17-oct-2026): instalado y APAGADO** (`WHATSAPP_ALERTS_ENABLED=false`). Mientras la web siga usando Firebase, las
-> funciones de Google son las que envían los avisos. Si se enciende este trabajador a la vez, **cada aviso sale dos veces**.
-> El encendido y el apagado de las funciones de Google se hacen juntos, en el corte (ver "Corte" más abajo).
+> **Producción desde el 17-oct-2026: ACTIVO en Coolify**, aplicación `aura-avisos`, con `WHATSAPP_ALERTS_ENABLED=true`.
+> La web ya usa Supabase. Las cinco funciones de Google están apagadas y sus dos programaciones pausadas.
+> Cada push a `main` despliega la web y este trabajador automáticamente. No tiene dominio público.
+> El contenedor anterior `aura-worker` está detenido: los comandos de Docker Compose de esta guía quedan para recuperación,
+> no para encender un segundo trabajador junto al de Coolify. La operación habitual se hace desde Coolify.
 
 ## Qué reemplaza a qué
 | Firebase (`functions/src/index.js`) | Acá |

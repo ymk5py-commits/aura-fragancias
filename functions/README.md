@@ -1,3 +1,9 @@
+# Archivado desde el 17-oct-2026
+
+La tienda usa el Supabase del servidor y los avisos los envía la aplicación `aura-avisos` de Coolify (`worker/`).
+Las cinco funciones de este directorio están desactivadas y sus programaciones pausadas. Se conserva este código para recuperación.
+No volver a habilitarlas en paralelo con el trabajador de producción.
+
 # Avisos de pedidos de Äura por WhatsApp
 
 Emisor autorizado: **+595 994 414 986** (YCloud / cuenta Meta **Aura**).

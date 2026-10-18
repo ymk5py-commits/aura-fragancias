@@ -54,6 +54,10 @@ interface Body {
 const bad = (error: string, status = 400) => NextResponse.json({ error }, { status });
 
 export async function POST(req: NextRequest) {
+  // Una pestaña vieja que todavía guarda en Firebase debe recargarse antes de crear un pago.
+  if (req.headers.get('x-aura-data-version') !== 'supabase-v1') {
+    return bad('Actualizamos la tienda. Recargá la página antes de continuar con el pago.', 409);
+  }
   try {
     const b = (await req.json().catch(() => null)) as Body | null;
     if (!b) return bad('Pedido inválido.');

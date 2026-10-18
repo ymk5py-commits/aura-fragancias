@@ -50,14 +50,16 @@ export async function subscribeSales(from: string, to: string, callback: (sales:
   return sdk.onSnapshot(q, (snapshot) => callback(snapshot.docs.map((d) => ({ ...d.data(), id: d.id } as Sale))), onError);
 }
 
-export async function subscribeSaleCosts(callback: (costs: Record<SaleSize, number>) => void, onError: (error: Error) => void) {
+/** Costos y receta viven en el mismo documento: una sola lectura y suscripción. */
+export async function subscribeSaleConfiguration(
+  callback: (config: { costs: Record<SaleSize, number>; recipe: CostRecipe }) => void,
+  onError: (error: Error) => void,
+) {
   const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  return sdk.onSnapshot(sdk.doc(db, 'salesConfig', 'costs'), (snapshot) => callback({ ...INITIAL_COSTS, ...snapshot.data()?.costs }), onError);
-}
-
-export async function subscribeCostRecipe(callback: (recipe: CostRecipe) => void, onError: (error: Error) => void) {
-  const [db, sdk] = await Promise.all([getFirebaseDb(), import('firebase/firestore')]);
-  return sdk.onSnapshot(sdk.doc(db, 'salesConfig', 'costs'), (snapshot) => callback(snapshot.data()?.recipe || INITIAL_RECIPE), onError);
+  return sdk.onSnapshot(sdk.doc(db, 'salesConfig', 'costs'), (snapshot) => {
+    const data = snapshot.data();
+    callback({ costs: { ...INITIAL_COSTS, ...data?.costs }, recipe: data?.recipe || INITIAL_RECIPE });
+  }, onError);
 }
 
 export async function saveCostRecipe(recipe: CostRecipe) {

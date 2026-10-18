@@ -45,20 +45,18 @@ export async function subscribeSales(from: string, to: string, callback: (sales:
   );
 }
 
-export async function subscribeSaleCosts(callback: (costs: Record<SaleSize, number>) => void, onError: (error: Error) => void) {
+/** Costos y receta viven en el mismo documento: una sola lectura y suscripción. */
+export async function subscribeSaleConfiguration(
+  callback: (config: { costs: Record<SaleSize, number>; recipe: CostRecipe }) => void,
+  onError: (error: Error) => void,
+) {
   return watch<Row | null>(
     ['sales_config'],
-    (sb) => sb.from('sales_config').select('costs').eq('id', 'costs').maybeSingle(),
-    (row) => callback({ ...INITIAL_COSTS, ...((row?.costs as Partial<Record<SaleSize, number>>) || {}) }),
-    onError,
-  );
-}
-
-export async function subscribeCostRecipe(callback: (recipe: CostRecipe) => void, onError: (error: Error) => void) {
-  return watch<Row | null>(
-    ['sales_config'],
-    (sb) => sb.from('sales_config').select('recipe').eq('id', 'costs').maybeSingle(),
-    (row) => callback((row?.recipe as CostRecipe) || INITIAL_RECIPE),
+    (sb) => sb.from('sales_config').select('costs,recipe').eq('id', 'costs').maybeSingle(),
+    (row) => callback({
+      costs: { ...INITIAL_COSTS, ...((row?.costs as Partial<Record<SaleSize, number>>) || {}) },
+      recipe: (row?.recipe as CostRecipe) || INITIAL_RECIPE,
+    }),
     onError,
   );
 }

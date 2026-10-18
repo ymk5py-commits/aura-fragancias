@@ -39,12 +39,17 @@ const AdminDashboard: React.FC = () => {
   const [seeding, setSeeding] = useState(false);
   const [toast, setToast] = useState('');
   const [tab, setTab] = useState<AdminTab>('products');
+  const [salesPrepared, setSalesPrepared] = useState(false);
+
+  const prepareTab = (next: AdminTab) => { if (next === 'sales') setSalesPrepared(true); };
 
   useEffect(() => {
     const readHash = () => {
       const match = (Object.entries(tabHashes) as [AdminTab, string][])
         .find(([, hash]) => hash && `#${hash}` === window.location.hash);
-      setTab(match?.[0] ?? 'products');
+      const next = match?.[0] ?? 'products';
+      prepareTab(next);
+      setTab(next);
     };
     readHash();
     window.addEventListener('hashchange', readHash);
@@ -52,6 +57,7 @@ const AdminDashboard: React.FC = () => {
   }, []);
 
   const goToTab = (next: AdminTab) => {
+    prepareTab(next);
     setTab(next);
     const hash = tabHashes[next] ? `#${tabHashes[next]}` : '';
     window.history.replaceState(window.history.state, '', `${window.location.pathname}${window.location.search}${hash}`);
@@ -170,6 +176,8 @@ const AdminDashboard: React.FC = () => {
             <button
               key={t.key}
               onClick={() => goToTab(t.key)}
+              onPointerEnter={() => prepareTab(t.key)}
+              onFocus={() => prepareTab(t.key)}
               className={`inline-flex shrink-0 items-center gap-2 px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] border-b-2 transition-colors ${
                 tab === t.key ? 'border-aura-ink text-aura-ink' : 'border-transparent text-zinc-400 hover:text-zinc-600'
               }`}
@@ -209,7 +217,8 @@ const AdminDashboard: React.FC = () => {
         {tab === 'giftCards' && <AdminGiftCards />}
         {tab === 'alertas' && <AdminAlertas incidents={incidents} loading={incidentsLoading} />}
         {tab === 'settings' && <SettingsForm />}
-        {tab === 'sales' && <AdminSales />}
+        {/* Se prepara al acercarse a la pestaña y conserva sus datos y período al volver. */}
+        {salesPrepared && <div hidden={tab !== 'sales'}><AdminSales /></div>}
         {tab === 'labels' && <AdminLabels />}
         {tab === 'brand' && <AdminBrand onGoToLabels={() => goToTab('labels')} />}
         {tab === 'reviews' && <AdminReviews />}

@@ -7,7 +7,7 @@ import { useSettings } from '../context/SettingsContext';
 import type { Perfume } from '../types';
 import { INITIAL_COSTS, paraguayDate, saleTotals, salesCsv, type Sale, type SaleSize } from '../lib/sales';
 import { EXPENSE_TYPES, INITIAL_RECIPE, erpSummary, expensesCsv, type CostRecipe, type Expense } from '../lib/erp';
-import { saveSale, saveExpense, saveCostRecipe, subscribeSales, subscribeExpenses, subscribeSaleCosts, subscribeCostRecipe, importLedger, loadImportSnapshot } from '../lib/salesService';
+import { saveSale, saveExpense, saveCostRecipe, subscribeSales, subscribeExpenses, subscribeSaleConfiguration, importLedger, loadImportSnapshot } from '../lib/salesService';
 import { CostForm, ExpenseForm, SaleForm, inputClass, money, primaryClass, secondaryClass } from './ErpForms';
 import AdminConversions from './AdminConversions';
 import AdminImport from './AdminImport';
@@ -104,19 +104,29 @@ export default function AdminSales() {
   const { products } = useProducts(); const { settings } = useSettings();
   const [month, setMonth] = useState(paraguayDate().slice(0, 7)); const [sales, setSales] = useState<Sale[]>([]); const [expenses, setExpenses] = useState<Expense[]>([]);
   const [costs, setCosts] = useState(INITIAL_COSTS); const [recipe, setRecipe] = useState(INITIAL_RECIPE);
-  const [loaded, setLoaded] = useState({ sales: false, expenses: false, costs: false, recipe: false }); const [error, setError] = useState('');
+  const [loaded, setLoaded] = useState({ month: '', sales: false, expenses: false, configuration: false });
+  const [periodError, setPeriodError] = useState(''); const [configurationError, setConfigurationError] = useState('');
+  // La receta no depende del mes. No volver a leerla al cambiar el período.
+  useEffect(() => {
+    let cancelled = false; let unsubscribe: (() => void) | undefined;
+    const fail = (e: Error) => { if (!cancelled) setConfigurationError(e.message); };
+    void subscribeSaleConfiguration((data) => {
+      if (cancelled) return;
+      setCosts(data.costs); setRecipe(data.recipe); setConfigurationError('');
+      setLoaded((l) => ({ ...l, configuration: true }));
+    }, fail).then((stop) => { if (cancelled) stop(); else unsubscribe = stop; }).catch((e) => fail(e instanceof Error ? e : new Error(String(e))));
+    return () => { cancelled = true; unsubscribe?.(); };
+  }, []);
   useEffect(() => {
     let cancelled = false; const subscriptions: (() => void)[] = [];
-    const fail = (e: Error) => { if (!cancelled) setError(e.message); };
-    const ready = (key: keyof typeof loaded) => { if (!cancelled) setLoaded((l) => ({ ...l, [key]: true })); };
-    setError(''); setLoaded({ sales: false, expenses: false, costs: false, recipe: false }); setSales([]); setExpenses([]);
+    const fail = (e: Error) => { if (!cancelled) setPeriodError(e.message); };
+    const ready = (key: 'sales' | 'expenses') => { if (!cancelled) setLoaded((l) => ({ ...l, [key]: true })); };
+    setPeriodError(''); setLoaded((l) => ({ ...l, month, sales: false, expenses: false })); setSales([]); setExpenses([]);
     const [year, m] = month.split('-').map(Number); const from = `${month}-01`; const to = `${month}-${new Date(Date.UTC(year, m, 0)).getUTCDate()}`;
     const attach = async (promise: Promise<() => void>) => { try { const unsubscribe = await promise; if (cancelled) unsubscribe(); else subscriptions.push(unsubscribe); } catch (e) { fail(e instanceof Error ? e : new Error(String(e))); } };
     void attach(subscribeSales(from, to, (data) => { if (!cancelled) { setSales(data); ready('sales'); } }, fail));
     void attach(subscribeExpenses(from, to, (data) => { if (!cancelled) { setExpenses(data); ready('expenses'); } }, fail));
-    void attach(subscribeSaleCosts((data) => { if (!cancelled) { setCosts(data); ready('costs'); } }, fail));
-    void attach(subscribeCostRecipe((data) => { if (!cancelled) { setRecipe(data); ready('recipe'); } }, fail));
     return () => { cancelled = true; subscriptions.forEach((unsubscribe) => unsubscribe()); };
   }, [month]);
-  return <ErpPanel sales={sales} expenses={expenses} costs={costs} recipe={recipe} products={products} prices={{ '10 ML': settings.price10, '30 ML': settings.price30, '50 ML': settings.price50 }} month={month} setMonth={setMonth} loading={!Object.values(loaded).every(Boolean)} error={error} onSaveSale={saveSale} onSaveExpense={saveExpense} onSaveRecipe={saveCostRecipe} onImport={importLedger} />;
+  return <ErpPanel sales={sales} expenses={expenses} costs={costs} recipe={recipe} products={products} prices={{ '10 ML': settings.price10, '30 ML': settings.price30, '50 ML': settings.price50 }} month={month} setMonth={setMonth} loading={loaded.month !== month || !loaded.sales || !loaded.expenses || !loaded.configuration} error={periodError || configurationError} onSaveSale={saveSale} onSaveExpense={saveExpense} onSaveRecipe={saveCostRecipe} onImport={importLedger} />;
 }

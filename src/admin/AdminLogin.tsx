@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Lock, Mail, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const AdminLogin: React.FC = () => {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -61,21 +62,32 @@ const AdminLogin: React.FC = () => {
             </div>
           </label>
 
-          <label className="block mb-5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2 block">Contraseña</span>
+          <div className="mb-5">
+            <label htmlFor="admin-password" className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-2 block">Contraseña</label>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input
-                type="password"
+                id="admin-password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-zinc-200 pl-10 pr-3 py-3 text-sm focus:outline-none focus:border-aura-ink transition-colors"
+                className="w-full border border-zinc-200 pl-10 pr-12 py-3 text-sm focus:outline-none focus:border-aura-ink transition-colors"
                 placeholder="••••••••"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(visible => !visible)}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-pressed={showPassword}
+                aria-controls="admin-password"
+                className="absolute right-0 top-0 flex h-full w-11 items-center justify-center text-zinc-500 transition-colors hover:text-aura-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-aura-ink"
+              >
+                {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+              </button>
             </div>
-          </label>
+          </div>
 
           {error && (
             <p className="text-[11px] text-red-600 bg-red-50 border border-red-100 px-3 py-2 mb-4" role="alert">

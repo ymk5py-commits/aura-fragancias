@@ -65,7 +65,7 @@ export async function startCardPayment(input: CardPaymentRequest): Promise<CardP
 
   const res = await fetch('/api/pagopar/iniciar', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Aura-Data-Version': 'supabase-v1' },
     body: JSON.stringify(input),
   });
   const data = (await res.json().catch(() => null)) as (CardPaymentStart & { error?: string }) | null;

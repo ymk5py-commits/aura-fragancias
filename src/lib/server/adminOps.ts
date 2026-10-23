@@ -5,8 +5,8 @@
 import type { PoolClient } from 'pg';
 import type { Order } from '../../types';
 import { giftCardEntries, isGiftCard, newGiftCard, orderAmounts, validateGiftCardUse } from '../giftCards';
-import { INITIAL_COSTS, SALE_SIZES, enforceSaleCosts, orderToSale, saleTotals, validateSale, type Sale, type SaleSize } from '../sales';
-import { recipeCost, validateExpense, validateRecipe, type CostRecipe, type Expense } from '../erp';
+import { INITIAL_COSTS, enforceSaleCosts, orderToSale, saleTotals, validateSale, type Sale, type SaleSize } from '../sales';
+import { recipeCost, recipeSizes, validateExpense, validateRecipe, type CostRecipe, type Expense } from '../erp';
 import type { ImportRow } from '../erpImport';
 import { giftCardFromRow, orderFromRow, saleFromRow, snakeifyObject, type Row } from '../supabaseMap';
 
@@ -211,7 +211,7 @@ export async function saveCostRecipe(client: PoolClient, input: { recipe: CostRe
   const { recipe } = input;
   const error = validateRecipe(recipe);
   if (error) throw new Error(error);
-  const costs = Object.fromEntries(SALE_SIZES.map((size) => [size, recipeCost(recipe, size).total]));
+  const costs = Object.fromEntries(recipeSizes(recipe).map((size) => [size, recipeCost(recipe, size).total]));
   await insertRow(client, 'sales_config', { id: 'costs', costs, recipe },
     'on conflict (id) do update set costs = excluded.costs, recipe = excluded.recipe, updated_at = now()');
 }

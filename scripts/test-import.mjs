@@ -50,3 +50,10 @@ test('rejects malformed snapshots and unknown column layouts', () => {
   for(const data of [null,{}, {...snapshot([]),sheets:[...snapshot([]).sheets,...snapshot([]).sheets]}]) assert.throws(()=>imp.parseSnapshot(JSON.stringify(data)));
   assert.throws(()=>imp.prepareImport({...snapshot([]),sheets:[{title:'V.OCT',sheetId:1,rows:[['invalid']]}]},options,[]));
 });
+test('a size outside Caja is blocked unless Costos has created it', () => {
+  const big = [...row]; big[4] = 100;
+  const [blocked] = imp.prepareImport(snapshot([big]), options, []);
+  assert.ok(blocked.errors.some(e => e.includes('100 ML')) && blocked.record === null);
+  const [allowed] = imp.prepareImport(snapshot([big]), { ...options, sizes: ['10 ML', '30 ML', '50 ML', '100 ML'] }, []);
+  assert.equal(allowed.errors.length, 0); assert.equal(allowed.record.items[0].size, '100 ML');
+});

@@ -83,8 +83,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const changePassword = async (newPassword: string) => {
     if (!isSupabaseConfigured) throw new Error('Supabase no está configurado.');
     const sb = await getSupabase();
-    const { error } = await sb.auth.updateUser({ password: newPassword });
-    if (error) throw new Error(error.message);
+    // También apaga el aviso de «contraseña temporal» que deja un admin al crear la cuenta o darle otra clave.
+    const { error } = await sb.auth.updateUser({ password: newPassword, data: { must_change_password: false } });
+    if (error) {
+      const message = { same_password: 'La contraseña nueva tiene que ser distinta de la actual.', weak_password: 'Esa contraseña es muy fácil de adivinar. Probá con una más larga.' }[error.code ?? ''];
+      throw new Error(message ?? error.message);
+    }
   };
 
   return (

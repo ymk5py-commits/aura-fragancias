@@ -6,7 +6,7 @@ import { useProducts } from '../context/ProductsContext';
 import { useSettings } from '../context/SettingsContext';
 import type { Perfume } from '../types';
 import { INITIAL_COSTS, paraguayDate, saleTotals, salesCsv, type Sale, type SaleSize } from '../lib/sales';
-import { EXPENSE_TYPES, INITIAL_RECIPE, erpSummary, expensesCsv, type CostRecipe, type Expense } from '../lib/erp';
+import { EXPENSE_TYPES, INITIAL_RECIPE, erpSummary, expensesCsv, packagingMissing, recipeSizes, type CostRecipe, type Expense } from '../lib/erp';
 import { saveSale, saveExpense, saveCostRecipe, subscribeSales, subscribeExpenses, subscribeSaleConfiguration, importLedger, loadImportSnapshot } from '../lib/salesService';
 import { CostForm, ExpenseForm, SaleForm, inputClass, money, primaryClass, secondaryClass } from './ErpForms';
 import AdminConversions from './AdminConversions';
@@ -36,6 +36,8 @@ export function ErpPanel(props: ErpPanelProps) {
   const [page, setPage] = useState(1); const [saleForm, setSaleForm] = useState<Sale | null>(null); const [expenseForm, setExpenseForm] = useState<Expense | null>(null);
   const [message, setMessage] = useState(''); const [conversions, setConversions] = useState(false);
   const summary = useMemo(() => erpSummary(sales, expenses), [sales, expenses]);
+  const sizes = useMemo(() => recipeSizes(recipe), [recipe]);
+  const pendingSizes = useMemo(() => sizes.filter((size) => packagingMissing(recipe, size)), [recipe, sizes]);
   const text = query.toLocaleLowerCase().trim();
   const filteredSales = sales.filter((s) => status === 'todos' || s.status === status).filter((s) => !text || [s.customer, s.phone, s.id, s.sourceOrderCode, ...s.items.flatMap((i) => [i.code, i.name])].some((v) => v?.toLocaleLowerCase().includes(text)));
   const filteredExpenses = expenses.filter((e) => type === 'todos' || e.type === type).filter((e) => !text || [e.category, e.description, e.payee].some((v) => v.toLocaleLowerCase().includes(text)));
@@ -94,8 +96,8 @@ export function ErpPanel(props: ErpPanelProps) {
       {rows > 25 && <div className="flex justify-between items-center text-xs text-zinc-500"><span>Página {page} de {pages} · Exportar incluye todos los resultados</span><div className="flex gap-2"><button className={secondaryClass} disabled={page === 1} onClick={() => setPage(page - 1)}>Anterior</button><button className={secondaryClass} disabled={page >= pages} onClick={() => setPage(page + 1)}>Siguiente</button></div></div>}
     </>}
     {!loading && !error && view === 'costs' && <CostForm initial={recipe} onSave={props.onSaveRecipe} />}
-    {!loading && !error && view === 'import' && props.onImport && <AdminImport products={products.map(p => ({ id: p.code, name: p.name }))} month={month} onImport={props.onImport} onLoadSnapshot={loadImportSnapshot} />}
-    {saleForm && <SaleForm initial={saleForm} products={products} costs={costs} prices={prices} onClose={() => setSaleForm(null)} onSave={(sale) => saveWithNotice('sale', sale)} />}
+    {!loading && !error && view === 'import' && props.onImport && <AdminImport products={products.map(p => ({ id: p.code, name: p.name }))} sizes={sizes} month={month} onImport={props.onImport} onLoadSnapshot={loadImportSnapshot} />}
+    {saleForm && <SaleForm initial={saleForm} products={products} costs={costs} prices={prices} pendingSizes={pendingSizes} onClose={() => setSaleForm(null)} onSave={(sale) => saveWithNotice('sale', sale)} />}
     {expenseForm && <ExpenseForm initial={expenseForm} onClose={() => setExpenseForm(null)} onSave={(expense) => saveWithNotice('expense', expense)} />}
   </div>;
 }
@@ -128,5 +130,5 @@ export default function AdminSales() {
     void attach(subscribeExpenses(from, to, (data) => { if (!cancelled) { setExpenses(data); ready('expenses'); } }, fail));
     return () => { cancelled = true; subscriptions.forEach((unsubscribe) => unsubscribe()); };
   }, [month]);
-  return <ErpPanel sales={sales} expenses={expenses} costs={costs} recipe={recipe} products={products} prices={{ '10 ML': settings.price10, '30 ML': settings.price30, '50 ML': settings.price50 }} month={month} setMonth={setMonth} loading={loaded.month !== month || !loaded.sales || !loaded.expenses || !loaded.configuration} error={periodError || configurationError} onSaveSale={saveSale} onSaveExpense={saveExpense} onSaveRecipe={saveCostRecipe} onImport={importLedger} />;
+  return <ErpPanel sales={sales} expenses={expenses} costs={costs} recipe={recipe} products={products} prices={{ ...recipe.prices, '10 ML': settings.price10, '30 ML': settings.price30, '50 ML': settings.price50 }} month={month} setMonth={setMonth} loading={loaded.month !== month || !loaded.sales || !loaded.expenses || !loaded.configuration} error={periodError || configurationError} onSaveSale={saveSale} onSaveExpense={saveExpense} onSaveRecipe={saveCostRecipe} onImport={importLedger} />;
 }

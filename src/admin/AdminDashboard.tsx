@@ -10,7 +10,7 @@ import { Perfume } from '../types';
 import { toggleVisible, deleteProduct, seedCatalog } from '../lib/productsService';
 import ProductForm from './ProductForm';
 import { cldn } from '../lib/img';
-import SettingsForm from './SettingsForm';
+import AdminSettings from './AdminSettings';
 import AdminSales from './AdminSales';
 import AdminOrders from './AdminOrders';
 import AdminGiftCards from './AdminGiftCards';
@@ -31,6 +31,9 @@ const tabHashes: Record<AdminTab, string> = {
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  // Cuenta creada o reiniciada por otro admin: entra con una contraseña temporal y tiene que elegir la suya.
+  const [forcedChangeDone, setForcedChangeDone] = useState(false);
+  const mustChangePassword = user?.user_metadata?.must_change_password === true && !forcedChangeDone;
   const { products, source } = useProducts();
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Perfume | null>(null);
@@ -216,7 +219,7 @@ const AdminDashboard: React.FC = () => {
         {tab === 'orders' && <AdminOrders />}
         {tab === 'giftCards' && <AdminGiftCards />}
         {tab === 'alertas' && <AdminAlertas incidents={incidents} loading={incidentsLoading} />}
-        {tab === 'settings' && <SettingsForm />}
+        {tab === 'settings' && <AdminSettings />}
         {/* Se prepara al acercarse a la pestaña y conserva sus datos y período al volver. */}
         {salesPrepared && <div hidden={tab !== 'sales'}><AdminSales /></div>}
         {tab === 'labels' && <AdminLabels />}
@@ -354,7 +357,9 @@ const AdminDashboard: React.FC = () => {
           {toast}
         </div>
       )}
-      {showPassword && <ChangePassword onClose={() => setShowPassword(false)} />}
+      {mustChangePassword
+        ? <ChangePassword required onClose={() => setForcedChangeDone(true)} />
+        : showPassword && <ChangePassword onClose={() => setShowPassword(false)} />}
     </div>
   );
 };

@@ -9,6 +9,7 @@
     "lint": "tsc --noEmit",
     "test:sitemap": "node --test scripts/test-sitemap.mjs",
     "test:erp": "node --test scripts/test-erp.mjs",
+    "test:users": "node --test scripts/test-admin-users.mjs",
     "test:whatsapp": "npm --prefix functions test",
     "test:gift-cards": "node --test scripts/test-gift-cards.mjs",
     "test:labels": "node --test scripts/test-labels.mjs",

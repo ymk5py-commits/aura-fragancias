@@ -1,11 +1,12 @@
-import { saleTotals, validateSale, type Sale, type SaleSize } from './sales';
+import { SALE_SIZES, saleTotals, validateSale, type Sale } from './sales';
 import { validateExpense, type Expense, type ExpenseType } from './erp';
 
 export interface SheetSnapshot {
   version: 1; spreadsheetId: string; title: string; readAt: string;
   sheets: { title: string; sheetId: number; rows: unknown[][] }[];
 }
-export interface ImportOptions { month: string; monthlyExpenseDates: boolean; correctInternet: boolean }
+/** `sizes`: presentaciones de Caja que se aceptan (por defecto las de la tienda; Caja pasa también las creadas en Costos). */
+export interface ImportOptions { month: string; monthlyExpenseDates: boolean; correctInternet: boolean; sizes?: readonly string[] }
 export interface ImportRow {
   key: string; sheet: string; row: number; kind: 'sale' | 'expense';
   record: Sale | Expense | null; errors: string[]; warnings: string[];
@@ -75,7 +76,8 @@ export function prepareImport(snapshot: SheetSnapshot, options: ImportOptions, c
         const name = text(get('FRAGANCIA')) || product?.name || '';
         if (!name) errors.push('Falta el nombre de la fragancia.');
         if (!product) warnings.push(code ? 'Código histórico fuera del catálogo actual.' : 'Sin código: se conserva como fragancia histórica, sin asociarla al catálogo.');
-        const size = `${amount(get('ML'))} ML` as SaleSize;
+        const size = `${amount(get('ML'))} ML`;
+        if (!(options.sizes ?? SALE_SIZES).includes(size)) errors.push(`La presentación ${size} no existe en Caja. Creala en Costos o corregí la planilla.`);
         const quantity = amount(get('CANTIDAD')); const unitPrice = amount(get('PV', 'PV UN'));
         const subtotal = quantity * unitPrice;
         const revenue = amount(get('TOTAL COBRADO'));

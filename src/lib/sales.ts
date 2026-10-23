@@ -1,7 +1,14 @@
 import type { Order } from '../types';
 
+/** Presentaciones que vende la tienda: siempre existen en Caja y no se pueden quitar. */
 export const SALE_SIZES = ['10 ML', '30 ML', '50 ML'] as const;
-export type SaleSize = typeof SALE_SIZES[number];
+/** Texto «<ml> ML». Las presentaciones extra (100 ML, etc.) se crean en Costos y viven en la receta de costos. */
+export type SaleSize = string;
+export const MAX_SALE_SIZES = 12;
+const SIZE_PATTERN = /^[1-9]\d{0,3} ML$/;
+export const isSaleSize = (value: unknown): value is SaleSize => typeof value === 'string' && SIZE_PATTERN.test(value);
+export const sizeMl = (size: SaleSize) => parseInt(size, 10);
+export const sortSizes = (sizes: Iterable<SaleSize>): SaleSize[] => [...new Set(sizes)].sort((a, b) => sizeMl(a) - sizeMl(b));
 export type SaleStatus = 'pagada' | 'pendiente' | 'anulada';
 export type SaleChannel = 'Mostrador' | 'WhatsApp' | 'Instagram' | 'Web' | 'Mayorista' | 'Otro';
 export const SALE_CHANNELS: SaleChannel[] = ['Mostrador', 'WhatsApp', 'Instagram', 'Web', 'Mayorista', 'Otro'];
@@ -25,7 +32,7 @@ export function saleLineId(item: SaleItem, index: number) { return item.lineId |
 export function changeSaleSize(item: SaleItem, size: SaleSize, costs: Record<SaleSize, number>, prices: Record<SaleSize, number>, original?: SaleItem): SaleItem {
   if (size === item.size) return item;
   if (original?.size === size) return { ...item, size, unitPrice: original.unitPrice, unitCost: original.unitCost };
-  return { ...item, size, unitPrice: prices[size], unitCost: costs[size] };
+  return { ...item, size, unitPrice: prices[size] ?? 0, unitCost: costs[size] ?? null };
 }
 
 /** Comprueba el costo en el guardado, además del bloqueo visible del formulario. */
@@ -38,6 +45,7 @@ export function enforceSaleCosts(sale: Sale, previous: Sale | null, costs: Recor
     used.add(lineId);
     const original = originals.get(lineId);
     const expected = original && original.size === item.size ? original.unitCost : costs[item.size];
+    if (expected === undefined) throw new Error(`La presentación ${item.size} ya no está disponible. Elegí otra.`);
     if (item.unitCost !== expected) throw new Error(original && original.size === item.size
       ? 'El costo histórico de esta fragancia está protegido. Volvé a abrir la venta; para cambiar costos futuros usá Costos.'
       : 'El costo parametrizado cambió. Volvé a abrir la venta para revisar el costo y el margen actualizados.');
@@ -102,7 +110,7 @@ export function validateSale(sale: Sale): string | null {
   for (const item of sale.items) {
     if (item.lineId !== undefined && (typeof item.lineId !== 'string' || !item.lineId.trim() || item.lineId.length > 100)) return 'Revisá el identificador de la fragancia.';
     if (!item.code.trim() || !item.name.trim() || item.code.length > 60 || item.name.length > 200) return 'Cada fragancia necesita código y nombre.';
-    if (!SALE_SIZES.includes(item.size)) return 'Elegí una presentación válida.';
+    if (!isSaleSize(item.size)) return 'Elegí una presentación válida.';
     if (!Number.isSafeInteger(item.quantity) || item.quantity < 1 || item.quantity > 10000) return 'La cantidad debe ser un entero entre 1 y 10.000.';
     if (!money(item.unitPrice) || (item.unitCost !== null && !money(item.unitCost))) return 'Los precios y costos deben ser guaraníes enteros, sin valores negativos.';
   }
@@ -120,8 +128,8 @@ export function orderToSale(order: Order, costs: Record<SaleSize, number>): Sale
   const timestamp = order.paidAt || (order.createdAt as { seconds?: number })?.seconds * 1000 || Date.now();
   const items = order.items.filter(item => item.code !== 'GIFT-CARD').map((item) => {
     const ml = Number(item.size.replace(/[^\d]/g, ''));
-    const size = `${ml} ML` as SaleSize;
-    if (!SALE_SIZES.includes(size)) throw new Error(`Presentación no reconocida: ${item.size}.`);
+    const size = `${ml} ML`;
+    if (!isSaleSize(size) || !Object.hasOwn(costs, size)) throw new Error(`Presentación no reconocida: ${item.size}.`);
     return { code: item.code, name: item.name, size, quantity: item.quantity, unitPrice: item.price, unitCost: costs[size] ?? null };
   });
   const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);

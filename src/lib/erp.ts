@@ -1,4 +1,4 @@
-import { PAYMENT_METHODS, csvCell, saleTotals, type Sale, type SaleSize } from './sales';
+import { MAX_SALE_SIZES, PAYMENT_METHODS, SALE_SIZES, csvCell, isSaleSize, saleTotals, sortSizes, type Sale, type SaleSize } from './sales';
 
 export const EXPENSE_TYPES = ['Operativo', 'Mercadería', 'Inversión', 'Retiro'] as const;
 export type ExpenseType = typeof EXPENSE_TYPES[number];
@@ -17,13 +17,18 @@ export interface Expense {
   updatedAt?: unknown;
 }
 
+export interface PackagingCosts { bottle: number; box: number; bag: number; label: number; largeLabel: number; other: number }
+export const PACKAGING_KEYS = ['bottle', 'box', 'bag', 'label', 'largeLabel', 'other'] as const;
 export interface CostRecipe {
   essencePercent: number;
   fixativePercent: number;
   essenceRate: number;
   fixativeRate: number;
   alcoholRate: number;
-  packaging: Record<SaleSize, { bottle: number; box: number; bag: number; label: number; largeLabel: number; other: number }>;
+  /** Una entrada por presentación: las de la tienda (10, 30 y 50 ML) y las que se crean en Costos. */
+  packaging: Record<SaleSize, PackagingCosts>;
+  /** Precio de venta sugerido para Caja de las presentaciones creadas en Costos (las de la tienda usan el precio de Configuración). */
+  prices?: Record<SaleSize, number>;
 }
 export const INITIAL_RECIPE: CostRecipe = {
   essencePercent: 30, fixativePercent: 5, essenceRate: 550, fixativeRate: 120, alcoholRate: 24,
@@ -34,7 +39,14 @@ export const INITIAL_RECIPE: CostRecipe = {
   },
 };
 
+export const emptyPackaging = (): PackagingCosts => ({ bottle: 0, box: 0, bag: 0, label: 0, largeLabel: 0, other: 0 });
+export const recipeSizes = (recipe: Pick<CostRecipe, 'packaging'>): SaleSize[] => sortSizes(Object.keys(recipe.packaging));
+/** Presentación sin packaging cargado: su costo solo incluye el líquido, hasta que se completen frasco, caja, etc. */
+export const packagingMissing = (recipe: Pick<CostRecipe, 'packaging'>, size: SaleSize) =>
+  !recipe.packaging[size] || Object.values(recipe.packaging[size]).every((n) => !n);
+
 export function recipeCost(recipe: CostRecipe, size: SaleSize) {
+  if (!recipe.packaging[size]) throw new Error(`No hay costos cargados para ${size}.`);
   const ml = parseInt(size);
   const essence = ml * recipe.essencePercent / 100;
   const fixative = ml * recipe.fixativePercent / 100;
@@ -45,9 +57,20 @@ export function recipeCost(recipe: CostRecipe, size: SaleSize) {
 }
 
 export function validateRecipe(recipe: CostRecipe) {
-  const values = [recipe.essencePercent, recipe.fixativePercent, recipe.essenceRate, recipe.fixativeRate, recipe.alcoholRate, ...Object.values(recipe.packaging).flatMap(Object.values)];
+  if (!recipe || typeof recipe !== 'object' || !recipe.packaging || typeof recipe.packaging !== 'object') return 'Revisá los costos y porcentajes.';
+  const sizes = Object.keys(recipe.packaging);
+  if (!sizes.every(isSaleSize)) return 'Una presentación tiene un nombre inválido. Usá solo mililitros enteros, por ejemplo 100 ML.';
+  if (!SALE_SIZES.every((size) => sizes.includes(size))) return 'Las presentaciones de la tienda (10, 30 y 50 ML) no se pueden quitar.';
+  if (sizes.length > MAX_SALE_SIZES) return `Podés tener hasta ${MAX_SALE_SIZES} presentaciones.`;
+  const packs = Object.values(recipe.packaging);
+  if (!packs.every((pack) => pack && typeof pack === 'object' && PACKAGING_KEYS.every((key) => key in pack))) return 'Revisá los costos y porcentajes.';
+  const values = [recipe.essencePercent, recipe.fixativePercent, recipe.essenceRate, recipe.fixativeRate, recipe.alcoholRate, ...packs.flatMap((pack) => PACKAGING_KEYS.map((key) => pack[key]))];
   if (!values.every((n) => Number.isFinite(n) && n >= 0 && n <= 1e9)) return 'Revisá los costos y porcentajes.';
   if (recipe.essencePercent + recipe.fixativePercent > 100) return 'Los porcentajes de esencia y fijador no pueden superar el 100%.';
+  if (recipe.prices !== undefined) {
+    const entries = recipe.prices && typeof recipe.prices === 'object' ? Object.entries(recipe.prices) : null;
+    if (!entries || !entries.every(([size, price]) => sizes.includes(size) && Number.isSafeInteger(price) && price >= 0 && price <= 1e9)) return 'Revisá los precios de venta sugeridos.';
+  }
   return null;
 }
 

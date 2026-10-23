@@ -7,8 +7,10 @@ import { saleTotals, type Sale } from '../lib/sales';
 import type { Expense } from '../lib/erp';
 import { inputClass, money, primaryClass } from './ErpForms';
 
-export default function AdminImport({ products, month, onImport, initialSnapshot, onLoadSnapshot }: {
+export default function AdminImport({ products, month, sizes, onImport, initialSnapshot, onLoadSnapshot }: {
   products: { id: string; name: string }[]; month: string;
+  /** Presentaciones de Caja vigentes (incluye las creadas en Costos). */
+  sizes?: readonly string[];
   initialSnapshot?: SheetSnapshot;
   onLoadSnapshot?: () => Promise<SheetSnapshot | null>;
   onImport: (rows: ImportRow[], onProgress: (done: number) => void) => Promise<{ created: number; skipped: number }>;
@@ -24,12 +26,12 @@ export default function AdminImport({ products, month, onImport, initialSnapshot
     let cancelled = false;
     onLoadSnapshot().then(source => {
       if (cancelled) return;
-      if (source) { prepareImport(source, { month: 'all', monthlyExpenseDates: false, correctInternet: false }, []); setSnapshot(source); }
+      if (source) { prepareImport(source, { month: 'all', monthlyExpenseDates: false, correctInternet: false, sizes }, []); setSnapshot(source); }
     }).catch(e => { if (!cancelled) setError(e instanceof Error ? e.message : 'No se pudo cargar la copia preparada.'); })
       .finally(() => { if (!cancelled) setLoadingSource(false); });
     return () => { cancelled = true; };
   }, [onLoadSnapshot, initialSnapshot]);
-  const rows = useMemo(() => snapshot ? prepareImport(snapshot, { month: scope, monthlyExpenseDates: monthlyDates, correctInternet: internet }, products) : [], [snapshot, scope, monthlyDates, internet, products]);
+  const rows = useMemo(() => snapshot ? prepareImport(snapshot, { month: scope, monthlyExpenseDates: monthlyDates, correctInternet: internet, sizes }, products) : [], [snapshot, scope, monthlyDates, internet, products, sizes]);
   const valid = rows.filter(row => row.record && !row.errors.length); const blocked = rows.filter(row => row.errors.length);
   const visible = onlyErrors ? blocked : rows;
   const revenue = valid.filter(row => row.kind === 'sale').reduce((sum, row) => sum + saleTotals(row.record as Sale).revenue, 0);
@@ -65,7 +67,7 @@ export default function AdminImport({ products, month, onImport, initialSnapshot
   const loadFile = async (file?: File) => {
     if (!file) return;
     resetReview(); setSnapshot(null);
-    try { if (file.size > 5_000_000) throw new Error('El archivo supera 5 MB.'); const parsed = parseSnapshot(await file.text()); prepareImport(parsed, { month: scope, monthlyExpenseDates: monthlyDates, correctInternet: internet }, products); setSnapshot(parsed); }
+    try { if (file.size > 5_000_000) throw new Error('El archivo supera 5 MB.'); const parsed = parseSnapshot(await file.text()); prepareImport(parsed, { month: scope, monthlyExpenseDates: monthlyDates, correctInternet: internet, sizes }, products); setSnapshot(parsed); }
     catch (e) { setError(e instanceof Error ? e.message : 'No se pudo abrir el archivo.'); }
   };
   const save = async () => {

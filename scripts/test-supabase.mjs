@@ -73,6 +73,9 @@ before(async () => {
   await db.query('drop schema if exists public cascade; create schema public;');
   await db.query(readFileSync('supabase/tests/stub-supabase.sql', 'utf8'));
   await db.query(readFileSync('supabase/migrations/001_esquema.sql', 'utf8'));
+  // Usuario de la web (en producción lo crea 003_usuario_servidor.sql) y la función que cierra sesiones de GoTrue.
+  await db.query("do $$ begin create role aura_server login bypassrls; exception when duplicate_object then null; end $$; grant usage on schema public to aura_server");
+  await db.query(readFileSync('supabase/migrations/004_cerrar_sesiones.sql', 'utf8'));
   await db.query("insert into public.products (id, code, name, visible) values ('A01','A01','Visible',true), ('H01','H01','Oculto',false)");
   await db.query("insert into public.settings (id, data) values ('site', '{\"price30\":70000}')");
 });
@@ -215,6 +218,56 @@ test('caja: rechaza cambios del costo histórico y parámetros obsoletos', async
   assert.equal((await one("select items->0->>'unitCost' as c from public.sales where id = 's1'")).c, String(historicalCost));
   await assert.rejects(run('saveSale', { sale: { ...venta, id: 'bad-new-cost', items: venta.items.map((i) => ({ ...i, unitCost: 1 })) } }), /parametrizado/);
   assert.equal(await count('sales', "id = 'bad-new-cost'"), 0);
+});
+
+test('caja: una presentación nueva (100 ML) guarda su costo, se vende con él y al quitarla las ventas viejas siguen editables', async () => {
+  const recipe = { ...erpModel.INITIAL_RECIPE, packaging: { ...erpModel.INITIAL_RECIPE.packaging, '100 ML': { bottle: 9000, box: 2500, bag: 3500, label: 500, largeLabel: 900, other: 100 } }, prices: { '100 ML': 200000 } };
+  await run('saveCostRecipe', { recipe });
+  const costs = (await one("select costs from public.sales_config where id = 'costs'")).costs;
+  assert.equal(costs['100 ML'], 35160); assert.equal(costs['30 ML'], 17398);
+  const grande = { ...venta, id: 'big-100', items: [{ ...venta.items[0], size: '100 ML', unitCost: 35160, unitPrice: 200000 }], collected: 200000 };
+  await run('saveSale', { sale: grande });
+  await assert.rejects(run('saveSale', { sale: { ...grande, id: 'big-wrong-cost', items: [{ ...grande.items[0], unitCost: 17398 }] } }), /parametrizado/);
+  // Se quita la presentación: lo vendido conserva su costo y se puede seguir corrigiendo; una venta nueva con ella se rechaza.
+  await run('saveCostRecipe', { recipe: erpModel.INITIAL_RECIPE });
+  assert.equal((await one("select costs ? '100 ML' as tiene from public.sales_config where id = 'costs'")).tiene, false);
+  await run('saveSale', { sale: { ...(await saleAsClient('big-100')), customer: 'Corregida sin la presentación' } });
+  assert.equal((await one("select items->0->>'unitCost' as c from public.sales where id = 'big-100'")).c, '35160');
+  await assert.rejects(run('saveSale', { sale: { ...grande, id: 'big-new' } }), /ya no está disponible/);
+  assert.equal(await count('sales', "id in ('big-wrong-cost','big-new')"), 0);
+});
+test('caja: la receta no puede quitar las presentaciones de la tienda ni traer nombres o precios inválidos', async () => {
+  const base = erpModel.INITIAL_RECIPE;
+  const { '30 ML': _quitada, ...sin30 } = base.packaging;
+  await assert.rejects(run('saveCostRecipe', { recipe: { ...base, packaging: sin30 } }), /no se pueden quitar/);
+  await assert.rejects(run('saveCostRecipe', { recipe: { ...base, packaging: { ...base.packaging, grande: base.packaging['50 ML'] } } }), /nombre inválido/);
+  await assert.rejects(run('saveCostRecipe', { recipe: { ...base, prices: { '30 ML': -1 } } }), /precios/);
+  assert.equal((await one("select costs->>'30 ML' as c from public.sales_config where id = 'costs'")).c, '17398');
+});
+
+// ================================================================= cuentas del panel
+test('sesiones: aura_revoke_sessions cierra solo las sesiones de la cuenta y únicamente la ejecuta el usuario del servidor', async () => {
+  const a = '00000000-0000-0000-0000-0000000000a1';
+  const b = '00000000-0000-0000-0000-0000000000b1';
+  await db.query('delete from auth.sessions');
+  await db.query('insert into auth.sessions (user_id) values ($1), ($1), ($2)', [a, b]);
+  // Sin `as()`: ese ayudante deshace la transacción y acá hay que ver el borrado confirmado.
+  const server = await db.connect();
+  let result;
+  try {
+    await server.query('set role aura_server');
+    result = await server.query('select public.aura_revoke_sessions($1::uuid) as n', [a]);
+  } finally {
+    await server.query('reset role');
+    server.release();
+  }
+  assert.equal(result.rows[0].n, 2);
+  assert.equal(Number((await one('select count(*)::int as n from auth.sessions where user_id = $1', [a])).n), 0);
+  assert.equal(Number((await one('select count(*)::int as n from auth.sessions where user_id = $1', [b])).n), 1);
+  for (const quien of [anon, admin, (fn) => as('service_role', { role: 'service_role' }, fn)]) {
+    await assert.rejects(quien((c) => c.query('select public.aura_revoke_sessions($1::uuid)', [b])), /permission denied/);
+  }
+  assert.equal(Number((await one('select count(*)::int as n from auth.sessions where user_id = $1', [b])).n), 1);
 });
 
 // ================================================================= pedidos web → ventas

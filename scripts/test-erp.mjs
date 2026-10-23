@@ -92,3 +92,64 @@ test('CSV places shared delivery and totals on only one line of a multi-item sal
 test('expenses require complete descriptions and integer guaranies', () => {
   assert.equal(erp.validateExpense(expense), null); assert.ok(erp.validateExpense({ ...expense, amount: 214.914 })); assert.ok(erp.validateExpense({ ...expense, date: '2026-02-30' }));
 });
+
+// ---- Presentaciones (ML) creadas en Costos ----
+const withSize = (size, pack = { bottle: 9000, box: 2500, bag: 3500, label: 500, largeLabel: 900, other: 100 }, price) => ({
+  ...erp.INITIAL_RECIPE,
+  packaging: { ...erp.INITIAL_RECIPE.packaging, [size]: pack },
+  ...(price === undefined ? {} : { prices: { [size]: price } }),
+});
+test('a size created in Costos is sold in Caja: valid sale, sorted list and exact recipe cost', () => {
+  const recipe = withSize('100 ML', undefined, 200000);
+  assert.equal(erp.validateRecipe(recipe), null);
+  assert.deepEqual([...erp.recipeSizes(recipe)], ['10 ML', '30 ML', '50 ML', '100 ML']);
+  const cost = erp.recipeCost(recipe, '100 ML');
+  assert.equal(cost.liquid, 18660); assert.equal(cost.packaging, 16500); assert.equal(cost.total, 35160);
+  assert.equal(sales.validateSale({ ...sale, items: [{ ...sale.items[0], size: '100 ML', unitCost: cost.total }] }), null);
+  assert.throws(() => erp.recipeCost(erp.INITIAL_RECIPE, '100 ML'), /No hay costos cargados para 100 ML/);
+});
+test('size names must be whole millilitres: rejects text, zero, decimals and padding', () => {
+  for (const size of ['abc', '0 ML', '05 ML', '10.5 ML', '100ML', '100 ml', '10000 ML', '', '-5 ML']) {
+    assert.equal(sales.isSaleSize(size), false, size);
+    assert.ok(sales.validateSale({ ...sale, items: [{ ...sale.items[0], size }] }), size);
+  }
+  for (const size of ['1 ML', '10 ML', '100 ML', '9999 ML']) assert.equal(sales.isSaleSize(size), true, size);
+  assert.deepEqual([...sales.sortSizes(['100 ML', '10 ML', '5 ML', '30 ML', '10 ML'])], ['5 ML', '10 ML', '30 ML', '100 ML']);
+});
+test('recipe validation protects the store sizes, the packaging fields, the prices and the size limit', () => {
+  const { '30 ML': _gone, ...withoutThirty } = erp.INITIAL_RECIPE.packaging;
+  assert.match(erp.validateRecipe({ ...erp.INITIAL_RECIPE, packaging: withoutThirty }), /no se pueden quitar/);
+  assert.match(erp.validateRecipe(withSize('cien')), /nombre inválido/);
+  assert.ok(erp.validateRecipe(withSize('100 ML', { bottle: 1, box: 1, bag: 1, label: 1, largeLabel: 1 })), 'missing packaging field');
+  assert.ok(erp.validateRecipe(withSize('100 ML', { bottle: NaN, box: 0, bag: 0, label: 0, largeLabel: 0, other: 0 })));
+  assert.ok(erp.validateRecipe(withSize('100 ML', undefined, -5)));
+  assert.ok(erp.validateRecipe(withSize('100 ML', undefined, 1.5)));
+  assert.ok(erp.validateRecipe({ ...withSize('100 ML'), prices: { '999 ML': 1000 } }), 'price for an unknown size');
+  const many = Object.fromEntries(Array.from({ length: 13 }, (_, i) => [`${(i + 1) * 100} ML`, erp.emptyPackaging()]));
+  assert.match(erp.validateRecipe({ ...erp.INITIAL_RECIPE, packaging: { ...erp.INITIAL_RECIPE.packaging, ...many } }), /hasta 12/);
+  assert.ok(erp.validateRecipe(null)); assert.ok(erp.validateRecipe({ ...erp.INITIAL_RECIPE, packaging: undefined }));
+});
+test('a size without packaging is flagged as incomplete until its costs are loaded', () => {
+  assert.equal(erp.packagingMissing(withSize('100 ML', erp.emptyPackaging()), '100 ML'), true);
+  assert.equal(erp.packagingMissing(withSize('100 ML'), '100 ML'), false);
+  assert.equal(erp.packagingMissing(erp.INITIAL_RECIPE, '30 ML'), false);
+});
+test('changing to a created size takes its cost and suggested price; without a price it starts at zero', () => {
+  const costs = { ...sales.INITIAL_COSTS, '100 ML': 35160 };
+  const item = sale.items[0];
+  const changed = sales.changeSaleSize(item, '100 ML', costs, { '30 ML': 70000, '100 ML': 200000 });
+  assert.equal(changed.unitCost, 35160); assert.equal(changed.unitPrice, 200000);
+  assert.equal(sales.changeSaleSize(item, '100 ML', costs, { '30 ML': 70000 }).unitPrice, 0);
+});
+test('a size removed from Costos stays editable in old sales but cannot be used in new lines', () => {
+  const old = { ...sale, items: [{ ...sale.items[0], lineId: 'a', size: '100 ML', unitCost: 35160 }], collected: 102000 };
+  const edited = { ...old, customer: 'Otro', items: [{ ...old.items[0], quantity: 3 }] };
+  assert.equal(sales.enforceSaleCosts(edited, old, sales.INITIAL_COSTS).items[0].unitCost, 35160);
+  assert.throws(() => sales.enforceSaleCosts({ ...old, items: [{ ...old.items[0], lineId: 'fresh' }] }, null, sales.INITIAL_COSTS), /ya no está disponible/);
+});
+test('web orders use the configured cost of their size and still reject unknown sizes', () => {
+  const order = { id: 'o2', orderId: 'AURA-2', name: 'Cliente', phone: '', total: 70000, shippingCost: 0, paymentMethod: 'transferencia', paidAt: Date.parse('2026-10-04T12:00:00Z'), items: [{ code: 'A', name: 'Perfume', size: '30ml', quantity: 1, price: 70000 }] };
+  assert.equal(sales.orderToSale(order, sales.INITIAL_COSTS).items[0].size, '30 ML');
+  assert.throws(() => sales.orderToSale({ ...order, items: [{ ...order.items[0], size: '100ml' }] }, sales.INITIAL_COSTS), /no reconocida/);
+  assert.equal(sales.orderToSale({ ...order, items: [{ ...order.items[0], size: '100ml' }] }, { ...sales.INITIAL_COSTS, '100 ML': 35160 }).items[0].unitCost, 35160);
+});

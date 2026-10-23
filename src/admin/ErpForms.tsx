@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { Loader2, Plus, Trash2, X } from 'lucide-react';
 import type { Perfume } from '../types';
-import { PAYMENT_METHODS, SALE_CHANNELS, SALE_SIZES, saleTotals, validateSale, saleLineId, changeSaleSize, type Sale, type SaleItem, type SaleSize } from '../lib/sales';
-import { EXPENSE_TYPES, INITIAL_RECIPE, recipeCost, validateExpense, type CostRecipe, type Expense } from '../lib/erp';
+import { MAX_SALE_SIZES, PAYMENT_METHODS, SALE_CHANNELS, SALE_SIZES, changeSaleSize, isSaleSize, saleLineId, saleTotals, sortSizes, validateSale, type Sale, type SaleItem, type SaleSize } from '../lib/sales';
+import { EXPENSE_TYPES, INITIAL_RECIPE, emptyPackaging, packagingMissing, recipeCost, recipeSizes, validateExpense, type CostRecipe, type Expense } from '../lib/erp';
 
 export const money = (n: number | null) => n == null ? 'Por completar' : `Gs. ${n.toLocaleString('es-PY')}`;
 export const inputClass = 'w-full min-w-0 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-aura-gold/30 focus:border-aura-gold';
@@ -45,8 +45,10 @@ function Modal({ title, close, children, busy }: { title: string; close: () => v
   </div>;
 }
 
-export function SaleForm({ initial, products, costs, prices, onSave, onClose }: {
+export function SaleForm({ initial, products, costs, prices, pendingSizes = [], onSave, onClose }: {
   initial: Sale; products: Perfume[]; costs: Record<SaleSize, number>; prices: Record<SaleSize, number>;
+  /** Presentaciones creadas en Costos a las que todavía les falta cargar el packaging. */
+  pendingSizes?: SaleSize[];
   onSave: (sale: Sale) => Promise<void>; onClose: () => void;
 }) {
   const [sale, setSale] = useState<Sale>(() => ({ ...initial, items: initial.items.map((item, i) => ({ ...item, lineId: saleLineId(item, i) })) }));
@@ -87,11 +89,12 @@ export function SaleForm({ initial, products, costs, prices, onSave, onClose }: 
             <div className="col-span-2"><Field label="Fragancia"><input className={inputClass} required maxLength={200} value={item.name} onChange={(e) => patchItem(index, { name: e.target.value })} placeholder="Nombre de la fragancia" /></Field></div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <Field label="Presentación"><select className={inputClass} value={item.size} onChange={(e) => { const size = e.target.value as SaleSize; const original = initial.updatedAt ? initial.items.find((line, i) => saleLineId(line, i) === item.lineId) : undefined; patchItem(index, changeSaleSize(item, size, costs, prices, original)); }}>{SALE_SIZES.map((size) => <option key={size}>{size}</option>)}</select></Field>
+            <Field label="Presentación"><select className={inputClass} value={item.size} onChange={(e) => { const size = e.target.value as SaleSize; const original = initial.updatedAt ? initial.items.find((line, i) => saleLineId(line, i) === item.lineId) : undefined; patchItem(index, changeSaleSize(item, size, costs, prices, original)); }}>{sortSizes([...Object.keys(costs), item.size]).map((size) => <option key={size}>{size}</option>)}</select></Field>
             <Field label="Cantidad"><input className={inputClass} required type="number" min={1} max={10000} step={1} value={item.quantity} onChange={(e) => patchItem(index, { quantity: Number(e.target.value) })} /></Field>
             <Field label="Precio unitario (Gs.)"><MoneyInput label={`Precio fragancia ${index + 1}`} value={item.unitPrice} onChange={(n) => patchItem(index, { unitPrice: n })} /></Field>
             <Field label="Costo unitario automático (Gs.)" hint={initial.updatedAt && initial.items.some((line, i) => saleLineId(line, i) === item.lineId && line.size === item.size) ? "Costo histórico conservado." : "Parametrizado en Costos."}><input aria-label={`Costo fragancia ${index + 1}`} className={`${inputClass} bg-zinc-100 tabular-nums`} readOnly value={money(item.unitCost)} /></Field>
           </div>
+          {pendingSizes.includes(item.size) && <p role="note" className="rounded-lg bg-amber-50 p-2.5 text-[11px] text-amber-800">Falta cargar el packaging de {item.size} en Costos: este costo incluye solo el líquido y el margen se ve mayor al real.</p>}
           <p className="text-xs text-right text-zinc-500">Importe: <strong className="text-zinc-900">{money(item.unitPrice * item.quantity)}</strong></p>
         </div>)}
         <button type="button" disabled={sale.items.length >= 50} className={`${secondaryClass} w-full`} onClick={() => patch({ items: [...sale.items, { lineId: crypto.randomUUID(), code: '', name: '', size: '30 ML', quantity: 1, unitPrice: prices['30 ML'], unitCost: costs['30 ML'] }] })}><Plus size={15} /> Agregar fragancia</button>
@@ -153,20 +156,47 @@ export function CostForm({ initial = INITIAL_RECIPE, onSave }: { initial?: CostR
   const [recipe, setRecipe] = useState<CostRecipe>(initial);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [newMl, setNewMl] = useState('');
+  const [sizeError, setSizeError] = useState('');
   const dirty = React.useRef(false);
   React.useEffect(() => { if (!dirty.current) setRecipe(initial); }, [initial]);
   const patch = (fields: Partial<CostRecipe>) => { dirty.current = true; setRecipe((r) => ({ ...r, ...fields })); setMessage(''); };
+  const sizes = recipeSizes(recipe);
+  const addSize = () => {
+    const ml = Number(newMl);
+    const size = `${ml} ML`;
+    if (!Number.isInteger(ml) || !isSaleSize(size)) return setSizeError('Escribí los mililitros con un número entero, por ejemplo 100.');
+    if (recipe.packaging[size]) return setSizeError(`${size} ya existe.`);
+    if (sizes.length >= MAX_SALE_SIZES) return setSizeError(`Podés tener hasta ${MAX_SALE_SIZES} presentaciones.`);
+    patch({ packaging: { ...recipe.packaging, [size]: emptyPackaging() } });
+    setNewMl(''); setSizeError('');
+  };
+  const removeSize = (size: SaleSize) => {
+    if (!confirm(`¿Quitar ${size} de Caja? Las ventas ya registradas conservan su costo; solo deja de ofrecerse en ventas nuevas.`)) return;
+    const { [size]: _removed, ...packaging } = recipe.packaging;
+    const { [size]: _price, ...prices } = recipe.prices || {};
+    patch({ packaging, prices });
+  };
   return <form onSubmit={async (e) => { e.preventDefault(); setBusy(true); setMessage(''); try { await onSave(recipe); dirty.current = false; setMessage('Costos guardados. Se usarán en las próximas ventas; el historial conserva sus costos.'); } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo guardar.'); } finally { setBusy(false); } }} className="space-y-5">
     <div><h3 className="text-xl font-luxury font-semibold">Costos por presentación</h3><p className="text-xs text-zinc-500 mt-1">Receta y packaging de la pestaña COSTOS de AURA CAJA. Los precios de venta de la tienda se gestionan en Configuración.</p></div>
     <div className="bg-white border border-zinc-200 rounded-xl p-5 grid grid-cols-2 sm:grid-cols-5 gap-4">
       {([['essencePercent', 'Esencia (%)'], ['fixativePercent', 'Fijador (%)'], ['essenceRate', 'Esencia (Gs./gr)'], ['fixativeRate', 'Fijador (Gs./gr)'], ['alcoholRate', 'Alcohol (Gs./ml)']] as const).map(([key, label]) => <Field key={key} label={label}><input className={inputClass} type="number" min={0} max={key.includes('Percent') ? 100 : 1e9} step="any" required value={recipe[key]} onChange={(e) => patch({ [key]: Number(e.target.value) })} /></Field>)}
     </div>
-    <div className="grid sm:grid-cols-3 gap-4">{SALE_SIZES.map((size) => {
+    <div className="bg-white border border-zinc-200 rounded-xl p-5 flex flex-col sm:flex-row sm:items-end gap-3">
+      <div className="flex-1"><h4 className="text-sm font-semibold">Presentaciones de Caja</h4><p className="text-[11px] text-zinc-500 mt-1">{sizes.join(' · ')}. Creá otra (por ejemplo 100) y completá sus costos abajo; después aparece al registrar una venta.</p></div>
+      <label className="block sm:w-40"><span className="block text-xs font-medium text-zinc-600 mb-1.5">Mililitros (ML)</span><input className={inputClass} type="number" inputMode="numeric" min={1} max={9999} step={1} placeholder="100" value={newMl} onChange={(e) => { setNewMl(e.target.value); setSizeError(''); }} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSize(); } }} /></label>
+      <button type="button" className={secondaryClass} disabled={!newMl} onClick={addSize}><Plus size={15} /> Crear presentación</button>
+    </div>
+    {sizeError && <p role="alert" className="rounded-lg bg-red-50 text-red-700 text-sm p-3">{sizeError}</p>}
+    <div className="grid sm:grid-cols-3 gap-4">{sizes.map((size) => {
       const cost = recipeCost(recipe, size);
+      const custom = !(SALE_SIZES as readonly string[]).includes(size);
       return <section key={size} className="bg-white border border-zinc-200 rounded-xl p-5 space-y-4">
-        <div className="flex justify-between items-center"><h4 className="text-xl font-luxury">{size}</h4><span className="text-sm font-bold text-aura-gold-deep">{money(cost.total)}</span></div>
+        <div className="flex justify-between items-center gap-2"><h4 className="text-xl font-luxury">{size}</h4><span className="flex items-center gap-2"><span className="text-sm font-bold text-aura-gold-deep">{money(cost.total)}</span>{custom && <button type="button" aria-label={`Quitar ${size}`} onClick={() => removeSize(size)} className="p-1 text-zinc-400 hover:text-red-600"><Trash2 size={16} /></button>}</span></div>
         <p className="text-[11px] text-zinc-500">Esencia {cost.essence.toLocaleString('es-PY')} gr · fijador {cost.fixative.toLocaleString('es-PY')} gr · alcohol {cost.alcohol.toLocaleString('es-PY')} ml</p>
+        {packagingMissing(recipe, size) && <p role="note" className="rounded-lg bg-amber-50 p-2.5 text-[11px] text-amber-800">Falta cargar el packaging: por ahora el costo incluye solo el líquido.</p>}
         {([['bottle', 'Frasco'], ['box', 'Caja'], ['bag', 'Bolsa'], ['label', 'Etiqueta'], ['largeLabel', 'Etiqueta grande'], ['other', 'Varios']] as const).map(([key, label]) => <Field key={key} label={`${label} (Gs.)`}><MoneyInput label={`${label} ${size}`} value={recipe.packaging[size][key]} onChange={(n) => patch({ packaging: { ...recipe.packaging, [size]: { ...recipe.packaging[size], [key]: n } } })} /></Field>)}
+        {custom && <Field label="Precio de venta sugerido (Gs.)" hint="Es el precio que propone Caja al elegir esta presentación; lo podés cambiar en cada venta."><MoneyInput label={`Precio sugerido ${size}`} value={recipe.prices?.[size] ?? 0} onChange={(n) => patch({ prices: { ...recipe.prices, [size]: n as number } })} /></Field>}
         <div className="border-t border-zinc-200 pt-3 flex justify-between text-xs text-zinc-500"><span>Líquido: {money(cost.liquid)}</span><span>Packaging: {money(cost.packaging)}</span></div>
       </section>;
     })}</div>
